@@ -1,67 +1,93 @@
 import sys
 import time
+import copy
 import threading
 import Queue
+
+info = {
+    'slow_printing': True
+}
+
+SET_PRINT_WORDS = ['print']
 
 KILL_WORDS = [
     'quit', 'stop', 'finish', 'end'
 ]
 
-CONTROLS = """
-           Actions
-------------------------------------------------------
+GO_WORDS = [
+    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run'
+]
 
-go <direction>     Move player. direction can be north,
-                   south, east or west
+TAKE_WORDS = [
+    'take', 'pick up', 'steal', 'acquire', 'grab', 'get'
+]
 
-take <item>        Add item to inventory
+DROP_WORDS = [
+    'drop', 'throw away', 'discard'
+]
 
-drop <item>        Drop item from inventory
+EQUIP_WORDS = [
+    'equip', 'use'
+]
 
-equip <item>       Equip item from inventory
+UNEQUIP_WORDS = [
+    'unequip', 'put away', 'stop using'
+]
 
-unequip            Unequip currently equipped item
-
-speak <name>       Interact with a person by name
-
-i                  Show inventory
-
-?                  Print current description
-
-------------------------------------------------------
-"""
+SPEAK_WORDS = [
+    'speak with', 'speak to', 'talk to', 'talk with', 'speak', 'talk'
+]
 
 input_queue = Queue.Queue()
 
-def wait_for_enter():
+def read_input_task():
     while True:
         input_queue.put(sys.stdin.read(1))
 
-enter_thread = threading.Thread(target=wait_for_enter)
+enter_thread = threading.Thread(target=read_input_task)
 enter_thread.daemon = True
 enter_thread.start()
 
-def unrecognised(map_obj, val):
+def unrecognised(player, val):
     print '\nUnrecognised command "%s"' % val
 
 def get_input(msg=''):
-    sys.stdout.write(msg)
-    sys.stdout.flush()
+    user_input = ""
+    buf = ""
 
-    msg = ""
-    c = ''
+    while user_input == "":
+        sys.stdout.write(msg)
+        sys.stdout.flush()
 
-    while (c != '\r') and (c != '\n'):
-        c = input_queue.get()
-        msg += c
+        c = ''
 
-    return msg
+        while (c != '\r') and (c != '\n'):
+            c = input_queue.get()
+            buf += c
+
+        user_input = buf.strip()
+
+    return user_input
+
+def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
+    ret = "z"
+    while not 'yes'.startswith(ret) and not 'no'.startswith(ret):
+        ret = get_input(prompt)
+
+    if 'yes'.startswith(ret):
+        return True
+
+    return False
 
 def remove_leading_whitespace(string):
     trimmed = [s.strip() for s in string.splitlines()]
     return '\n'.join(trimmed)
 
-def slow_print(msg, chardelay=0.03):
+def slow_print(msg, chardelay=0.02):
+    if not info['slow_printing']:
+        print msg
+        return
+
     for i in range(len(msg)):
         try:
             c = input_queue.get_nowait()
@@ -135,14 +161,26 @@ class Person(object):
         self.description = description
         self.on_speak = on_speak
 
-    def next_response(self):
-        if self.response >= len(self.responses):
-            ret = "Fuck off"
-        else:
-            ret = self.responses[self.response]
-            self.response += 1
+    def say(self, msg):
+        sys.stdout.write('\n%s: ' % self.name)
+        sys.stdout.flush()
+        slow_print('"%s"' % msg)
 
-        return '%s: "%s"' % (self.name, ret)
+    def buy_equipped_item(self, player):
+        equipped = player.inventory_items['equipped']
+        self.say("Ah, I see you have %s %s. I would like to buy it for "
+            "%d coins." % (equipped.prefix, equipped.name, equipped.value)) 
+
+        if ask_yes_no("[sell %s for %d coins? (yes/no)] : "
+                % (equipped.name, equipped.value)):
+            player.coins += equipped.value
+            equipped_copy = copy.deepcopy(equipped)
+            player.delete_equipped()
+            slow_print("\nSale completed.")
+            return equipped_copy
+
+        slow_print("\nSale cancelled")
+        return None
 
 class Item(object):
     """
@@ -155,15 +193,19 @@ class Item(object):
         self.prefix = prefix
         self.description = description
 
-class Map(object):
+class Player(object):
     """
-    Base class for a tile-based map
+    Base class to hold player related methods & data
     """
 
-    def __init__(self, start_tile=None):
+    def __init__(self, start_tile=None, input_prompt=None):
         self.start = start_tile
         self.current = start_tile
+        self.prompt = input_prompt
+        self.coins = 0
         self.inventory_items = {'equipped': None}
+        self.name = ""
+        self.title = ""
 
     def _move(self, dest, name):
         if dest is None:
@@ -183,16 +225,22 @@ class Map(object):
 
         self.current = dest
 
-        slow_print("\nYou moved %s." % name)
+        slow_print("\nYou go %s." % name)
         time.sleep(1)
         slow_print("%s" % self.current_state())
 
         return dest
 
+    def delete_equipped(self):
+        equipped = self.inventory_items['equipped']
+        if equipped:
+            del self.inventory_items[equipped.name]
+            self.inventory_items['equipped'] = None
+
     def current_state(self):
         items = []
 
-        ret = "\nYou are in %s" % self.current.description
+        ret = "\nYou are %s" % self.current.description
        
         if self.current.people:
             for p in self.current.people:
@@ -209,6 +257,12 @@ class Map(object):
 
         ret += "\n\n%s" % self.current.summary()
         return ret
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_title(self, title):
+        self.title = title
 
     def move_north(self):
         self._move(self.current.north, "north")
@@ -230,6 +284,7 @@ class MapBuilder(object):
     def __init__(self, name=None, description=None):
         self.start = Tile(name, description)
         self.current = self.start
+        self.prompt = "[?]: "
 
     def add_enter_callback(self, callback):
         self.current.on_enter = callback
@@ -248,6 +303,9 @@ class MapBuilder(object):
 
     def set_locked(self):
         self.current.locked = True
+
+    def set_input_prompt(self, prompt):
+        self.prompt = prompt
 
     def _do_move(self, dest, name, description):
         if dest is None:
@@ -279,66 +337,69 @@ class MapBuilder(object):
         self.current = self.current.south
         self.current.north = old
 
-    def get_map(self):
-        return Map(self.start)
+    def build_player(self):
+        return Player(self.start, self.prompt)
 
-def do_move(map_obj, direction):
+def do_move(player, direction):
     if not direction or direction.strip() == "":
         print "\nWhere do you want to go?"
         return
 
     if 'north'.startswith(direction):
-        map_obj.move_north()
+        player.move_north()
     elif 'south'.startswith(direction):
-        map_obj.move_south()
+        player.move_south()
     elif 'east'.startswith(direction):
-        map_obj.move_east()
+        player.move_east()
     elif 'west'.startswith(direction):
-        map_obj.move_west()
+        player.move_west()
     else:
-        unrecognised(map_obj, direction)
+        unrecognised(player, direction)
 
-def do_take(map_obj, item_name):
+def do_take(player, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhat do you want to take?"
         return
 
-    for i in range(len(map_obj.current.items)):
-        if map_obj.current.items[i].name.startswith(item_name):
-            full = map_obj.current.items[i].name
-            map_obj.inventory_items[full] = map_obj.current.items[i]
-            del map_obj.current.items[i]
+    for i in range(len(player.current.items)):
+        if (player.current.items[i].name.startswith(item_name) or
+                (item_name in player.current.items[i].name)):
+            full = player.current.items[i].name
+            player.inventory_items[full] = player.current.items[i]
+            del player.current.items[i]
 
             slow_print('\n%s added to inventory' % full)
             return
 
     print "\n%s: no such item" % item_name
 
-def do_drop(map_obj, item_name):
+def do_drop(player, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhat do you want to drop?"
         return
 
-    for i in map_obj.inventory_items:
-        if i.startswith(item_name):
-            map_obj.inventory_items[i].description = "on the floor"
-            map_obj.current.items.append(map_obj.inventory_items[i])
-            del map_obj.inventory_items[i]
+    for i in player.inventory_items:
+        if i.startswith(item_name) or item_name in i:
+            player.inventory_items[i].description = "on the floor"
+            player.current.items.append(player.inventory_items[i])
+            del player.inventory_items[i]
             slow_print("\nDropped %s" % i)
             return
 
     print "\n%s: no such item in inventory" % item_name
 
-def do_speak(map_obj, name):
+def do_speak(player, name):
     if not name or name.strip() == "":
         print "\nWho do you want to speak to?"
         return
 
-    for p in map_obj.current.people:
+    for p in player.current.people:
         if p.name.lower().startswith(name):
-            sys.stdout.write('\n%s: ' % p.name)
-            sys.stdout.flush()
-            slow_print('"%s"' % p.on_speak(map_obj))
+            response = p.on_speak(p, player)
+
+            if response:
+                p.say(response)
+
             return
 
     print "\n%s: no such person" % name
@@ -349,82 +410,116 @@ def do_quit():
     while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
         ret = get_input("[really stop playing? (yes/no)]: ")
 
+        print ret
         if 'yes'.startswith(ret.lower()):
             sys.exit()
         elif 'no'.startswith(ret.lower()):
             return
 
-def do_equip(map_obj, item_name):
+def do_equip(player, item_name):
     if not item_name or item_name.strip() == "":
-        print "\nWhat do you want to equip?"
+        print "\nWhich inventory item do you want to equip?"
         return
 
-    for i in map_obj.inventory_items:
-        if i.startswith(item_name):
+    for i in player.inventory_items:
+        if i.startswith(item_name) or item_name in i:
             slow_print("\nEquipped %s" % i)
-            map_obj.inventory_items['equipped'] = map_obj.inventory_items[i]
+            player.inventory_items['equipped'] = player.inventory_items[i]
             return
 
     print "\n%s: no such item in inventory" % item_name
 
-def do_unequip(map_obj):
-    equipped = map_obj.inventory_items['equipped']
+def do_unequip(player, fields):
+    equipped = player.inventory_items['equipped']
     if not equipped:
         slow_print('\nNothing is currently equipped')
     else:
-        map_obj.inventory_items['equipped'] = None
+        player.inventory_items['equipped'] = None
         slow_print('\n%s unequipped' % equipped.name)
 
-def parse_command(map_obj, fields):
-    if fields[0] == 'go':
-        do_move(map_obj, ' '.join(fields[1:]))
-    elif fields[0] == 'take':
-        do_take(map_obj, ' '.join(fields[1:]))
-    elif fields[0] == 'drop':
-        do_drop(map_obj, ' '.join(fields[1:]))
-    elif fields[0] == 'speak':  
-        do_speak(map_obj, ' '.join(fields[1:]))
-    elif fields[0] == 'equip':
-        do_equip(map_obj, ' '.join(fields[1:]))
-    elif fields[0] == 'unequip':
-        do_unequip(map_obj)
-    elif 'inventory'.startswith(fields[0]):
-        print inventory_listing(map_obj)
-    elif fields[0].startswith('?'):
-        print map_obj.current_state()
-    elif fields[0] in KILL_WORDS:
-        do_quit()
-    else:
-        unrecognised(map_obj, fields[0])
+def do_set_print_speed(player, setting):
+    if not setting or setting == "":
+        print ("\nWhat printing speed would you like? (e.g. "
+            "'print fast' or 'print slow')")
+        return
 
-def inventory_listing(map_obj):
-    if not map_obj.inventory_items:
+    if 'slow'.startswith(setting):
+        info['slow_printing'] = True
+        print "\nOK, will do."
+    elif 'fast'.startswith(setting):
+        info['slow_printing'] = False
+        print "\nOK, got it."
+    else:
+        print("\nUnrecognised print speed-- please say 'print fast' "
+            "or 'print slow'")
+
+def check_word_set(word, word_set):
+    for w in word_set:
+        if word.startswith(w):
+            return w
+
+    return None
+
+def is_shorthand_direction(word):
+    for w in ['north', 'south', 'east', 'west']:
+        if w.startswith(word):
+            return w
+
+    return None
+
+command_table = [
+    (SET_PRINT_WORDS, do_set_print_speed),
+    (GO_WORDS, do_move),
+    (TAKE_WORDS, do_take),
+    (DROP_WORDS, do_drop),
+    (SPEAK_WORDS, do_speak),
+    (EQUIP_WORDS, do_equip),
+    (UNEQUIP_WORDS, do_unequip),
+    (KILL_WORDS, do_quit)
+]
+
+def parse_command(player, action):
+    fields = [f.strip() for f in action.split()]
+
+    for word_set, task in command_table:
+        ret = check_word_set(action, word_set)
+        if ret:
+            task(player, action[len(ret):].strip())
+            return
+
+    if action == "" or fields[0].startswith('?'):
+        print player.current_state()
+    elif 'inventory'.startswith(fields[0]):
+        print inventory_listing(player)
+    elif is_shorthand_direction(action):
+        do_move(player, action)
+    else:
+        unrecognised(player, fields[0])
+
+def inventory_listing(player):
+    if len(player.inventory_items) == 1 and player.coins == 0:
         return "\nInventory is empty"
 
+    print "\n{0:35}{1:1}({2})".format('coins', "", player.coins)
+
     ret = ''
-    for i in map_obj.inventory_items:
+    for i in player.inventory_items:
         if i == 'equipped':
             continue
 
-        item = map_obj.inventory_items[i]
+        item = player.inventory_items[i]
         msg = item.name
 
-        if map_obj.inventory_items[i] is map_obj.inventory_items['equipped']:
+        if player.inventory_items[i] is player.inventory_items['equipped']:
             msg += " (equipped)"
 
         ret += "\n{0:35}{1:1}({2})".format(msg, "", item.value)
 
     return ret
 
-def run_map(map_obj):
-    print CONTROLS
-    slow_print(map_obj.current_state())
+def run_game(player):
+    slow_print(player.current_state())
 
     while True:
-        action = get_input("\n[action?]: ").strip().lower()
-        fields = [f.strip() for f in action.split()]
-
-        if len(action) < 1:
-            continue
-
-        parse_command(map_obj, fields)
+        action = get_input("\n%s" % player.prompt).strip().lower()
+        parse_command(player, action.strip())
