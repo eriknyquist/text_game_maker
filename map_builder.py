@@ -1,33 +1,36 @@
 import sys
 import time
 import copy
+import string
 import threading
 import Queue
 
 info = {
-    'slow_printing': True
+    'slow_printing': True,
+    'last_command': '?'
 }
 
 SET_PRINT_WORDS = ['print']
 
 KILL_WORDS = [
-    'quit', 'stop', 'finish', 'end'
+    'quit', 'stop', 'finish', 'end', 'exit'
 ]
 
 GO_WORDS = [
-    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run'
+    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip', 'jump',
+    'dance', 'creep', 'sneak', 'tiptoe'
 ]
 
 TAKE_WORDS = [
-    'take', 'pick up', 'steal', 'acquire', 'grab', 'get'
+    'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
 ]
 
 DROP_WORDS = [
-    'drop', 'throw away', 'discard'
+    'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete'
 ]
 
 EQUIP_WORDS = [
-    'equip', 'use'
+    'equip', 'use', 'whip out', 'take out', 'brandish'
 ]
 
 UNEQUIP_WORDS = [
@@ -51,11 +54,11 @@ enter_thread.start()
 def unrecognised(player, val):
     print '\nUnrecognised command "%s"' % val
 
-def get_input(msg=''):
+def get_input(msg='', allow_empty=False):
     user_input = ""
     buf = ""
 
-    while user_input == "":
+    while True:
         sys.stdout.write(msg)
         sys.stdout.flush()
 
@@ -66,6 +69,9 @@ def get_input(msg=''):
             buf += c
 
         user_input = buf.strip()
+
+        if allow_empty or (len(user_input) > 0):
+            break
 
     return user_input
 
@@ -99,6 +105,7 @@ def slow_print(msg, chardelay=0.02):
                 return
 
         sys.stdout.write(msg[i])
+        sys.stdout.flush()
         time.sleep(chardelay)
 
     print ''
@@ -169,7 +176,7 @@ class Person(object):
     def buy_equipped_item(self, player):
         equipped = player.inventory_items['equipped']
         self.say("Ah, I see you have %s %s. I would like to buy it for "
-            "%d coins." % (equipped.prefix, equipped.name, equipped.value)) 
+            "%d coins." % (equipped.prefix, equipped.name, equipped.value))
 
         if ask_yes_no("[sell %s for %d coins? (yes/no)] : "
                 % (equipped.name, equipped.value)):
@@ -207,7 +214,7 @@ class Player(object):
         self.name = ""
         self.title = ""
 
-    def _move(self, dest, name):
+    def _move(self, dest, word, name):
         if dest is None:
             slow_print("\nCan't go %s from here." % name)
             return self.current
@@ -225,8 +232,10 @@ class Player(object):
 
         self.current = dest
 
-        slow_print("\nYou go %s." % name)
-        time.sleep(1)
+        slow_print("\nYou %s %s." % (word, name))
+        if info['slow_printing']:
+            time.sleep(1)
+
         slow_print("%s" % self.current_state())
 
         return dest
@@ -241,11 +250,11 @@ class Player(object):
         items = []
 
         ret = "\nYou are %s" % self.current.description
-       
+
         if self.current.people:
             for p in self.current.people:
                 items.append("%s is %s" % (p.name, p.description))
-            
+
             ret += "\n\n%s" % ('\n'.join(items))
 
         items = []
@@ -264,17 +273,17 @@ class Player(object):
     def set_title(self, title):
         self.title = title
 
-    def move_north(self):
-        self._move(self.current.north, "north")
+    def move_north(self, word):
+        self._move(self.current.north, word, "north")
 
-    def move_south(self):
-        self._move(self.current.south, "south")
+    def move_south(self, word):
+        self._move(self.current.south, word, "south")
 
-    def move_east(self):
-        self._move(self.current.east, "east")
+    def move_east(self, word):
+        self._move(self.current.east, word, "east")
 
-    def move_west(self):
-        self._move(self.current.west, "west")
+    def move_west(self, word):
+        self._move(self.current.west, word, "west")
 
 class MapBuilder(object):
     """
@@ -340,23 +349,23 @@ class MapBuilder(object):
     def build_player(self):
         return Player(self.start, self.prompt)
 
-def do_move(player, direction):
+def do_move(player, word, direction):
     if not direction or direction.strip() == "":
         print "\nWhere do you want to go?"
         return
 
     if 'north'.startswith(direction):
-        player.move_north()
+        player.move_north(word)
     elif 'south'.startswith(direction):
-        player.move_south()
+        player.move_south(word)
     elif 'east'.startswith(direction):
-        player.move_east()
+        player.move_east(word)
     elif 'west'.startswith(direction):
-        player.move_west()
+        player.move_west(word)
     else:
         unrecognised(player, direction)
 
-def do_take(player, item_name):
+def do_take(player, word, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhat do you want to take?"
         return
@@ -373,22 +382,28 @@ def do_take(player, item_name):
 
     print "\n%s: no such item" % item_name
 
-def do_drop(player, item_name):
+def do_drop(player, word, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhat do you want to drop?"
         return
 
     for i in player.inventory_items:
         if i.startswith(item_name) or item_name in i:
+            # Place item on the floor in current room
             player.inventory_items[i].description = "on the floor"
             player.current.items.append(player.inventory_items[i])
+
+            # Clear equipped slot if dropped item was equipped
+            if player.inventory_items['equipped'] == player.inventory_items[i]:
+                player.inventory_items['equipped'] = None
+
             del player.inventory_items[i]
             slow_print("\nDropped %s" % i)
             return
 
     print "\n%s: no such item in inventory" % item_name
 
-def do_speak(player, name):
+def do_speak(player, word, name):
     if not name or name.strip() == "":
         print "\nWho do you want to speak to?"
         return
@@ -404,7 +419,7 @@ def do_speak(player, name):
 
     print "\n%s: no such person" % name
 
-def do_quit():
+def do_quit(player, word, name):
     ret = 'z'
 
     while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
@@ -416,7 +431,7 @@ def do_quit():
         elif 'no'.startswith(ret.lower()):
             return
 
-def do_equip(player, item_name):
+def do_equip(player, word, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhich inventory item do you want to equip?"
         return
@@ -429,7 +444,7 @@ def do_equip(player, item_name):
 
     print "\n%s: no such item in inventory" % item_name
 
-def do_unequip(player, fields):
+def do_unequip(player, word, fields):
     equipped = player.inventory_items['equipped']
     if not equipped:
         slow_print('\nNothing is currently equipped')
@@ -437,7 +452,7 @@ def do_unequip(player, fields):
         player.inventory_items['equipped'] = None
         slow_print('\n%s unequipped' % equipped.name)
 
-def do_set_print_speed(player, setting):
+def do_set_print_speed(player, word, setting):
     if not setting or setting == "":
         print ("\nWhat printing speed would you like? (e.g. "
             "'print fast' or 'print slow')")
@@ -470,31 +485,39 @@ def is_shorthand_direction(word):
 command_table = [
     (SET_PRINT_WORDS, do_set_print_speed),
     (GO_WORDS, do_move),
+    (EQUIP_WORDS, do_equip),
     (TAKE_WORDS, do_take),
     (DROP_WORDS, do_drop),
     (SPEAK_WORDS, do_speak),
-    (EQUIP_WORDS, do_equip),
     (UNEQUIP_WORDS, do_unequip),
     (KILL_WORDS, do_quit)
 ]
 
 def parse_command(player, action):
+    if action == '':
+        action = info['last_command']
+        print '\n' + action
+
     fields = [f.strip() for f in action.split()]
 
     for word_set, task in command_table:
         ret = check_word_set(action, word_set)
         if ret:
-            task(player, action[len(ret):].strip())
+            task(player, ret, action[len(ret):].strip())
+            info['last_command'] = action
             return
 
-    if action == "" or fields[0].startswith('?'):
+    if fields[0].startswith('?'):
         print player.current_state()
     elif 'inventory'.startswith(fields[0]):
         print inventory_listing(player)
     elif is_shorthand_direction(action):
-        do_move(player, action)
+        do_move(player, 'go', action)
     else:
         unrecognised(player, fields[0])
+        return
+
+    info['last_command'] = action
 
 def inventory_listing(player):
     if len(player.inventory_items) == 1 and player.coins == 0:
@@ -521,5 +544,5 @@ def run_game(player):
     slow_print(player.current_state())
 
     while True:
-        action = get_input("\n%s" % player.prompt).strip().lower()
-        parse_command(player, action.strip())
+        action = get_input("\n%s" % player.prompt, allow_empty=True)
+        parse_command(player, action.strip().lower())
