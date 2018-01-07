@@ -523,9 +523,9 @@ def inventory_listing(player):
     if len(player.inventory_items) == 1 and player.coins == 0:
         return "\nInventory is empty"
 
-    print "\n{0:35}{1:1}({2})".format('coins', "", player.coins)
+    ret = "\n--------------- INVENTORY ---------------\n"
+    ret += "\n{0:35}{1:1}({2})\n".format('COINS', "", player.coins)
 
-    ret = ''
     for i in player.inventory_items:
         if i == 'equipped':
             continue
@@ -538,6 +538,7 @@ def inventory_listing(player):
 
         ret += "\n{0:35}{1:1}({2})".format(msg, "", item.value)
 
+    ret += "\n\n-----------------------------------------"
     return ret
 
 def run_game(player):

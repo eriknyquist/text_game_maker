@@ -16,11 +16,15 @@ alan_lines = [
     "I'd buy some food if you had it.",
 ]
 
-def alan_speak_cb(person, player):
+def alan_speak_callback(person, player):
+    if alan_info['eaten']:
+        return "Didn't we talk already? Be gone."
+
     if player.inventory_items['equipped']:
         item = person.buy_equipped_item(player)
         if item:
             # Sale successful
+            alan_info['eaten'] = True
             return None
         else:
             # Sale cancelled
@@ -29,12 +33,9 @@ def alan_speak_cb(person, player):
     if alan_info['count'] < len(alan_lines):
         alan_info['count'] += 1
 
-    if alan_info['eaten']:
-        return "Didn't we talk already? Be gone."
-
     return alan_lines[alan_info['count'] - 1]
         
-def room_2_enter_cb(player, src, dest):
+def locked_room_enter_callback(player, src, dest):
     equipped = player.inventory_items['equipped']
     if equipped and equipped.name == 'metal key':
         player.delete_equipped()
@@ -73,11 +74,11 @@ def main():
     )
 
     builder.set_locked()
-    builder.add_enter_callback(room_2_enter_cb)
+    builder.add_enter_callback(locked_room_enter_callback)
 
     builder.add_person(
         map_builder.Person(
-            "Alan", "standing in the corner", alan_speak_cb
+            "Alan", "standing in the corner", alan_speak_callback
         )
     )
 
