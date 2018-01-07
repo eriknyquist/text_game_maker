@@ -1,7 +1,6 @@
 import sys
 import time
 import copy
-import string
 import threading
 import Queue
 
@@ -39,6 +38,14 @@ UNEQUIP_WORDS = [
 
 SPEAK_WORDS = [
     'speak with', 'speak to', 'talk to', 'talk with', 'speak', 'talk'
+]
+
+LOOK_WORDS = [
+    "?", "look", "peep", "peek", "show", "viddy"
+]
+
+INVENTORY_WORDS = [
+    'i', 'inventory'
 ]
 
 input_queue = Queue.Queue()
@@ -169,9 +176,17 @@ class Person(object):
         self.on_speak = on_speak
 
     def say(self, msg):
-        sys.stdout.write('\n%s: ' % self.name)
+        lines = msg.splitlines()
+        lines[-1] += '"'
+
+        sys.stdout.write('\n%s: "' % self.name)
         sys.stdout.flush()
-        slow_print('"%s"' % msg)
+        slow_print(lines[0])
+
+        for line in lines[1:]:
+            sys.stdout.write(' ' * (len(self.name) + 2))
+            sys.stdout.flush()
+            slow_print(line)
 
     def buy_equipped_item(self, player):
         equipped = player.inventory_items['equipped']
@@ -468,6 +483,29 @@ def do_set_print_speed(player, word, setting):
         print("\nUnrecognised print speed-- please say 'print fast' "
             "or 'print slow'")
 
+def do_look(player, word, setting):
+    print player.current_state()
+
+def do_inventory_listing(player, word, setting):
+    print "\n--------------- INVENTORY ---------------"
+    print "\n{0:35}{1:1}({2})".format('COINS', "", player.coins)
+
+    if len(player.inventory_items) > 1:
+        print ''
+        for i in player.inventory_items:
+            if i == 'equipped':
+                continue
+
+            item = player.inventory_items[i]
+            msg = item.name
+
+            if player.inventory_items[i] is player.inventory_items['equipped']:
+                msg += " (equipped)"
+
+            print "{0:35}{1:1}({2})".format(msg, "", item.value)
+
+    print"\n-----------------------------------------"
+
 def check_word_set(word, word_set):
     for w in word_set:
         if word.startswith(w):
@@ -490,7 +528,9 @@ command_table = [
     (DROP_WORDS, do_drop),
     (SPEAK_WORDS, do_speak),
     (UNEQUIP_WORDS, do_unequip),
-    (KILL_WORDS, do_quit)
+    (KILL_WORDS, do_quit),
+    (LOOK_WORDS, do_look),
+    (INVENTORY_WORDS, do_inventory_listing)
 ]
 
 def parse_command(player, action):
@@ -507,39 +547,13 @@ def parse_command(player, action):
             info['last_command'] = action
             return
 
-    if fields[0].startswith('?'):
-        print player.current_state()
-    elif 'inventory'.startswith(fields[0]):
-        print inventory_listing(player)
-    elif is_shorthand_direction(action):
+    if is_shorthand_direction(action):
         do_move(player, 'go', action)
     else:
         unrecognised(player, fields[0])
         return
 
     info['last_command'] = action
-
-def inventory_listing(player):
-    if len(player.inventory_items) == 1 and player.coins == 0:
-        return "\nInventory is empty"
-
-    ret = "\n--------------- INVENTORY ---------------\n"
-    ret += "\n{0:35}{1:1}({2})\n".format('COINS', "", player.coins)
-
-    for i in player.inventory_items:
-        if i == 'equipped':
-            continue
-
-        item = player.inventory_items[i]
-        msg = item.name
-
-        if player.inventory_items[i] is player.inventory_items['equipped']:
-            msg += " (equipped)"
-
-        ret += "\n{0:35}{1:1}({2})".format(msg, "", item.value)
-
-    ret += "\n\n-----------------------------------------"
-    return ret
 
 def run_game(player):
     slow_print(player.current_state())
