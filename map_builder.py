@@ -4,6 +4,59 @@ import copy
 import threading
 import Queue
 
+basic_controls = """
+Movement
+--------
+
+Use phrases like 'east' or 'go south' to move around
+
+
+Items
+-----
+
+Items are referred to by name. Use an item's name along with various verbs
+to manipulate it:
+
+ * Use 'i', 'inventory' or anything in between to show current inventory
+   contents
+
+ * Use phrases like 'get key' or 'pick up key' to add an item to your inventory
+   by name (the item is named 'key' in this example and the following examples)
+
+ * Use phrases like 'use key' or 'equip key' to equip an item by name from your
+   inventory
+
+ * Use phrases like 'put away key' or 'unequip key' to unequip an item
+
+ * Equip inventory items to use them. For example, to use a key to unlock
+   a door, walk to the door with the key equipped
+
+
+People
+------
+
+People you encounter are referred to by name. Most interaction with people is
+done through speaking.
+
+* Use phrases like 'speak to alan', 'talk to alan', 'speak alan' to interact
+  with a person by name (sample person is named 'Alan' in this example and the
+  following examples)
+
+* If you speak to someone with an inventory item equipped, they will see
+  it and may offer to buy it.
+
+* Use phrases like 'loot alan' or 'search alan' to try and steal a person's
+  items and add them to your inventory. Attempts to loot a living person
+  are usually unsuccessful.
+
+
+Misc
+----
+
+Use words like 'look' or 'show' to be reminded of your current surroundings
+Use 'help' or '?' to show this information
+"""
+
 info = {
     'slow_printing': True,
     'last_command': '?'
@@ -41,11 +94,19 @@ SPEAK_WORDS = [
 ]
 
 LOOK_WORDS = [
-    "?", "look", "peep", "peek", "show", "viddy"
+    "look", "peep", "peek", "show", "viddy"
+]
+
+LOOT_WORDS = [
+    "loot", "search"
 ]
 
 INVENTORY_WORDS = [
     'i', 'inventory'
+]
+
+HELP_WORDS = [
+    '?', 'help'
 ]
 
 input_queue = Queue.Queue()
@@ -81,6 +142,21 @@ def get_input(msg='', allow_empty=False):
             break
 
     return user_input
+
+def list_to_english(strlist):
+    if len(strlist) == 1:
+        return strlist[0]
+
+    msg = ""
+    for i in range(len(strlist[:-1])):
+        if i == (len(strlist) - 2):
+            delim = ' and'
+        else:
+            delim = ','
+
+        msg += '%s%s ' % (strlist[i], delim)
+
+    return msg + strlist[-1]
 
 def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
     ret = "z"
@@ -170,10 +246,27 @@ class Person(object):
     Represents a person that we can interact with
     """
 
-    def __init__(self, name, description, on_speak=None):
+    def __init__(self, name, description, on_speak=None, alive=True, coins=50,
+            items={}):
         self.name = name
         self.description = description
         self.on_speak = on_speak
+        self.alive = alive
+        self.coins = coins
+        self.items = items
+
+    def die(self, msg=None):
+        self.alive = False
+        self.name = "%s's corpse" % self.name
+        self.description = "on the floor"
+
+        if msg is None or msg == "":
+            msg = '\n%s has died.' % self.name
+
+        slow_print(msg)
+
+    def is_alive(self):
+        return self.alive
 
     def say(self, msg):
         lines = msg.splitlines()
@@ -190,13 +283,28 @@ class Person(object):
 
     def buy_equipped_item(self, player):
         equipped = player.inventory_items['equipped']
-        self.say("Ah, I see you have %s %s. I would like to buy it for "
-            "%d coins." % (equipped.prefix, equipped.name, equipped.value))
+        cost = equipped.value
+        msg = "Ah, I see you have %s %s." % (equipped.prefix, equipped.name)
 
-        if ask_yes_no("[sell %s for %d coins? (yes/no)] : "
-                % (equipped.name, equipped.value)):
-            player.coins += equipped.value
+        if self.coins >= cost:
+            msg += " I would like to buy it for %d coins." % cost
+        else:
+            msg += (" I would like to buy it from you,\n"
+                    "but I only have %d coins. Will you accept that price\n"
+                    "instead?" % self.coins)
+            cost = self.coins
+
+        self.say(msg)
+        if ask_yes_no("\n[sell %s for %d coins? (yes/no)] : "
+                % (equipped.name, cost)):
+            # Transfer money
+            player.coins += cost
+            self.coins -= cost
+
+            # Transfer item
             equipped_copy = copy.deepcopy(equipped)
+            self.items[equipped_copy] = equipped_copy
+
             player.delete_equipped()
             slow_print("\nSale completed.")
             return equipped_copy
@@ -260,6 +368,24 @@ class Player(object):
         if equipped:
             del self.inventory_items[equipped.name]
             self.inventory_items['equipped'] = None
+
+    def loot(self, person):
+        if not person.coins and not person.items:
+            print('\n%s has nothing to loot.' % person.name)
+        else:
+            print_items = []
+            if person.coins:
+                print_items.append('%d coins' % person.coins)
+                self.coins += person.coins
+                person.coins = 0
+
+            if person.items:
+                pitems = (['%s %s' % (i.prefix, i.name) for i in person.items])
+                print_items.extend(pitems)
+                self.inventory_items.update(person.items)
+                person.items.clear()
+
+            print "\nFound %s." % (list_to_english(print_items))
 
     def current_state(self):
         items = []
@@ -425,10 +551,12 @@ def do_speak(player, word, name):
 
     for p in player.current.people:
         if p.name.lower().startswith(name):
-            response = p.on_speak(p, player)
-
-            if response:
-                p.say(response)
+            if p.is_alive():
+                response = p.on_speak(p, player)
+                if response:
+                    p.say(response)
+            else:
+                slow_print('\n%s says nothing. %s is dead.' % (p.name, p.name))
 
             return
 
@@ -466,6 +594,21 @@ def do_unequip(player, word, fields):
     else:
         player.inventory_items['equipped'] = None
         slow_print('\n%s unequipped' % equipped.name)
+
+def do_loot(player, word, name):
+    if not name or name.strip() == "":
+        print "\nWho do you want to %s?" % word
+        return
+
+    for p in player.current.people:
+        if p.name.lower().startswith(name):
+            if p.is_alive():
+                slow_print('\nYou are dead.')
+                slow_print('%s caught you trying to loot them, and killed you.'
+                    % p.name)
+                sys.exit()
+            else:
+                player.loot(p)
 
 def do_set_print_speed(player, word, setting):
     if not setting or setting == "":
@@ -506,6 +649,9 @@ def do_inventory_listing(player, word, setting):
 
     print"\n-----------------------------------------"
 
+def do_help(player, word, setting):
+    print basic_controls
+
 def check_word_set(word, word_set):
     for w in word_set:
         if word.startswith(w):
@@ -528,9 +674,11 @@ command_table = [
     (DROP_WORDS, do_drop),
     (SPEAK_WORDS, do_speak),
     (UNEQUIP_WORDS, do_unequip),
+    (LOOT_WORDS, do_loot),
     (KILL_WORDS, do_quit),
     (LOOK_WORDS, do_look),
-    (INVENTORY_WORDS, do_inventory_listing)
+    (INVENTORY_WORDS, do_inventory_listing),
+    (HELP_WORDS, do_help)
 ]
 
 def parse_command(player, action):
