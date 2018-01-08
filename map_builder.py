@@ -53,12 +53,17 @@ done through speaking.
 Misc
 ----
 
-Use words like 'look' or 'show' to be reminded of your current surroundings
-Use 'help' or '?' to show this information
-"""
+* Use words like 'look' or 'show' to be reminded of your current surroundings
+
+* Use 'print slow' to set printing mode to print one character at a time
+  (looks cool for about 3 seconds)
+
+* Use 'print fast' to set printing mode to normal printing
+
+* Use 'help' or '?' to show this information"""
 
 info = {
-    'slow_printing': True,
+    'slow_printing': False,
     'last_command': '?'
 }
 
@@ -303,7 +308,7 @@ class Person(object):
 
             # Transfer item
             equipped_copy = copy.deepcopy(equipped)
-            self.items[equipped_copy] = equipped_copy
+            self.items[equipped_copy.name] = equipped_copy
 
             player.delete_equipped()
             slow_print("\nSale completed.")
@@ -369,9 +374,9 @@ class Player(object):
             del self.inventory_items[equipped.name]
             self.inventory_items['equipped'] = None
 
-    def loot(self, person):
+    def loot(self, word, person):
         if not person.coins and not person.items:
-            print('\n%s has nothing to loot.' % person.name)
+            slow_print('\nYou %s %s, and find nothing.' % (word, person.name))
         else:
             print_items = []
             if person.coins:
@@ -380,12 +385,14 @@ class Player(object):
                 person.coins = 0
 
             if person.items:
-                pitems = (['%s %s' % (i.prefix, i.name) for i in person.items])
-                print_items.extend(pitems)
+                for n, i in person.items.items():
+                    print_items.append('%s %s' % (i.prefix, n))
+
                 self.inventory_items.update(person.items)
                 person.items.clear()
 
-            print "\nFound %s." % (list_to_english(print_items))
+            slow_print("\nYou %s %s, and find %s." % (word, person.name,
+                list_to_english(print_items)))
 
     def current_state(self):
         items = []
@@ -608,7 +615,7 @@ def do_loot(player, word, name):
                     % p.name)
                 sys.exit()
             else:
-                player.loot(p)
+                player.loot(word, p)
 
 def do_set_print_speed(player, word, setting):
     if not setting or setting == "":

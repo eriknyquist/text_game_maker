@@ -45,16 +45,14 @@ def alan_speak_callback(person, player):
         "speak to me.",
     ]
 
-    if alan_info['eaten']:
-        # Return description of basic commands (once alan has eaten...)
-        return map_builder.basic_controls
-
     if player.inventory_items['equipped']:
         item = person.buy_equipped_item(player)
         if item:
             # Sale successful
             alan_info['eaten'] = True
-            if item.name != 'sausage':
+            if item.name == 'sausage':
+                del person.items[item.name]
+            else:
                 person.die('\n%s died from trying to eat a %s.'
                     % (person.name, item.name))
 
@@ -62,6 +60,11 @@ def alan_speak_callback(person, player):
         else:
             # Sale cancelled
             return None
+
+    else:
+        if alan_info['eaten']:
+            # Return description of basic commands (once alan has eaten...)
+            return map_builder.basic_controls
 
     if alan_info['count'] < len(alan_lines):
         alan_info['count'] += 1
