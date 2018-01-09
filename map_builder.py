@@ -127,7 +127,20 @@ enter_thread.start()
 def unrecognised(player, val):
     print '\nUnrecognised command "%s"' % val
 
-def get_input(msg='', allow_empty=False):
+def read_line(msg='', allow_empty=False):
+    """
+    Read a line of input from stdin
+
+    :param msg: message to print before reading input
+    :type msg: str
+    :param allow_empty: if True, prompt will be repeated until a non-empty\
+        line is entered
+    :type allow_empty: bool
+
+    :return: '\n' or '\r' terminated line
+    :rtype: str
+    """
+
     user_input = ""
     buf = ""
 
@@ -149,6 +162,18 @@ def get_input(msg='', allow_empty=False):
     return user_input
 
 def list_to_english(strlist):
+    """
+    Convert a list of strings to description of the list in english.
+    For example, ['4 coins', 'an apple', 'a sausage'] would be converted to
+    '4 coins, an apple and a sausage'
+
+    :param strlist: list of strings to convert to english
+    :type strlist: str
+
+    :return: english description of the passed list
+    :rtype: str
+    """
+
     if len(strlist) == 1:
         return strlist[0]
 
@@ -164,9 +189,20 @@ def list_to_english(strlist):
     return msg + strlist[-1]
 
 def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
+    """
+    Ask player a yes/no question, and repeat the prompt until player
+    gives a valid answer
+
+    :param prompt: prompt containing question to ask
+    :type prompt: str
+
+    :return: player's response
+    :rtype: str
+    """
+
     ret = "z"
     while not 'yes'.startswith(ret) and not 'no'.startswith(ret):
-        ret = get_input(prompt)
+        ret = read_line(prompt)
 
     if 'yes'.startswith(ret):
         return True
@@ -178,6 +214,17 @@ def remove_leading_whitespace(string):
     return '\n'.join(trimmed)
 
 def slow_print(msg, chardelay=0.02):
+    """
+    Print one character at a time if player has set 'print slow', otherwise
+    print normally
+
+    :param msg: message to print
+    :type msg: str
+    :param chardelay: time in seconds to delay between each character if player\
+        has set 'print slow'
+    :type chardelay: float
+    """
+
     if not info['slow_printing']:
         print msg
         return
@@ -205,18 +252,37 @@ class Tile(object):
 
     def __init__(self, name=None, description=None, on_enter=None,
             on_exit=None):
-        self.locked = False
+        """
+        Initialise a Tile instance
+
+        :param str name: short description, e.g. "a dark cellar"
+        :param str description: long description, printed when player enters\
+            the room e.g. "a dark, scary cellar with blah blah blah... "
+        :param on_enter: callback to be invoked when player attempts to enter\
+            this tile (see documentation for Tile.add_on_enter()
+        :param on_exit: callback to be invoked when player attempts to exit\
+            this tile (see documentation for Tile.add_on_exit()
+        """
+
         self.name = name
         self.description = remove_leading_whitespace(description)
 
+        # If tile is locked, player will only see a locked door.
+        self.locked = False
+
+        # Adjacent tiles to the north, south, east and west of this tile
         self.north = None
         self.south = None
         self.east = None
         self.west = None
 
+        # Items on this tile
         self.items = []
+
+        # People on this tile
         self.people = []
 
+        # Enter/exit callbacks
         self.on_enter = on_enter
         self.on_exit = on_exit
 
@@ -232,6 +298,10 @@ class Tile(object):
             return None
 
     def summary(self):
+        """
+        Return a description of all available directions from this tile
+        """
+
         ret = []
 
         north = self._get_name(self.north, 'north')
@@ -248,11 +318,19 @@ class Tile(object):
 
 class Person(object):
     """
-    Represents a person that we can interact with
+    Represents a person that the player can interact with
     """
 
     def __init__(self, name, description, on_speak=None, alive=True, coins=50,
             items={}):
+        """
+        Initialises a Person instance
+
+        :param str name: name of Person, e.g. "John"
+        :param str description: description of Person, e.g. "squatting in the\
+            corner"
+        :param:
+        """
         self.name = name
         self.description = description
         self.on_speak = on_speak
@@ -261,6 +339,14 @@ class Person(object):
         self.items = items
 
     def die(self, msg=None):
+        """
+        Kill this person, and print a message to inform the player
+        of this person's death.
+
+        :param msg: message to print informing player of person's death
+        :type msg: str
+        """
+
         self.alive = False
         self.name = "%s's corpse" % self.name
         self.description = "on the floor"
@@ -271,9 +357,23 @@ class Person(object):
         slow_print(msg)
 
     def is_alive(self):
+        """
+        Test if this person is alive
+
+        :return: True if this person is alive, otherwise false
+        :rtype: bool
+        """
+
         return self.alive
 
     def say(self, msg):
+        """
+        Speak to the player
+
+        :param msg: message to speak
+        :type msg: str
+        """
+
         lines = msg.splitlines()
         lines[-1] += '"'
 
@@ -287,6 +387,21 @@ class Person(object):
             slow_print(line)
 
     def buy_equipped_item(self, player):
+        """
+        Ask player to buy equipped item. Expects player to have something
+        equipped (so check before uing this method).
+
+        If player's equipped item costs more coins than this person has, the
+        person will automatically ask if the player will accept the lower
+        amount, and can still buy the item if the player says yes.
+
+        :param player: player object
+        :type player: map_builder.Player
+
+        :return: Returns the item if sale was successful, None otherwise
+        :rtype: map_builder.Item
+        """
+
         equipped = player.inventory_items['equipped']
         cost = equipped.value
         msg = "Ah, I see you have %s %s." % (equipped.prefix, equipped.name)
@@ -323,10 +438,10 @@ class Item(object):
     """
 
     def __init__(self, prefix, name, description, value):
-        self.value = value
-        self.name = name
-        self.prefix = prefix
-        self.description = description
+        self.value = value              # Item value in coins
+        self.name = name                # Item name (e.g. "apple")
+        self.prefix = prefix            # Either "a" or "an"
+        self.description = description  # Description, e.g. "on the floor"
 
 class Player(object):
     """
@@ -443,10 +558,10 @@ class MapBuilder(object):
         self.current = self.start
         self.prompt = "[?]: "
 
-    def add_enter_callback(self, callback):
+    def set_on_enter(self, callback):
         self.current.on_enter = callback
 
-    def add_exit_callback(self, callback):
+    def set_on_exit(self, callback):
         self.current.on_exit = callback
 
     def add_description(self, desc):
@@ -573,7 +688,7 @@ def do_quit(player, word, name):
     ret = 'z'
 
     while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
-        ret = get_input("[really stop playing? (yes/no)]: ")
+        ret = read_line("[really stop playing? (yes/no)]: ")
 
         print ret
         if 'yes'.startswith(ret.lower()):
@@ -714,5 +829,5 @@ def run_game(player):
     slow_print(player.current_state())
 
     while True:
-        action = get_input("\n%s" % player.prompt, allow_empty=True)
+        action = read_line("\n%s" % player.prompt, allow_empty=True)
         parse_command(player, action.strip().lower())

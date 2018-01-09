@@ -46,6 +46,7 @@ def alan_speak_callback(person, player):
     ]
 
     if player.inventory_items['equipped']:
+        # Player has an item equipped: try to buy it
         item = person.buy_equipped_item(player)
         if item:
             # Sale successful
@@ -62,8 +63,9 @@ def alan_speak_callback(person, player):
             return None
 
     else:
+        # Player has no item equipped: print basic controls
+        # (if we've been fed...)
         if alan_info['eaten']:
-            # Return description of basic commands (once alan has eaten...)
             return map_builder.basic_controls
 
     if alan_info['count'] < len(alan_lines):
@@ -77,7 +79,7 @@ def locked_room_enter_callback(player, src, dest):
     an item named 'metal key'. Called when player attempts to enter whichever
     tile this callback is attached to.
 
-    Attach to current room with map_builder.add_enter_callback()
+    Attach to current room with map_builder.add_on_enter()
 
     params:
 
@@ -104,7 +106,7 @@ def enter_window_callback(player, src, dest):
     Called when player attempts to enter whichever room this callback is
     attached to.
 
-    Attach to current room with map_builder.add_enter_callback()
+    Attach to current room with map_builder.add_on_enter()
 
     params:
 
@@ -146,7 +148,7 @@ def main():
         "an open window, with nothing to be seen but darkness behind it", ""
     )
 
-    builder.add_enter_callback(enter_window_callback)
+    builder.add_on_enter(enter_window_callback)
 
     builder.move_east()
     builder.move_east(
@@ -156,7 +158,7 @@ def main():
     )
 
     builder.set_locked()
-    builder.add_enter_callback(locked_room_enter_callback)
+    builder.add_on_enter(locked_room_enter_callback)
 
     builder.move_west("a cellar", "a dark cellar")
 
@@ -176,4 +178,5 @@ def main():
     # Start the game!
     map_builder.run_game(player)
 
-main()
+if __name__ == "__main__":
+    main()
