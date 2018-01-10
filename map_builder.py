@@ -116,28 +116,26 @@ HELP_WORDS = [
 
 input_queue = Queue.Queue()
 
-def read_input_task():
+def _read_input_task():
     while True:
         input_queue.put(sys.stdin.read(1))
 
-enter_thread = threading.Thread(target=read_input_task)
+enter_thread = threading.Thread(target=_read_input_task)
 enter_thread.daemon = True
 enter_thread.start()
 
-def unrecognised(player, val):
+def _unrecognised(player, val):
     print '\nUnrecognised command "%s"' % val
 
 def read_line(msg='', allow_empty=False):
     """
     Read a line of input from stdin
 
-    :param msg: message to print before reading input
-    :type msg: str
-    :param allow_empty: if True, prompt will be repeated until a non-empty\
+    :param str msg: message to print before reading input
+    :param bool allow_empty: if True, prompt will be repeated until a non-empty\
         line is entered
-    :type allow_empty: bool
 
-    :return: '\n' or '\r' terminated line
+    :return: a line ending with either a newline or carriage return character
     :rtype: str
     """
 
@@ -209,7 +207,7 @@ def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
 
     return False
 
-def remove_leading_whitespace(string):
+def _remove_leading_whitespace(string):
     trimmed = [s.strip() for s in string.splitlines()]
     return '\n'.join(trimmed)
 
@@ -265,7 +263,7 @@ class Tile(object):
         """
 
         self.name = name
-        self.description = remove_leading_whitespace(description)
+        self.description = _remove_leading_whitespace(description)
 
         # If tile is locked, player will only see a locked door.
         self.locked = False
@@ -337,6 +335,9 @@ class Person(object):
         self.alive = alive
         self.coins = coins
         self.items = items
+
+    def __str__(self):
+        return '%s is %s' % (self.name, self.description)
 
     def die(self, msg=None):
         """
@@ -438,10 +439,22 @@ class Item(object):
     """
 
     def __init__(self, prefix, name, description, value):
-        self.value = value              # Item value in coins
-        self.name = name                # Item name (e.g. "apple")
-        self.prefix = prefix            # Either "a" or "an"
-        self.description = description  # Description, e.g. "on the floor"
+        """
+        Initialises an Item instance
+
+        :param str prefix: Generally either "a" or "an"
+        :param str name: Item name, e.g. "apple"
+        :param str description: Item description, e.g. "on the floor"
+        :param int value: Item value in coins
+        """
+
+        self.value = value
+        self.name = name
+        self.prefix = prefix
+        self.description = description
+
+    def __str__(self):
+        return '%s %s is %s' % (self.prefix, self.name, self.description)
 
 class Player(object):
     """
@@ -449,6 +462,11 @@ class Player(object):
     """
 
     def __init__(self, start_tile=None, input_prompt=None):
+        """
+        :param map_builder.Tile start_tile: Game starting tile
+        :param str input_prompt: Custom string to prompt player for game input
+        """
+
         self.start = start_tile
         self.current = start_tile
         self.prompt = input_prompt
@@ -483,13 +501,35 @@ class Player(object):
 
         return dest
 
+    def set_name(self, name):
+        """
+        Set player name
+
+        :param str name: new player name
+        """
+
+        self.name = name
+
+    def set_title(self, title):
+        """
+        Set player title
+
+        :param str title: new player title
+        """
+
+        self.title = title
+
     def delete_equipped(self):
+        """
+        Delete currently equipped item from inventory, if there is one
+        """
+
         equipped = self.inventory_items['equipped']
         if equipped:
             del self.inventory_items[equipped.name]
             self.inventory_items['equipped'] = None
 
-    def loot(self, word, person):
+    def _loot(self, word, person):
         if not person.coins and not person.items:
             slow_print('\nYou %s %s, and find nothing.' % (word, person.name))
         else:
@@ -506,129 +546,56 @@ class Player(object):
                 self.inventory_items.update(person.items)
                 person.items.clear()
 
-            slow_print("\nYou %s %s, and find %s." % (word, person.name,
+            slow_print("\nYou %s %s.\nYou find %s." % (word, person.name,
                 list_to_english(print_items)))
 
     def current_state(self):
+        """
+        Returns the full descriptive text for the current game state
+        """
+
         items = []
 
         ret = "\nYou are %s" % self.current.description
 
         if self.current.people:
-            for p in self.current.people:
-                items.append("%s is %s" % (p.name, p.description))
+            ret += "\n\n%s" % ('\n'.join([str(i) for i in self.current.people]))
 
-            ret += "\n\n%s" % ('\n'.join(items))
-
-        items = []
         if self.current.items:
-            for i in self.current.items:
-                items.append("%s %s is %s" % (i.prefix, i.name, i.description))
-
-            ret += "\n\n%s" % ('\n'.join(items))
+            ret += "\n\n%s" % ('\n'.join([str(i) for i in self.current.items]))
 
         ret += "\n\n%s" % self.current.summary()
         return ret
 
-    def set_name(self, name):
-        self.name = name
-
-    def set_title(self, title):
-        self.title = title
-
-    def move_north(self, word):
+    def _move_north(self, word):
         self._move(self.current.north, word, "north")
 
-    def move_south(self, word):
+    def _move_south(self, word):
         self._move(self.current.south, word, "south")
 
-    def move_east(self, word):
+    def _move_east(self, word):
         self._move(self.current.east, word, "east")
 
-    def move_west(self, word):
+    def _move_west(self, word):
         self._move(self.current.west, word, "west")
 
-class MapBuilder(object):
-    """
-    Base class for building a tile-based map
-    """
-
-    def __init__(self, name=None, description=None):
-        self.start = Tile(name, description)
-        self.current = self.start
-        self.prompt = "[?]: "
-
-    def set_on_enter(self, callback):
-        self.current.on_enter = callback
-
-    def set_on_exit(self, callback):
-        self.current.on_exit = callback
-
-    def add_description(self, desc):
-        self.current.description = desc
-
-    def add_item(self, item):
-        self.current.items.append(item)
-
-    def add_person(self, person):
-        self.current.people.append(person)
-
-    def set_locked(self):
-        self.current.locked = True
-
-    def set_input_prompt(self, prompt):
-        self.prompt = prompt
-
-    def _do_move(self, dest, name, description):
-        if dest is None:
-            dest = Tile(name, description)
-
-        return self.current, dest
-
-    def move_west(self, name=None, description=None):
-        old, new = self._do_move(self.current.west, name, description)
-        self.current.west = new
-        self.current = self.current.west
-        self.current.east = old
-
-    def move_east(self, name=None, description=None):
-        old, new = self._do_move(self.current.east, name, description)
-        self.current.east = new
-        self.current = self.current.east
-        self.current.west = old
-
-    def move_north(self, name=None, description=None):
-        old, new = self._do_move(self.current.north, name, description)
-        self.current.north = new
-        self.current = self.current.north
-        self.current.south = old
-
-    def move_south(self, name=None, description=None):
-        old, new = self._do_move(self.current.south, name, description)
-        self.current.south = new
-        self.current = self.current.south
-        self.current.north = old
-
-    def build_player(self):
-        return Player(self.start, self.prompt)
-
-def do_move(player, word, direction):
+def _do_move(player, word, direction):
     if not direction or direction.strip() == "":
         print "\nWhere do you want to go?"
         return
 
     if 'north'.startswith(direction):
-        player.move_north(word)
+        player._move_north(word)
     elif 'south'.startswith(direction):
-        player.move_south(word)
+        player._move_south(word)
     elif 'east'.startswith(direction):
-        player.move_east(word)
+        player._move_east(word)
     elif 'west'.startswith(direction):
-        player.move_west(word)
+        player._move_west(word)
     else:
-        unrecognised(player, direction)
+        _unrecognised(player, direction)
 
-def do_take(player, word, item_name):
+def _do_take(player, word, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhat do you want to take?"
         return
@@ -645,7 +612,7 @@ def do_take(player, word, item_name):
 
     print "\n%s: no such item" % item_name
 
-def do_drop(player, word, item_name):
+def _do_drop(player, word, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhat do you want to drop?"
         return
@@ -666,7 +633,7 @@ def do_drop(player, word, item_name):
 
     print "\n%s: no such item in inventory" % item_name
 
-def do_speak(player, word, name):
+def _do_speak(player, word, name):
     if not name or name.strip() == "":
         print "\nWho do you want to speak to?"
         return
@@ -684,7 +651,7 @@ def do_speak(player, word, name):
 
     print "\n%s: no such person" % name
 
-def do_quit(player, word, name):
+def _do_quit(player, word, name):
     ret = 'z'
 
     while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
@@ -696,7 +663,7 @@ def do_quit(player, word, name):
         elif 'no'.startswith(ret.lower()):
             return
 
-def do_equip(player, word, item_name):
+def _do_equip(player, word, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhich inventory item do you want to equip?"
         return
@@ -709,7 +676,7 @@ def do_equip(player, word, item_name):
 
     print "\n%s: no such item in inventory" % item_name
 
-def do_unequip(player, word, fields):
+def _do_unequip(player, word, fields):
     equipped = player.inventory_items['equipped']
     if not equipped:
         slow_print('\nNothing is currently equipped')
@@ -717,7 +684,7 @@ def do_unequip(player, word, fields):
         player.inventory_items['equipped'] = None
         slow_print('\n%s unequipped' % equipped.name)
 
-def do_loot(player, word, name):
+def _do_loot(player, word, name):
     if not name or name.strip() == "":
         print "\nWho do you want to %s?" % word
         return
@@ -730,9 +697,9 @@ def do_loot(player, word, name):
                     % p.name)
                 sys.exit()
             else:
-                player.loot(word, p)
+                player._loot(word, p)
 
-def do_set_print_speed(player, word, setting):
+def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
         print ("\nWhat printing speed would you like? (e.g. "
             "'print fast' or 'print slow')")
@@ -748,10 +715,10 @@ def do_set_print_speed(player, word, setting):
         print("\nUnrecognised print speed-- please say 'print fast' "
             "or 'print slow'")
 
-def do_look(player, word, setting):
+def _do_look(player, word, setting):
     print player.current_state()
 
-def do_inventory_listing(player, word, setting):
+def _do_inventory_listing(player, word, setting):
     print "\n--------------- INVENTORY ---------------"
     print "\n{0:35}{1:1}({2})".format('COINS', "", player.coins)
 
@@ -771,17 +738,17 @@ def do_inventory_listing(player, word, setting):
 
     print"\n-----------------------------------------"
 
-def do_help(player, word, setting):
+def _do_help(player, word, setting):
     print basic_controls
 
-def check_word_set(word, word_set):
+def _check_word_set(word, word_set):
     for w in word_set:
         if word.startswith(w):
             return w
 
     return None
 
-def is_shorthand_direction(word):
+def _is_shorthand_direction(word):
     for w in ['north', 'south', 'east', 'west']:
         if w.startswith(word):
             return w
@@ -789,21 +756,21 @@ def is_shorthand_direction(word):
     return None
 
 command_table = [
-    (SET_PRINT_WORDS, do_set_print_speed),
-    (GO_WORDS, do_move),
-    (EQUIP_WORDS, do_equip),
-    (TAKE_WORDS, do_take),
-    (DROP_WORDS, do_drop),
-    (SPEAK_WORDS, do_speak),
-    (UNEQUIP_WORDS, do_unequip),
-    (LOOT_WORDS, do_loot),
-    (KILL_WORDS, do_quit),
-    (LOOK_WORDS, do_look),
-    (INVENTORY_WORDS, do_inventory_listing),
-    (HELP_WORDS, do_help)
+    (SET_PRINT_WORDS, _do_set_print_speed),
+    (GO_WORDS, _do_move),
+    (EQUIP_WORDS, _do_equip),
+    (TAKE_WORDS, _do_take),
+    (DROP_WORDS, _do_drop),
+    (SPEAK_WORDS, _do_speak),
+    (UNEQUIP_WORDS, _do_unequip),
+    (LOOT_WORDS, _do_loot),
+    (KILL_WORDS, _do_quit),
+    (LOOK_WORDS, _do_look),
+    (INVENTORY_WORDS, _do_inventory_listing),
+    (HELP_WORDS, _do_help)
 ]
 
-def parse_command(player, action):
+def _parse_command(player, action):
     if action == '':
         action = info['last_command']
         print '\n' + action
@@ -811,23 +778,212 @@ def parse_command(player, action):
     fields = [f.strip() for f in action.split()]
 
     for word_set, task in command_table:
-        ret = check_word_set(action, word_set)
+        ret = _check_word_set(action, word_set)
         if ret:
             task(player, ret, action[len(ret):].strip())
             info['last_command'] = action
             return
 
-    if is_shorthand_direction(action):
-        do_move(player, 'go', action)
+    if _is_shorthand_direction(action):
+        _do_move(player, 'go', action)
     else:
-        unrecognised(player, fields[0])
+        _unrecognised(player, fields[0])
         return
 
     info['last_command'] = action
 
-def run_game(player):
-    slow_print(player.current_state())
+class MapBuilder(object):
+    """
+    Base class for building a tile-based map
+    """
 
-    while True:
-        action = read_line("\n%s" % player.prompt, allow_empty=True)
-        parse_command(player, action.strip().lower())
+    def __init__(self, name=None, description=None):
+        """
+        Initialises a MapBuilder instance. When you create a MapBuilder
+        object, it automatically creates the first tile, and sets it as the
+        current tile to build on.
+
+        :param str name: short name for starting Tile
+        :param str description: short name for starting Tile
+        """
+
+        self.player_title = "sir"
+        self.player_name = "john"
+
+        self.start = Tile(name, description)
+        self.current = self.start
+        self.prompt = "[?]: "
+
+    def set_on_enter(self, callback):
+        """
+        Set callback function to be invoked when player attempts to enter the
+        current tile. The callback function should accept 3 arguments:
+
+            callback(player, source, dest):
+
+        * *player*: map_builder.Player object, player instance
+        * *source*: map_builder.Tile object, source tile (tile that player is
+          trying to exit
+        * *destination*: map_builder.Tile object, destination tile (tile that
+          player is trying to enter
+
+        :param callback: the callback function
+        """
+
+        self.current.on_enter = callback
+
+    def set_on_exit(self, callback):
+        """
+        Set callback function to be invoked when player attempts to enter the
+        current tile. The callback should accept three  arguments:
+
+            callback(player, source, dest):
+
+        * *player*: map_builder.Player object, player instance
+        * *source*: map_builder.Tile object, source tile (tile that player is
+          trying to exit
+        * *destination*: map_builder.Tile object, destination tile (tile that
+          player is trying to enter
+
+        :param callback: the callback function
+        """
+
+        self.current.on_exit = callback
+
+    def set_player_name(self, name):
+        """
+        Set player name
+
+        :param str name: new player name
+        """
+
+        self.player_name = name
+
+    def set_player_title(self, title):
+        """
+        Set player title
+
+        :param str title: new player title
+        """
+
+        self.player_title = title
+
+    def add_description(self, desc):
+        """
+        Add long description for current tile
+
+        :param str desc: description text
+        """
+
+        self.current.description = desc
+
+    def add_item(self, item):
+        """
+        Add item to current tile
+
+        :param map_builder.Item item: the item to add
+        """
+
+        self.current.items.append(item)
+
+    def add_person(self, person):
+        """
+        Add person to current tile
+
+        :param map_builder.Person person: the person to add
+        """
+
+        self.current.people.append(person)
+
+    def set_locked(self):
+        """
+        Set the current tile to be locked. The player will not be able to
+        enter a locked tile (unless some enter/exit callback unlocks it)
+        """
+
+        self.current.locked = True
+
+    def set_input_prompt(self, prompt):
+        """
+        Set the message to print when prompting a player for game input
+
+        :param str prompt: message to print
+        """
+
+        self.prompt = prompt
+
+    def __do_move(self, dest, name, description):
+        if dest is None:
+            dest = Tile(name, description)
+
+        return self.current, dest
+
+    def move_west(self, name=None, description=None):
+        """
+        Create a new tile to the west of the current tile, and set the new
+        tile as the current tile
+
+        :param str name: short description of tile
+        :param str description: long description of tile
+        """
+
+        old, new = self.__do_move(self.current.west, name, description)
+        self.current.west = new
+        self.current = self.current.west
+        self.current.east = old
+
+    def move_east(self, name=None, description=None):
+        """
+        Create a new tile to the east of the current tile, and set the new
+        tile as the current tile
+
+        :param str name: short description of tile
+        :param str description: long description of tile
+        """
+
+        old, new = self.__do_move(self.current.east, name, description)
+        self.current.east = new
+        self.current = self.current.east
+        self.current.west = old
+
+    def move_north(self, name=None, description=None):
+        """
+        Create a new tile to the north of the current tile, and set the new
+        tile as the current tile
+
+        :param str name: short description of tile
+        :param str description: long description of tile
+        """
+
+        old, new = self.__do_move(self.current.north, name, description)
+        self.current.north = new
+        self.current = self.current.north
+        self.current.south = old
+
+    def move_south(self, name=None, description=None):
+        """
+        Create a new tile to the south of the current tile, and set the new
+        tile as the current tile
+
+        :param str name: short description of tile
+        :param str description: long description of tile
+        """
+
+        old, new = self.__do_move(self.current.south, name, description)
+        self.current.south = new
+        self.current = self.current.south
+        self.current.north = old
+
+    def run_game(self):
+        """
+        Start running the game
+        """
+
+        player = Player(self.start, self.prompt)
+        player.set_name(self.player_name)
+        player.set_title(self.player_title)
+        slow_print(player.current_state())
+
+        while True:
+            action = read_line("\n%s" % player.prompt, allow_empty=True)
+            _parse_command(player, action.strip().lower())

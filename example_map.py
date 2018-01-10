@@ -14,12 +14,9 @@ def alan_speak_callback(person, player):
     To attach to a Person object, pass this callback to the map_builder.Person
     constructor when creating a Person instance
 
-    params:
-
-        person: map_builder.Person object, the Person that this callback is
-                attached to
-
-        player: map_builder.Player object
+    :param map_builder.Person person: the Person that this callback is\
+        attached to
+    :param map_builder.Player player: Player instance
     """
 
     # Alan will progressively give more hints about basic controls
@@ -79,17 +76,13 @@ def locked_room_enter_callback(player, src, dest):
     an item named 'metal key'. Called when player attempts to enter whichever
     tile this callback is attached to.
 
-    Attach to current room with map_builder.add_on_enter()
+    Attach to current room with map_builder.set_on_enter()
 
-    params:
-
-        player: map_builder.Player object
-
-           src: map_builder.Tile object, source tile (the tile that player is
-                trying to exit)
-
-          dest: map_builder.Tile object, destination tile (the tile that player
-                is trying to enter)
+    :param map_builder.Player player: Player instance
+    :param map_builder.Tile src: source tile (the tile that player is trying\
+        to exit)
+    :param map_builder.Tile dest: destination tile (the tile that player is\
+        trying to enter)
     """
 
     equipped = player.inventory_items['equipped']
@@ -106,17 +99,13 @@ def enter_window_callback(player, src, dest):
     Called when player attempts to enter whichever room this callback is
     attached to.
 
-    Attach to current room with map_builder.add_on_enter()
+    Attach to current room with map_builder.set_on_enter()
 
-    params:
-
-        player: map_builder.Player object
-
-           src: map_builder.Tile object, source tile (the tile that player is
-                trying to exit)
-
-          dest: map_builder.Tile object, destination tile (the tile that player
-                is trying to enter)
+    :param map_builder.Player player: map_builder.Player object
+    :param map_builder.Tile src: source tile (the tile that player is trying\
+        to exit)
+    :param map_builder.Tile dest: destination tile (the tile that player is\
+        trying to enter)
     """
 
     # map_builder.slow_print will print slowly, one character at a time, unless
@@ -127,7 +116,6 @@ def enter_window_callback(player, src, dest):
     sys.exit()
 
 def main():
-
     builder = map_builder.MapBuilder(
         "the starting room",
         """in a small square room with stone walls and ceilings. The floor is
@@ -148,7 +136,7 @@ def main():
         "an open window, with nothing to be seen but darkness behind it", ""
     )
 
-    builder.add_on_enter(enter_window_callback)
+    builder.set_on_enter(enter_window_callback)
 
     builder.move_east()
     builder.move_east(
@@ -158,25 +146,22 @@ def main():
     )
 
     builder.set_locked()
-    builder.add_on_enter(locked_room_enter_callback)
+    builder.set_on_enter(locked_room_enter_callback)
 
     builder.move_west("a cellar", "a dark cellar")
 
     # Set the input prompt
     builder.set_input_prompt("[action?]: ")
 
-    # Finished building map-- get the player object
-    player = builder.build_player()
-
-    name = map_builder.get_input("What is your name? : ")
-    title = map_builder.get_input("What is your title (sir, lady, "
+    name = map_builder.read_line("What is your name? : ")
+    title = map_builder.read_line("What is your title (sir, lady, "
         "etc...)? : ")
 
-    player.set_name(name.title())
-    player.set_title(title.title())
+    builder.set_player_name(name.title())
+    builder.set_player_title(title.title())
 
     # Start the game!
-    map_builder.run_game(player)
+    builder.run_game()
 
 if __name__ == "__main__":
     main()

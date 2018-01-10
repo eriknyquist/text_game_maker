@@ -1,0 +1,735 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>map_builder module &mdash; Text adventure builder 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Text adventure builder 0.1 documentation" href="index.html"/>
+        <link rel="up" title="." href="modules.html"/>
+        <link rel="prev" title="example_map module" href="example_map.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> Text adventure builder
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">.</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="example_map.html">example_map module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">map_builder module</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Text adventure builder</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="modules.html">.</a> &raquo;</li>
+      
+    <li>map_builder module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/map_builder.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="module-map_builder">
+<span id="map-builder-module"></span><h1>map_builder module<a class="headerlink" href="#module-map_builder" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="map_builder.Item">
+<em class="property">class </em><code class="descclassname">map_builder.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for collectable item</p>
+<dl class="method">
+<dt id="map_builder.Item.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Item.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialises an Item instance</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>prefix</strong> (<em>str</em>) &#8211; Generally either &#8220;a&#8221; or &#8220;an&#8221;</li>
+<li><strong>name</strong> (<em>str</em>) &#8211; Item name, e.g. &#8220;apple&#8221;</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; Item description, e.g. &#8220;on the floor&#8221;</li>
+<li><strong>value</strong> (<em>int</em>) &#8211; Item value in coins</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="map_builder.MapBuilder">
+<em class="property">class </em><code class="descclassname">map_builder.</code><code class="descname">MapBuilder</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class for building a tile-based map</p>
+<dl class="method">
+<dt id="map_builder.MapBuilder.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialises a MapBuilder instance. When you create a MapBuilder
+object, it automatically creates the first tile, and sets it as the
+current tile to build on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; short name for starting Tile</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; short name for starting Tile</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.add_description">
+<code class="descname">add_description</code><span class="sig-paren">(</span><em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.add_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add long description for current tile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>desc</strong> (<em>str</em>) &#8211; description text</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.add_item">
+<code class="descname">add_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.add_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add item to current tile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference internal" href="#map_builder.Item" title="map_builder.Item"><em>map_builder.Item</em></a>) &#8211; the item to add</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.add_person">
+<code class="descname">add_person</code><span class="sig-paren">(</span><em>person</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.add_person" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add person to current tile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>person</strong> (<a class="reference internal" href="#map_builder.Person" title="map_builder.Person"><em>map_builder.Person</em></a>) &#8211; the person to add</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.move_east">
+<code class="descname">move_east</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.move_east" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new tile to the east of the current tile, and set the new
+tile as the current tile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; short description of tile</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; long description of tile</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.move_north">
+<code class="descname">move_north</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.move_north" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new tile to the north of the current tile, and set the new
+tile as the current tile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; short description of tile</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; long description of tile</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.move_south">
+<code class="descname">move_south</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.move_south" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new tile to the south of the current tile, and set the new
+tile as the current tile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; short description of tile</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; long description of tile</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.move_west">
+<code class="descname">move_west</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.move_west" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new tile to the west of the current tile, and set the new
+tile as the current tile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; short description of tile</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; long description of tile</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.run_game">
+<code class="descname">run_game</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.run_game" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start running the game</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.set_input_prompt">
+<code class="descname">set_input_prompt</code><span class="sig-paren">(</span><em>prompt</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.set_input_prompt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the message to print when prompting a player for game input</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prompt</strong> (<em>str</em>) &#8211; message to print</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.set_locked">
+<code class="descname">set_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.set_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the current tile to be locked. The player will not be able to
+enter a locked tile (unless some enter/exit callback unlocks it)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.set_on_enter">
+<code class="descname">set_on_enter</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.set_on_enter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to be invoked when player attempts to enter the
+current tile. The callback function should accept 3 arguments:</p>
+<blockquote>
+<div>callback(player, source, dest):</div></blockquote>
+<ul class="simple">
+<li><em>player</em>: map_builder.Player object, player instance</li>
+<li><em>source</em>: map_builder.Tile object, source tile (tile that player is
+trying to exit</li>
+<li><em>destination</em>: map_builder.Tile object, destination tile (tile that
+player is trying to enter</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> &#8211; the callback function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.set_on_exit">
+<code class="descname">set_on_exit</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.set_on_exit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to be invoked when player attempts to enter the
+current tile. The callback should accept three  arguments:</p>
+<blockquote>
+<div>callback(player, source, dest):</div></blockquote>
+<ul class="simple">
+<li><em>player</em>: map_builder.Player object, player instance</li>
+<li><em>source</em>: map_builder.Tile object, source tile (tile that player is
+trying to exit</li>
+<li><em>destination</em>: map_builder.Tile object, destination tile (tile that
+player is trying to enter</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> &#8211; the callback function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.set_player_name">
+<code class="descname">set_player_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.set_player_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set player name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; new player name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.MapBuilder.set_player_title">
+<code class="descname">set_player_title</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.MapBuilder.set_player_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set player title</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>title</strong> (<em>str</em>) &#8211; new player title</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="map_builder.Person">
+<em class="property">class </em><code class="descclassname">map_builder.</code><code class="descname">Person</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Person" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Represents a person that the player can interact with</p>
+<dl class="method">
+<dt id="map_builder.Person.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Person.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialises a Person instance</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; name of Person, e.g. &#8220;John&#8221;</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; description of Person, e.g. &#8220;squatting in the            corner&#8221;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Person.buy_equipped_item">
+<code class="descname">buy_equipped_item</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Person.buy_equipped_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ask player to buy equipped item. Expects player to have something
+equipped (so check before uing this method).</p>
+<p>If player&#8217;s equipped item costs more coins than this person has, the
+person will automatically ask if the player will accept the lower
+amount, and can still buy the item if the player says yes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>player</strong> (<a class="reference internal" href="#map_builder.Player" title="map_builder.Player"><em>map_builder.Player</em></a>) &#8211; player object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns the item if sale was successful, None otherwise</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#map_builder.Item" title="map_builder.Item">map_builder.Item</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Person.die">
+<code class="descname">die</code><span class="sig-paren">(</span><em>msg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Person.die" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kill this person, and print a message to inform the player
+of this person&#8217;s death.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<em>str</em>) &#8211; message to print informing player of person&#8217;s death</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Person.is_alive">
+<code class="descname">is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Person.is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if this person is alive</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if this person is alive, otherwise false</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Person.say">
+<code class="descname">say</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Person.say" title="Permalink to this definition">¶</a></dt>
+<dd><p>Speak to the player</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<em>str</em>) &#8211; message to speak</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="map_builder.Player">
+<em class="property">class </em><code class="descclassname">map_builder.</code><code class="descname">Player</code><span class="sig-paren">(</span><em>start_tile=None</em>, <em>input_prompt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Player" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Base class to hold player related methods &amp; data</p>
+<dl class="method">
+<dt id="map_builder.Player.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>start_tile=None</em>, <em>input_prompt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Player.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>start_tile</strong> (<a class="reference internal" href="#map_builder.Tile" title="map_builder.Tile"><em>map_builder.Tile</em></a>) &#8211; Game starting tile</li>
+<li><strong>input_prompt</strong> (<em>str</em>) &#8211; Custom string to prompt player for game input</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Player.current_state">
+<code class="descname">current_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Player.current_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the full descriptive text for the current game state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Player.delete_equipped">
+<code class="descname">delete_equipped</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Player.delete_equipped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete currently equipped item from inventory, if there is one</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Player.set_name">
+<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Player.set_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set player name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; new player name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Player.set_title">
+<code class="descname">set_title</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Player.set_title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set player title</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>title</strong> (<em>str</em>) &#8211; new player title</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="map_builder.Tile">
+<em class="property">class </em><code class="descclassname">map_builder.</code><code class="descname">Tile</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em>, <em>on_enter=None</em>, <em>on_exit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Tile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Represents a single &#8216;tile&#8217; or &#8216;room&#8217; in the game</p>
+<dl class="method">
+<dt id="map_builder.Tile.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em>, <em>on_enter=None</em>, <em>on_exit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Tile.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise a Tile instance</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; short description, e.g. &#8220;a dark cellar&#8221;</li>
+<li><strong>description</strong> (<em>str</em>) &#8211; long description, printed when player enters            the room e.g. &#8220;a dark, scary cellar with blah blah blah... &#8220;</li>
+<li><strong>on_enter</strong> &#8211; callback to be invoked when player attempts to enter            this tile (see documentation for Tile.add_on_enter()</li>
+<li><strong>on_exit</strong> &#8211; callback to be invoked when player attempts to exit            this tile (see documentation for Tile.add_on_exit()</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="map_builder.Tile.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.Tile.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a description of all available directions from this tile</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="map_builder.ask_yes_no">
+<code class="descclassname">map_builder.</code><code class="descname">ask_yes_no</code><span class="sig-paren">(</span><em>prompt='[ continue (yes/no)? ]: '</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.ask_yes_no" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ask player a yes/no question, and repeat the prompt until player
+gives a valid answer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prompt</strong> (<em>str</em>) &#8211; prompt containing question to ask</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">player&#8217;s response</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="map_builder.list_to_english">
+<code class="descclassname">map_builder.</code><code class="descname">list_to_english</code><span class="sig-paren">(</span><em>strlist</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.list_to_english" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a list of strings to description of the list in english.
+For example, [&#8216;4 coins&#8217;, &#8216;an apple&#8217;, &#8216;a sausage&#8217;] would be converted to
+&#8216;4 coins, an apple and a sausage&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>strlist</strong> (<em>str</em>) &#8211; list of strings to convert to english</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">english description of the passed list</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="map_builder.read_line">
+<code class="descclassname">map_builder.</code><code class="descname">read_line</code><span class="sig-paren">(</span><em>msg=''</em>, <em>allow_empty=False</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.read_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a line of input from stdin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>msg</strong> (<em>str</em>) &#8211; message to print before reading input</li>
+<li><strong>allow_empty</strong> (<em>bool</em>) &#8211; if True, prompt will be repeated until a non-empty        line is entered</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a line ending with either a newline or carriage return character</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="map_builder.slow_print">
+<code class="descclassname">map_builder.</code><code class="descname">slow_print</code><span class="sig-paren">(</span><em>msg</em>, <em>chardelay=0.02</em><span class="sig-paren">)</span><a class="headerlink" href="#map_builder.slow_print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print one character at a time if player has set &#8216;print slow&#8217;, otherwise
+print normally</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>msg</strong> (<em>str</em>) &#8211; message to print</li>
+<li><strong>chardelay</strong> (<em>float</em>) &#8211; time in seconds to delay between each character if player        has set &#8216;print slow&#8217;</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="example_map.html" class="btn btn-neutral" title="example_map module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Erik Nyquist.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
