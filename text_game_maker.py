@@ -63,8 +63,8 @@ Misc
 * Use 'help' or '?' to show this information"""
 
 info = {
-    'slow_printing': False,
-    'last_command': '?'
+    'game_printing': False,
+    'last_command': 'look'
 }
 
 SET_PRINT_WORDS = ['print']
@@ -211,7 +211,7 @@ def _remove_leading_whitespace(string):
     trimmed = [s.strip() for s in string.splitlines()]
     return '\n'.join(trimmed)
 
-def slow_print(msg, chardelay=0.02):
+def game_print(msg, chardelay=0.02):
     """
     Print one character at a time if player has set 'print slow', otherwise
     print normally
@@ -223,7 +223,7 @@ def slow_print(msg, chardelay=0.02):
     :type chardelay: float
     """
 
-    if not info['slow_printing']:
+    if not info['game_printing']:
         print msg
         return
 
@@ -263,7 +263,8 @@ class Tile(object):
         """
 
         self.name = name
-        self.description = _remove_leading_whitespace(description)
+        if description:
+            self.description = _remove_leading_whitespace(description)
 
         # If tile is locked, player will only see a locked door.
         self.locked = False
@@ -314,6 +315,20 @@ class Tile(object):
 
         return '\n'.join(ret)
 
+    def set_locked(self):
+        """
+        Lock this tile-- player will only see a locked door
+        """
+
+        self.locked = True
+
+    def set_unlocked(self):
+        """
+        Unlock this tile-- player can enter normally
+        """
+
+        self.locked = False
+
 class Person(object):
     """
     Represents a person that the player can interact with
@@ -355,7 +370,7 @@ class Person(object):
         if msg is None or msg == "":
             msg = '\n%s has died.' % self.name
 
-        slow_print(msg)
+        game_print(msg)
 
     def is_alive(self):
         """
@@ -380,12 +395,12 @@ class Person(object):
 
         sys.stdout.write('\n%s: "' % self.name)
         sys.stdout.flush()
-        slow_print(lines[0])
+        game_print(lines[0])
 
         for line in lines[1:]:
             sys.stdout.write(' ' * (len(self.name) + 2))
             sys.stdout.flush()
-            slow_print(line)
+            game_print(line)
 
     def buy_equipped_item(self, player):
         """
@@ -397,10 +412,10 @@ class Person(object):
         amount, and can still buy the item if the player says yes.
 
         :param player: player object
-        :type player: map_builder.Player
+        :type player: text_game_maker.Player
 
         :return: Returns the item if sale was successful, None otherwise
-        :rtype: map_builder.Item
+        :rtype: text_game_maker.Item
         """
 
         equipped = player.inventory_items['equipped']
@@ -427,10 +442,10 @@ class Person(object):
             self.items[equipped_copy.name] = equipped_copy
 
             player.delete_equipped()
-            slow_print("\nSale completed.")
+            game_print("\nSale completed.")
             return equipped_copy
 
-        slow_print("\nSale cancelled")
+        game_print("\nSale cancelled")
         return None
 
 class Item(object):
@@ -463,7 +478,7 @@ class Player(object):
 
     def __init__(self, start_tile=None, input_prompt=None):
         """
-        :param map_builder.Tile start_tile: Game starting tile
+        :param text_game_maker.Tile start_tile: Game starting tile
         :param str input_prompt: Custom string to prompt player for game input
         """
 
@@ -477,7 +492,7 @@ class Player(object):
 
     def _move(self, dest, word, name):
         if dest is None:
-            slow_print("\nCan't go %s from here." % name)
+            game_print("\nCan't go %s from here." % name)
             return self.current
 
         if self.current.on_exit and (not
@@ -488,16 +503,16 @@ class Player(object):
             return
 
         if dest.locked:
-            slow_print("\nCan't go through a locked door without a key")
+            game_print("\nCan't go through a locked door without a key")
             return self.current
 
         self.current = dest
 
-        slow_print("\nYou %s %s." % (word, name))
-        if info['slow_printing']:
+        game_print("\nYou %s %s." % (word, name))
+        if info['game_printing']:
             time.sleep(1)
 
-        slow_print("%s" % self.current_state())
+        game_print("%s" % self.current_state())
 
         return dest
 
@@ -519,6 +534,18 @@ class Player(object):
 
         self.title = title
 
+    def has_equipped(self, item_name):
+        """
+        Check if player has specific item equipped
+
+        :param str item_name: name of item to check for
+        :return: True if player has item equipped, false otherwise
+        :rtype: bool
+        """
+
+        equipped = self.inventory_items['equipped']
+        return (equipped and (equipped.name == item_name))
+
     def delete_equipped(self):
         """
         Delete currently equipped item from inventory, if there is one
@@ -531,7 +558,7 @@ class Player(object):
 
     def _loot(self, word, person):
         if not person.coins and not person.items:
-            slow_print('\nYou %s %s, and find nothing.' % (word, person.name))
+            game_print('\nYou %s %s, and find nothing.' % (word, person.name))
         else:
             print_items = []
             if person.coins:
@@ -546,7 +573,7 @@ class Player(object):
                 self.inventory_items.update(person.items)
                 person.items.clear()
 
-            slow_print("\nYou %s %s.\nYou find %s." % (word, person.name,
+            game_print("\nYou %s %s.\nYou find %s." % (word, person.name,
                 list_to_english(print_items)))
 
     def current_state(self):
@@ -564,7 +591,10 @@ class Player(object):
         if self.current.items:
             ret += "\n\n%s" % ('\n'.join([str(i) for i in self.current.items]))
 
-        ret += "\n\n%s" % self.current.summary()
+        summary = self.current.summary()
+        if summary:
+            ret += "\n\n%s" % summary
+
         return ret
 
     def _move_north(self, word):
@@ -607,7 +637,7 @@ def _do_take(player, word, item_name):
             player.inventory_items[full] = player.current.items[i]
             del player.current.items[i]
 
-            slow_print('\n%s added to inventory' % full)
+            game_print('\n%s added to inventory' % full)
             return
 
     print "\n%s: no such item" % item_name
@@ -628,7 +658,7 @@ def _do_drop(player, word, item_name):
                 player.inventory_items['equipped'] = None
 
             del player.inventory_items[i]
-            slow_print("\nDropped %s" % i)
+            game_print("\nDropped %s" % i)
             return
 
     print "\n%s: no such item in inventory" % item_name
@@ -645,7 +675,7 @@ def _do_speak(player, word, name):
                 if response:
                     p.say(response)
             else:
-                slow_print('\n%s says nothing. %s is dead.' % (p.name, p.name))
+                game_print('\n%s says nothing. %s is dead.' % (p.name, p.name))
 
             return
 
@@ -670,7 +700,7 @@ def _do_equip(player, word, item_name):
 
     for i in player.inventory_items:
         if i.startswith(item_name) or item_name in i:
-            slow_print("\nEquipped %s" % i)
+            game_print("\nEquipped %s" % i)
             player.inventory_items['equipped'] = player.inventory_items[i]
             return
 
@@ -679,10 +709,10 @@ def _do_equip(player, word, item_name):
 def _do_unequip(player, word, fields):
     equipped = player.inventory_items['equipped']
     if not equipped:
-        slow_print('\nNothing is currently equipped')
+        game_print('\nNothing is currently equipped')
     else:
         player.inventory_items['equipped'] = None
-        slow_print('\n%s unequipped' % equipped.name)
+        game_print('\n%s unequipped' % equipped.name)
 
 def _do_loot(player, word, name):
     if not name or name.strip() == "":
@@ -692,8 +722,8 @@ def _do_loot(player, word, name):
     for p in player.current.people:
         if p.name.lower().startswith(name):
             if p.is_alive():
-                slow_print('\nYou are dead.')
-                slow_print('%s caught you trying to loot them, and killed you.'
+                game_print('\nYou are dead.')
+                game_print('%s caught you trying to loot them, and killed you.'
                     % p.name)
                 sys.exit()
             else:
@@ -706,10 +736,10 @@ def _do_set_print_speed(player, word, setting):
         return
 
     if 'slow'.startswith(setting):
-        info['slow_printing'] = True
+        info['game_printing'] = True
         print "\nOK, will do."
     elif 'fast'.startswith(setting):
-        info['slow_printing'] = False
+        info['game_printing'] = False
         print "\nOK, got it."
     else:
         print("\nUnrecognised print speed-- please say 'print fast' "
@@ -821,10 +851,10 @@ class MapBuilder(object):
 
             callback(player, source, dest):
 
-        * *player*: map_builder.Player object, player instance
-        * *source*: map_builder.Tile object, source tile (tile that player is
+        * *player*: text_game_maker.Player object, player instance
+        * *source*: text_game_maker.Tile object, source tile (tile that player is
           trying to exit
-        * *destination*: map_builder.Tile object, destination tile (tile that
+        * *destination*: text_game_maker.Tile object, destination tile (tile that
           player is trying to enter
 
         :param callback: the callback function
@@ -839,10 +869,10 @@ class MapBuilder(object):
 
             callback(player, source, dest):
 
-        * *player*: map_builder.Player object, player instance
-        * *source*: map_builder.Tile object, source tile (tile that player is
+        * *player*: text_game_maker.Player object, player instance
+        * *source*: text_game_maker.Tile object, source tile (tile that player is
           trying to exit
-        * *destination*: map_builder.Tile object, destination tile (tile that
+        * *destination*: text_game_maker.Tile object, destination tile (tile that
           player is trying to enter
 
         :param callback: the callback function
@@ -868,20 +898,29 @@ class MapBuilder(object):
 
         self.player_title = title
 
-    def add_description(self, desc):
+    def set_name(self, name):
+        """
+        Add short description for current tile
+
+        :param str desc: description text
+        """
+
+        self.current.name = name
+
+    def set_description(self, desc):
         """
         Add long description for current tile
 
         :param str desc: description text
         """
 
-        self.current.description = desc
+        self.current.description = _remove_leading_whitespace(desc)
 
     def add_item(self, item):
         """
         Add item to current tile
 
-        :param map_builder.Item item: the item to add
+        :param text_game_maker.Item item: the item to add
         """
 
         self.current.items.append(item)
@@ -890,7 +929,7 @@ class MapBuilder(object):
         """
         Add person to current tile
 
-        :param map_builder.Person person: the person to add
+        :param text_game_maker.Person person: the person to add
         """
 
         self.current.people.append(person)
@@ -901,7 +940,7 @@ class MapBuilder(object):
         enter a locked tile (unless some enter/exit callback unlocks it)
         """
 
-        self.current.locked = True
+        self.current.set_locked()
 
     def set_input_prompt(self, prompt):
         """
@@ -982,7 +1021,7 @@ class MapBuilder(object):
         player = Player(self.start, self.prompt)
         player.set_name(self.player_name)
         player.set_title(self.player_title)
-        slow_print(player.current_state())
+        game_print(player.current_state())
 
         while True:
             action = read_line("\n%s" % player.prompt, allow_empty=True)

@@ -1,5 +1,5 @@
-import map_builder
 import sys
+import text_game_maker as gamemaker
 
 alan_info = {
     'count': 0,
@@ -11,12 +11,12 @@ def alan_speak_callback(person, player):
     "Speak" callback for a helpful game character who explains game
     rules & commands
 
-    To attach to a Person object, pass this callback to the map_builder.Person
-    constructor when creating a Person instance
+    To attach to a Person object, pass this callback to the
+    text_game_maker.Person constructor when creating a Person instance
 
-    :param map_builder.Person person: the Person that this callback is\
+    :param text_game_maker.Person person: the Person that this callback is\
         attached to
-    :param map_builder.Player player: Player instance
+    :param text_game_maker.Player player: Player instance
     """
 
     # Alan will progressively give more hints about basic controls
@@ -63,7 +63,7 @@ def alan_speak_callback(person, player):
         # Player has no item equipped: print basic controls
         # (if we've been fed...)
         if alan_info['eaten']:
-            return map_builder.basic_controls
+            return gamemaker.basic_controls
 
     if alan_info['count'] < len(alan_lines):
         alan_info['count'] += 1
@@ -76,19 +76,18 @@ def locked_room_enter_callback(player, src, dest):
     an item named 'metal key'. Called when player attempts to enter whichever
     tile this callback is attached to.
 
-    Attach to current room with map_builder.set_on_enter()
+    Attach to current room with text_game_maker.set_on_enter()
 
-    :param map_builder.Player player: Player instance
-    :param map_builder.Tile src: source tile (the tile that player is trying\
-        to exit)
-    :param map_builder.Tile dest: destination tile (the tile that player is\
-        trying to enter)
+    :param text_game_maker.Player player: Player instance
+    :param text_game_maker.Tile src: source tile (the tile that player is\
+        trying to exit)
+    :param text_game_maker.Tile dest: destination tile (the tile that player\
+        is trying to enter)
     """
 
-    equipped = player.inventory_items['equipped']
-    if equipped and equipped.name == 'metal key':
+    if player.has_equipped('metal key'):
         player.delete_equipped()
-        dest.locked = False
+        dest.set_unlocked()
         return True
 
     return True
@@ -99,35 +98,35 @@ def enter_window_callback(player, src, dest):
     Called when player attempts to enter whichever room this callback is
     attached to.
 
-    Attach to current room with map_builder.set_on_enter()
+    Attach to current room with text_game_maker.set_on_enter()
 
-    :param map_builder.Player player: map_builder.Player object
-    :param map_builder.Tile src: source tile (the tile that player is trying\
-        to exit)
-    :param map_builder.Tile dest: destination tile (the tile that player is\
-        trying to enter)
+    :param text_game_maker.Player player: text_game_maker.Player object
+    :param text_game_maker.Tile src: source tile (the tile that player is\
+        trying to exit)
+    :param text_game_maker.Tile dest: destination tile (the tile that player\
+        is trying to enter)
     """
 
-    # map_builder.slow_print will print slowly, one character at a time, unless
-    # player has typed 'print fast', in which case slow_print will print
+    # text_game_maker.game_print will print slowly, one character at a time,
+    # unless player has typed 'print fast', in which case game_print will print
     # normally
-    map_builder.slow_print("You are dead. You plummeted into the rocks and the "
-        "sea below the window.")
+    gamemaker.game_print("You are dead. You plummeted into the rocks "
+        "and the sea below the window.")
     sys.exit()
 
 def main():
-    builder = map_builder.MapBuilder(
+    builder = gamemaker.MapBuilder(
         "the starting room",
         """in a small square room with stone walls and ceilings. The floor is
         dirt. The only light comes from the fire of the torches that line the
         walls."""
     )
 
-    builder.add_item(map_builder.Item("a", "metal key", "on the floor", 25))
-    builder.add_item(map_builder.Item("a", "sausage", "on the floor", 5))
+    builder.add_item(gamemaker.Item("a", "metal key", "on the floor", 25))
+    builder.add_item(gamemaker.Item("a", "sausage", "on the floor", 5))
 
     builder.add_person(
-        map_builder.Person(
+        gamemaker.Person(
             "Alan", "standing in the corner", alan_speak_callback
         )
     )
@@ -153,9 +152,8 @@ def main():
     # Set the input prompt
     builder.set_input_prompt("[action?]: ")
 
-    name = map_builder.read_line("What is your name? : ")
-    title = map_builder.read_line("What is your title (sir, lady, "
-        "etc...)? : ")
+    name = gamemaker.read_line("What is your name? : ")
+    title = gamemaker.read_line("What is your title (sir, lady, etc...)? : ")
 
     builder.set_player_name(name.title())
     builder.set_player_title(title.title())
