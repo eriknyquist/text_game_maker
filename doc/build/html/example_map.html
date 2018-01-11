@@ -32,7 +32,7 @@
   
     <link rel="top" title="Text adventure builder 0.1 documentation" href="index.html"/>
         <link rel="up" title="." href="modules.html"/>
-        <link rel="next" title="map_builder module" href="map_builder.html"/>
+        <link rel="next" title="text_game_maker module" href="text_game_maker.html"/>
         <link rel="prev" title="." href="modules.html"/> 
 
   
@@ -75,7 +75,7 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">.</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="">example_map module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="map_builder.html">map_builder module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="text_game_maker.html">text_game_maker module</a></li>
 </ul>
 </li>
 </ul>
@@ -124,15 +124,15 @@
 <code class="descclassname">example_map.</code><code class="descname">alan_speak_callback</code><span class="sig-paren">(</span><em>person</em>, <em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#example_map.alan_speak_callback" title="Permalink to this definition">¶</a></dt>
 <dd><p>&#8220;Speak&#8221; callback for a helpful game character who explains game
 rules &amp; commands</p>
-<p>To attach to a Person object, pass this callback to the map_builder.Person
-constructor when creating a Person instance</p>
+<p>To attach to a Person object, pass this callback to the
+text_game_maker.Person constructor when creating a Person instance</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>person</strong> (<a class="reference internal" href="map_builder.html#map_builder.Person" title="map_builder.Person"><em>map_builder.Person</em></a>) &#8211; the Person that this callback is        attached to</li>
-<li><strong>player</strong> (<a class="reference internal" href="map_builder.html#map_builder.Player" title="map_builder.Player"><em>map_builder.Player</em></a>) &#8211; Player instance</li>
+<li><strong>person</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Person" title="text_game_maker.Person"><em>text_game_maker.Person</em></a>) &#8211; the Person that this callback is        attached to</li>
+<li><strong>player</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Player" title="text_game_maker.Player"><em>text_game_maker.Player</em></a>) &#8211; Player instance</li>
 </ul>
 </td>
 </tr>
@@ -146,15 +146,15 @@ constructor when creating a Person instance</p>
 <dd><p>Enter callback for a tile that kills the player as soon as they enter.
 Called when player attempts to enter whichever room this callback is
 attached to.</p>
-<p>Attach to current room with map_builder.set_on_enter()</p>
+<p>Attach to current room with text_game_maker.set_on_enter()</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>player</strong> (<a class="reference internal" href="map_builder.html#map_builder.Player" title="map_builder.Player"><em>map_builder.Player</em></a>) &#8211; map_builder.Player object</li>
-<li><strong>src</strong> (<a class="reference internal" href="map_builder.html#map_builder.Tile" title="map_builder.Tile"><em>map_builder.Tile</em></a>) &#8211; source tile (the tile that player is trying        to exit)</li>
-<li><strong>dest</strong> (<a class="reference internal" href="map_builder.html#map_builder.Tile" title="map_builder.Tile"><em>map_builder.Tile</em></a>) &#8211; destination tile (the tile that player is        trying to enter)</li>
+<li><strong>player</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Player" title="text_game_maker.Player"><em>text_game_maker.Player</em></a>) &#8211; text_game_maker.Player object</li>
+<li><strong>src</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; source tile (the tile that player is        trying to exit)</li>
+<li><strong>dest</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; destination tile (the tile that player        is trying to enter)</li>
 </ul>
 </td>
 </tr>
@@ -168,15 +168,15 @@ attached to.</p>
 <dd><p>Enter callback for a room with a locked door that can only be unlocked by
 an item named &#8216;metal key&#8217;. Called when player attempts to enter whichever
 tile this callback is attached to.</p>
-<p>Attach to current room with map_builder.set_on_enter()</p>
+<p>Attach to current room with text_game_maker.set_on_enter()</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>player</strong> (<a class="reference internal" href="map_builder.html#map_builder.Player" title="map_builder.Player"><em>map_builder.Player</em></a>) &#8211; Player instance</li>
-<li><strong>src</strong> (<a class="reference internal" href="map_builder.html#map_builder.Tile" title="map_builder.Tile"><em>map_builder.Tile</em></a>) &#8211; source tile (the tile that player is trying        to exit)</li>
-<li><strong>dest</strong> (<a class="reference internal" href="map_builder.html#map_builder.Tile" title="map_builder.Tile"><em>map_builder.Tile</em></a>) &#8211; destination tile (the tile that player is        trying to enter)</li>
+<li><strong>player</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Player" title="text_game_maker.Player"><em>text_game_maker.Player</em></a>) &#8211; Player instance</li>
+<li><strong>src</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; source tile (the tile that player is        trying to exit)</li>
+<li><strong>dest</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; destination tile (the tile that player        is trying to enter)</li>
 </ul>
 </td>
 </tr>
@@ -197,7 +197,7 @@ tile this callback is attached to.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="map_builder.html" class="btn btn-neutral float-right" title="map_builder module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="text_game_maker.html" class="btn btn-neutral float-right" title="text_game_maker module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="modules.html" class="btn btn-neutral" title="." accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

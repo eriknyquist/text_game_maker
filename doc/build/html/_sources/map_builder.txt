@@ -1,7 +1,0 @@
-map_builder module
-==================
-
-.. automodule:: map_builder
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,0 +1,7 @@
+text_game_maker module
+======================
+
+.. automodule:: text_game_maker
+    :members:
+    :undoc-members:
+    :show-inheritance:
