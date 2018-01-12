@@ -4,6 +4,60 @@ import copy
 import threading
 import Queue
 
+info = {
+    'slow_printing': False,
+    'sequence_count': None,
+    'last_command': 'look'
+}
+
+COMMAND_DELIMITERS = [',', ';', '/', '\\']
+SET_PRINT_WORDS = ['print']
+
+KILL_WORDS = [
+    'quit', 'stop', 'finish', 'end', 'exit'
+]
+
+GO_WORDS = [
+    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip', 'jump',
+    'dance', 'creep', 'sneak', 'tiptoe'
+]
+
+TAKE_WORDS = [
+    'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
+]
+
+DROP_WORDS = [
+    'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete'
+]
+
+EQUIP_WORDS = [
+    'equip', 'use', 'whip out', 'take out', 'brandish'
+]
+
+UNEQUIP_WORDS = [
+    'unequip', 'put away', 'stop using'
+]
+
+SPEAK_WORDS = [
+    'speak with', 'speak to', 'talk to', 'talk with', 'speak', 'talk'
+]
+
+LOOK_WORDS = [
+    "look", "peep", "peek", "show", "viddy"
+]
+
+LOOT_WORDS = [
+    "loot", "search"
+]
+
+INVENTORY_WORDS = [
+    'i', 'inventory'
+]
+
+HELP_WORDS = [
+    '?', 'help'
+]
+
 basic_controls = """
 Movement
 --------
@@ -62,60 +116,6 @@ Misc
 
 * Use 'help' or '?' to show this information"""
 
-info = {
-    'game_printing': False,
-    'sequence_count': None,
-    'last_command': 'look'
-}
-
-COMMAND_DELIMITERS = [',', ';', '/', '\\']
-SET_PRINT_WORDS = ['print']
-
-KILL_WORDS = [
-    'quit', 'stop', 'finish', 'end', 'exit'
-]
-
-GO_WORDS = [
-    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip', 'jump',
-    'dance', 'creep', 'sneak', 'tiptoe'
-]
-
-TAKE_WORDS = [
-    'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
-]
-
-DROP_WORDS = [
-    'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete'
-]
-
-EQUIP_WORDS = [
-    'equip', 'use', 'whip out', 'take out', 'brandish'
-]
-
-UNEQUIP_WORDS = [
-    'unequip', 'put away', 'stop using'
-]
-
-SPEAK_WORDS = [
-    'speak with', 'speak to', 'talk to', 'talk with', 'speak', 'talk'
-]
-
-LOOK_WORDS = [
-    "look", "peep", "peek", "show", "viddy"
-]
-
-LOOT_WORDS = [
-    "loot", "search"
-]
-
-INVENTORY_WORDS = [
-    'i', 'inventory'
-]
-
-HELP_WORDS = [
-    '?', 'help'
-]
-
 input_queue = Queue.Queue()
 
 def _read_input_task():
@@ -129,45 +129,7 @@ enter_thread.start()
 def _unrecognised(player, val):
     print '\nUnrecognised command "%s"' % val
 
-def read_line(msg='', allow_empty=False):
-    """
-    Read a line of input from stdin
-
-    :param str msg: message to print before reading input
-    :param bool allow_empty: if True, prompt will be repeated until a non-empty\
-        line is entered
-
-    :return: a line ending with either a newline or carriage return character
-    :rtype: str
-    """
-
-    user_input = ""
-    buf = ""
-
-    while True:
-        sys.stdout.write(msg)
-        sys.stdout.flush()
-
-        c = ''
-
-        while (c != '\r') and (c != '\n'):
-            c = input_queue.get()
-            buf += c
-
-        user_input = buf.strip()
-
-        if allow_empty or (len(user_input) > 0):
-            break
-
-    # If we are in the middle of command chain, decrement the count
-    # of commands remaining in the input queue
-    if info['sequence_count']:
-        info['sequence_count'] -= 1
-        print user_input
-
-    return user_input
-
-def list_to_english(strlist):
+def list_to_english(strlist, conj='and'):
     """
     Convert a list of strings to description of the list in english.
     For example, ['4 coins', 'an apple', 'a sausage'] would be converted to
@@ -186,13 +148,60 @@ def list_to_english(strlist):
     msg = ""
     for i in range(len(strlist[:-1])):
         if i == (len(strlist) - 2):
-            delim = ' and'
+            delim = ' ' + conj
         else:
             delim = ','
 
         msg += '%s%s ' % (strlist[i], delim)
 
     return msg + strlist[-1]
+
+def _quit_hint():
+    print ("\nUse %s to stop playing"
+        % (list_to_english(['"%s"' % i for i in KILL_WORDS], conj='or')))
+
+def read_line_raw(msg=''):
+    """
+    Read a line of input from stdin
+
+    :param str msg: message to print before reading input
+    :return: a line ending with either a newline or carriage return character
+    :rtype: str
+    """
+
+    user_input = ""
+    buf = ""
+
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+
+    c = ''
+
+    while (c != '\r') and (c != '\n'):
+        try:
+            c = input_queue.get()
+        except KeyboardInterrupt:
+            _quit_hint()
+            continue
+
+        buf += c
+
+    user_input = buf.strip()
+
+    # If we are in the middle of command chain, decrement the count
+    # of commands remaining in the input queue
+    if info['sequence_count']:
+        info['sequence_count'] -= 1
+        print user_input
+
+    return user_input
+
+def read_line(msg):
+    ret = ""
+    while ret == "":
+        ret = read_line_raw(msg)
+
+    return ret
 
 def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
     """
@@ -207,13 +216,10 @@ def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
     """
 
     ret = "z"
-    while not 'yes'.startswith(ret) and not 'no'.startswith(ret):
+    while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
         ret = read_line(prompt)
 
-    if 'yes'.startswith(ret):
-        return True
-
-    return False
+    return 'yes'.startswith(ret)
 
 def _remove_leading_whitespace(string):
     trimmed = [s.strip() for s in string.splitlines()]
@@ -231,19 +237,20 @@ def game_print(msg, chardelay=0.02):
     :type chardelay: float
     """
 
-    if not info['game_printing']:
+    if not info['slow_printing']:
         print msg
         return
 
     for i in range(len(msg)):
-        try:
-            c = input_queue.get_nowait()
-        except Queue.Empty:
-            pass
-        else:
-            if c == '\n':
-                print msg[i:]
-                return
+        if not info['sequence_count']:
+            try:
+                c = input_queue.get_nowait()
+            except Queue.Empty:
+                pass
+            else:
+                if c == '\n':
+                    print msg[i:]
+                    return
 
         sys.stdout.write(msg[i])
         sys.stdout.flush()
@@ -517,9 +524,6 @@ class Player(object):
         self.current = dest
 
         game_print("\nYou %s %s." % (word, name))
-        if info['game_printing']:
-            time.sleep(1)
-
         game_print("%s" % self.current_state())
 
         return dest
@@ -690,8 +694,7 @@ def _do_speak(player, word, name):
     print "\n%s: no such person" % name
 
 def _do_quit(player, word, name):
-    ret = 'z'
-
+    ret = "z"
     while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
         ret = read_line("[really stop playing? (yes/no)]: ")
 
@@ -744,10 +747,10 @@ def _do_set_print_speed(player, word, setting):
         return
 
     if 'slow'.startswith(setting):
-        info['game_printing'] = True
+        info['slow_printing'] = True
         print "\nOK, will do."
     elif 'fast'.startswith(setting):
-        info['game_printing'] = False
+        info['slow_printing'] = False
         print "\nOK, got it."
     else:
         print("\nUnrecognised print speed-- please say 'print fast' "
@@ -1043,7 +1046,7 @@ class MapBuilder(object):
         info['sequence_count'] = len(sequence)
 
         while info['sequence_count'] > 0:
-            action = read_line("\n> ", allow_empty=True).strip().lower()
+            action = read_line_raw("\n> ").strip().lower()
             _parse_command(player, action)
 
         info['sequence_count'] = None
@@ -1059,7 +1062,7 @@ class MapBuilder(object):
         game_print(player.current_state())
 
         while True:
-            action = read_line("\n%s" % player.prompt, allow_empty=True)
+            action = read_line_raw("\n%s" % player.prompt)
             delim = self._get_command_delimiter(action)
 
             if delim:
