@@ -64,9 +64,11 @@ Misc
 
 info = {
     'game_printing': False,
+    'sequence_count': None,
     'last_command': 'look'
 }
 
+COMMAND_DELIMITERS = [',', ';', '/', '\\']
 SET_PRINT_WORDS = ['print']
 
 KILL_WORDS = [
@@ -156,6 +158,12 @@ def read_line(msg='', allow_empty=False):
 
         if allow_empty or (len(user_input) > 0):
             break
+
+    # If we are in the middle of command chain, decrement the count
+    # of commands remaining in the input queue
+    if info['sequence_count']:
+        info['sequence_count'] -= 1
+        print user_input
 
     return user_input
 
@@ -1013,6 +1021,33 @@ class MapBuilder(object):
         self.current = self.current.south
         self.current.north = old
 
+    def _get_command_delimiter(self, action):
+        for i in COMMAND_DELIMITERS:
+            if i in action:
+                for j in COMMAND_DELIMITERS:
+                    if j != i and j in action:
+                        return None
+
+                return i
+
+        return None
+
+    def _run_command_sequence(self, player, sequence):
+        # Inject commands into the input queue
+        lines = '\n'.join(sequence) + '\n'
+        [input_queue.put(c) for c in lines]
+
+        # Set the global command sequence count, so we know how many commands
+        # from the chain are left in the input queue (even if a user callback
+        # 'steals' some of the commands by calling read_input)
+        info['sequence_count'] = len(sequence)
+
+        while info['sequence_count'] > 0:
+            action = read_line("\n> ", allow_empty=True).strip().lower()
+            _parse_command(player, action)
+
+        info['sequence_count'] = None
+
     def run_game(self):
         """
         Start running the game
@@ -1025,4 +1060,11 @@ class MapBuilder(object):
 
         while True:
             action = read_line("\n%s" % player.prompt, allow_empty=True)
+            delim = self._get_command_delimiter(action)
+
+            if delim:
+                sequence = action.lstrip(delim).split(delim)
+                self._run_command_sequence(player, sequence)
+                continue
+
             _parse_command(player, action.strip().lower())
