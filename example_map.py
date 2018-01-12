@@ -110,8 +110,8 @@ def enter_window_callback(player, src, dest):
     # text_game_maker.game_print will print slowly, one character at a time,
     # unless player has typed 'print fast', in which case game_print will print
     # normally
-    gamemaker.game_print("You are dead. You plummeted into the rocks "
-        "and the sea below the window.")
+    gamemaker.game_print("\nYou are dead. You plummeted into the rocks "
+        "and the sea below the window.\n")
     sys.exit()
 
 def main():

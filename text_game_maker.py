@@ -27,7 +27,7 @@ TAKE_WORDS = [
 ]
 
 DROP_WORDS = [
-    'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete'
+    'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete', 'undock'
 ]
 
 EQUIP_WORDS = [
@@ -39,15 +39,16 @@ UNEQUIP_WORDS = [
 ]
 
 SPEAK_WORDS = [
-    'speak with', 'speak to', 'talk to', 'talk with', 'speak', 'talk'
+    'speak with', 'speak to', 'talk to', 'chat to', 'chat with', 'talk with',
+    'chat', 'speak', 'talk'
 ]
 
 LOOK_WORDS = [
-    "look", "peep", "peek", "show", "viddy"
+    'look', 'peep', 'peek', 'show', 'viddy'
 ]
 
 LOOT_WORDS = [
-    "loot", "search"
+    'loot', 'search', 'rob', 'pickpocket'
 ]
 
 INVENTORY_WORDS = [
@@ -733,9 +734,10 @@ def _do_loot(player, word, name):
     for p in player.current.people:
         if p.name.lower().startswith(name):
             if p.is_alive():
-                game_print('\nYou are dead.')
-                game_print('%s caught you trying to loot them, and killed you.'
-                    % p.name)
+                game_print("\nYou are dead.")
+                game_print("\nYou were caught trying to %s %s."
+                    % (word, p.name))
+                game_print("\n%s didn't like this, and killed you.\n" % p.name)
                 sys.exit()
             else:
                 player._loot(word, p)
