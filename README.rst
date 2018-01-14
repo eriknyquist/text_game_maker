@@ -8,8 +8,13 @@ simple game made with |projectname|:
 
 .. code:: python
 
-    from text_game_maker import MapBuilder, Item
+    import text_game_maker
+    from text_game_maker.item import Item
+    from text_game_maker.person import Person
+    from text_game_maker.map_builder import MapBuilder
 
+    # callback function for locked room: each time player attempts to enter
+    # the locked room, this callback function will be called
     def room_enter_callback(player, source, dest):
         if player.has_equipped('brass key'):
             # if 'brass key' is equipped, delete from player's inventory ...
@@ -55,6 +60,9 @@ Features overview
 * Built-in parser for player input, with variants of common words & phrases for
   controlling the player, e.g. "take key", "get key", "pick up key"
 
+* Commands can be chained in a single line using a comma, e.g.
+  "pick up apple, equip apple, speak to alan"
+
 * Names of items, game characters or directions entered by the player can
   be very flexible, to save players from typing the full names all the time.
   For example, to add an item called "metal key" to the player's inventory,
@@ -68,5 +76,5 @@ Features overview
 Documentation
 =============
 
-View the API documentation by cloning this repository and opening
+View the full API documentation by cloning this repository and opening
 ``doc/build/html/index.html`` with a web browser.

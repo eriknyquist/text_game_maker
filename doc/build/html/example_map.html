@@ -32,7 +32,7 @@
   
     <link rel="top" title="Text adventure builder 0.1 documentation" href="index.html"/>
         <link rel="up" title="." href="modules.html"/>
-        <link rel="next" title="text_game_maker module" href="text_game_maker.html"/>
+        <link rel="next" title="text_game_maker package" href="text_game_maker.html"/>
         <link rel="prev" title="." href="modules.html"/> 
 
   
@@ -75,7 +75,16 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">.</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="">example_map module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="text_game_maker.html">text_game_maker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="text_game_maker.html">text_game_maker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="text_game_maker.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="text_game_maker.html#module-text_game_maker.item">text_game_maker.item module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="text_game_maker.html#module-text_game_maker.map_builder">text_game_maker.map_builder module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="text_game_maker.html#module-text_game_maker.person">text_game_maker.person module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="text_game_maker.html#module-text_game_maker.player">text_game_maker.player module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="text_game_maker.html#module-text_game_maker.tile">text_game_maker.tile module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="text_game_maker.html#module-text_game_maker">Module contents</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -131,8 +140,8 @@ text_game_maker.Person constructor when creating a Person instance</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>person</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Person" title="text_game_maker.Person"><em>text_game_maker.Person</em></a>) &#8211; the Person that this callback is        attached to</li>
-<li><strong>player</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Player" title="text_game_maker.Player"><em>text_game_maker.Player</em></a>) &#8211; Player instance</li>
+<li><strong>person</strong> (<em>text_game_maker.Person</em>) &#8211; the Person that this callback is        attached to</li>
+<li><strong>player</strong> (<em>text_game_maker.Player</em>) &#8211; Player instance</li>
 </ul>
 </td>
 </tr>
@@ -146,20 +155,6 @@ text_game_maker.Person constructor when creating a Person instance</p>
 <dd><p>Enter callback for a tile that kills the player as soon as they enter.
 Called when player attempts to enter whichever room this callback is
 attached to.</p>
-<p>Attach to current room with text_game_maker.set_on_enter()</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>player</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Player" title="text_game_maker.Player"><em>text_game_maker.Player</em></a>) &#8211; text_game_maker.Player object</li>
-<li><strong>src</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; source tile (the tile that player is        trying to exit)</li>
-<li><strong>dest</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; destination tile (the tile that player        is trying to enter)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="function">
@@ -174,9 +169,9 @@ tile this callback is attached to.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>player</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Player" title="text_game_maker.Player"><em>text_game_maker.Player</em></a>) &#8211; Player instance</li>
-<li><strong>src</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; source tile (the tile that player is        trying to exit)</li>
-<li><strong>dest</strong> (<a class="reference internal" href="text_game_maker.html#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; destination tile (the tile that player        is trying to enter)</li>
+<li><strong>player</strong> (<em>text_game_maker.Player</em>) &#8211; Player instance</li>
+<li><strong>src</strong> (<em>text_game_maker.Tile</em>) &#8211; source tile (the tile that player is        trying to exit)</li>
+<li><strong>dest</strong> (<em>text_game_maker.Tile</em>) &#8211; destination tile (the tile that player        is trying to enter)</li>
 </ul>
 </td>
 </tr>
@@ -207,7 +202,7 @@ tile this callback is attached to.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="text_game_maker.html" class="btn btn-neutral float-right" title="text_game_maker module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="text_game_maker.html" class="btn btn-neutral float-right" title="text_game_maker package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="modules.html" class="btn btn-neutral" title="." accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

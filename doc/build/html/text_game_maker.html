@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>text_game_maker module &mdash; Text adventure builder 0.1 documentation</title>
+  <title>text_game_maker package &mdash; Text adventure builder 0.1 documentation</title>
   
 
   
@@ -74,7 +74,16 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">.</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="example_map.html">example_map module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="">text_game_maker module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">text_game_maker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-text_game_maker.item">text_game_maker.item module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-text_game_maker.map_builder">text_game_maker.map_builder module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-text_game_maker.person">text_game_maker.person module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-text_game_maker.player">text_game_maker.player module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-text_game_maker.tile">text_game_maker.tile module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-text_game_maker">Module contents</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -103,7 +112,7 @@
       
           <li><a href="modules.html">.</a> &raquo;</li>
       
-    <li>text_game_maker module</li>
+    <li>text_game_maker package</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -116,16 +125,21 @@
 </div>
           <div role="main" class="document">
             
-  <div class="section" id="module-text_game_maker">
-<span id="text-game-maker-module"></span><h1>text_game_maker module<a class="headerlink" href="#module-text_game_maker" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="text-game-maker-package">
+<h1>text_game_maker package<a class="headerlink" href="#text-game-maker-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-text_game_maker.item">
+<span id="text-game-maker-item-module"></span><h2>text_game_maker.item module<a class="headerlink" href="#module-text_game_maker.item" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="text_game_maker.Item">
-<em class="property">class </em><code class="descclassname">text_game_maker.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description=None</em>, <em>value=None</em>, <em>on_take=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.item.Item">
+<em class="property">class </em><code class="descclassname">text_game_maker.item.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description=None</em>, <em>value=None</em>, <em>on_take=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.item.Item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Base class for collectable item</p>
 <dl class="method">
-<dt id="text_game_maker.Item.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description=None</em>, <em>value=None</em>, <em>on_take=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.item.Item.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description=None</em>, <em>value=None</em>, <em>on_take=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.item.Item.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialises an Item instance</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -145,8 +159,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Item.set_description">
-<code class="descname">set_description</code><span class="sig-paren">(</span><em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_description" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.item.Item.set_description">
+<code class="descname">set_description</code><span class="sig-paren">(</span><em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.item.Item.set_description" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the description of the item&#8217;s location/sitation in the world,
 e.g. &#8220;on the floor&#8221;</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -160,8 +174,8 @@ e.g. &#8220;on the floor&#8221;</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Item.set_name">
-<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_name" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.item.Item.set_name">
+<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.item.Item.set_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the name of this item</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -174,8 +188,8 @@ e.g. &#8220;on the floor&#8221;</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Item.set_on_take">
-<code class="descname">set_on_take</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_on_take" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.item.Item.set_on_take">
+<code class="descname">set_on_take</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.item.Item.set_on_take" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set callback function to be invoked when player attempts to add this
 item to their inventory. Callback should accept one argument:</p>
 <blockquote>
@@ -185,7 +199,7 @@ item to their inventory. Callback should accept one argument:</p>
 </dl>
 </div></blockquote>
 <ul class="simple">
-<li><em>player</em> (text_game_maker.Player): player instance</li>
+<li><em>player</em> (text_game_maker.player.Player): player instance</li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -198,14 +212,14 @@ item to their inventory. Callback should accept one argument:</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Item.set_prefix">
-<code class="descname">set_prefix</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_prefix" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.item.Item.set_prefix">
+<code class="descname">set_prefix</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.item.Item.set_prefix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set item prefix word (usually &#8216;an&#8217; or &#8216;a&#8217;)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Item.set_value">
-<code class="descname">set_value</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_value" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.item.Item.set_value">
+<code class="descname">set_value</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.item.Item.set_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of this item in coins</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -219,14 +233,17 @@ item to their inventory. Callback should accept one argument:</p>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-text_game_maker.map_builder">
+<span id="text-game-maker-map-builder-module"></span><h2>text_game_maker.map_builder module<a class="headerlink" href="#module-text_game_maker.map_builder" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="text_game_maker.MapBuilder">
-<em class="property">class </em><code class="descclassname">text_game_maker.</code><code class="descname">MapBuilder</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder">
+<em class="property">class </em><code class="descclassname">text_game_maker.map_builder.</code><code class="descname">MapBuilder</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Base class for building a tile-based map</p>
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialises a MapBuilder instance. When you create a MapBuilder
 object, it automatically creates the first tile, and sets it as the
 current tile to build on.</p>
@@ -245,36 +262,50 @@ current tile to build on.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.add_item">
-<code class="descname">add_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.add_item" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.add_item">
+<code class="descname">add_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.add_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add item to current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference internal" href="#text_game_maker.Item" title="text_game_maker.Item"><em>text_game_maker.Item</em></a>) &#8211; the item to add</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference internal" href="#text_game_maker.item.Item" title="text_game_maker.item.Item"><em>text_game_maker.item.Item</em></a>) &#8211; the item to add</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.add_person">
-<code class="descname">add_person</code><span class="sig-paren">(</span><em>person</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.add_person" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.add_person">
+<code class="descname">add_person</code><span class="sig-paren">(</span><em>person</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.add_person" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add person to current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>person</strong> (<a class="reference internal" href="#text_game_maker.Person" title="text_game_maker.Person"><em>text_game_maker.Person</em></a>) &#8211; the person to add</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>person</strong> (<a class="reference internal" href="#text_game_maker.person.Person" title="text_game_maker.person.Person"><em>text_game_maker.person.Person</em></a>) &#8211; the person to add</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.move_east">
-<code class="descname">move_east</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.move_east" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.inject_input">
+<code class="descname">inject_input</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.inject_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inject data into the game&#8217;s input stream (as if player had typed it)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>str</em>) &#8211; string of text to inject</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.map_builder.MapBuilder.move_east">
+<code class="descname">move_east</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.move_east" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new tile to the east of the current tile, and set the new
 tile as the current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -292,8 +323,8 @@ tile as the current tile</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.move_north">
-<code class="descname">move_north</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.move_north" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.move_north">
+<code class="descname">move_north</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.move_north" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new tile to the north of the current tile, and set the new
 tile as the current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -311,8 +342,8 @@ tile as the current tile</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.move_south">
-<code class="descname">move_south</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.move_south" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.move_south">
+<code class="descname">move_south</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.move_south" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new tile to the south of the current tile, and set the new
 tile as the current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -330,8 +361,8 @@ tile as the current tile</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.move_west">
-<code class="descname">move_west</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.move_west" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.move_west">
+<code class="descname">move_west</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.move_west" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a new tile to the west of the current tile, and set the new
 tile as the current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -349,14 +380,14 @@ tile as the current tile</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.run_game">
-<code class="descname">run_game</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.run_game" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.run_game">
+<code class="descname">run_game</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.run_game" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start running the game</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_description">
-<code class="descname">set_description</code><span class="sig-paren">(</span><em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_description" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_description">
+<code class="descname">set_description</code><span class="sig-paren">(</span><em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_description" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add long description for current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -369,8 +400,8 @@ tile as the current tile</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_input_prompt">
-<code class="descname">set_input_prompt</code><span class="sig-paren">(</span><em>prompt</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_input_prompt" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_input_prompt">
+<code class="descname">set_input_prompt</code><span class="sig-paren">(</span><em>prompt</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_input_prompt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the message to print when prompting a player for game input</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -383,15 +414,15 @@ tile as the current tile</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_locked">
-<code class="descname">set_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_locked" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_locked">
+<code class="descname">set_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_locked" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the current tile to be locked. The player will not be able to
 enter a locked tile (unless some enter/exit callback unlocks it)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_name">
-<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_name" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_name">
+<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add short description for current tile</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -404,18 +435,18 @@ enter a locked tile (unless some enter/exit callback unlocks it)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_on_enter">
-<code class="descname">set_on_enter</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_on_enter" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_on_enter">
+<code class="descname">set_on_enter</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_on_enter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set callback function to be invoked when player attempts to enter the
 current tile. The callback function should accept 3 arguments:</p>
 <blockquote>
 <div>callback(player, source, dest):</div></blockquote>
 <ul class="simple">
-<li><em>player</em> (text_game_maker.Player object): player instance</li>
-<li><em>source</em> (text_game_maker.Tile object): source tile (tile that player
-is trying to exit</li>
-<li><em>destination</em> (text_game_maker.Tile object): destination tile (tile
-that player is trying to enter</li>
+<li><em>player</em> (text_game_maker.player.Player object): player instance</li>
+<li><em>source</em> (text_game_maker.tile.Tile object): source tile (tile that
+player is trying to exit</li>
+<li><em>destination</em> (text_game_maker.tile.Tile object): destination tile
+(tile that player is trying to enter</li>
 <li><em>Return value</em> (bool): If False, player&#8217;s attempt to enter the
 current tile will be blocked (silently&#8211; up to you to print something
 if you need it here). If True, player will be allowed to continue
@@ -432,18 +463,18 @@ normally</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_on_exit">
-<code class="descname">set_on_exit</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_on_exit" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_on_exit">
+<code class="descname">set_on_exit</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_on_exit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set callback function to be invoked when player attempts to enter the
 current tile. The callback should accept three  arguments:</p>
 <blockquote>
 <div>callback(player, source, dest):</div></blockquote>
 <ul class="simple">
-<li><em>player</em> (text_game_maker.Player object): player instance</li>
-<li><em>source</em> (text_game_maker.Tile object): source tile (tile that player
-is trying to exit</li>
-<li><em>destination</em> (text_game_maker.Tile object): destination tile (tile
-that player is trying to enter</li>
+<li><em>player</em> (text_game_maker.player.Player object): player instance</li>
+<li><em>source</em> (text_game_maker.tile.Tile object): source tile (tile that
+player is trying to exit</li>
+<li><em>destination</em> (text_game_maker.tile.Tile object): destination tile
+(tile that player is trying to enter</li>
 <li><em>Return value</em> (bool): If False, player&#8217;s attempt to exit the
 current tile will be blocked (silently&#8211; up to you to print something
 if you need it here). If True, player will be allowed to continue
@@ -460,8 +491,8 @@ normally.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_player_name">
-<code class="descname">set_player_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_player_name" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_player_name">
+<code class="descname">set_player_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_player_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set player name</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -474,8 +505,8 @@ normally.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.MapBuilder.set_player_title">
-<code class="descname">set_player_title</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.MapBuilder.set_player_title" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.map_builder.MapBuilder.set_player_title">
+<code class="descname">set_player_title</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_player_title" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set player title</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -489,14 +520,17 @@ normally.</li>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-text_game_maker.person">
+<span id="text-game-maker-person-module"></span><h2>text_game_maker.person module<a class="headerlink" href="#module-text_game_maker.person" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="text_game_maker.Person">
-<em class="property">class </em><code class="descclassname">text_game_maker.</code><code class="descname">Person</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.person.Person">
+<em class="property">class </em><code class="descclassname">text_game_maker.person.</code><code class="descname">Person</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Represents a person that the player can interact with</p>
 <dl class="method">
-<dt id="text_game_maker.Person.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.person.Person.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialises a Person instance</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -505,7 +539,7 @@ normally.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> (<em>str</em>) &#8211; name of Person, e.g. &#8220;John&#8221;</li>
 <li><strong>description</strong> (<em>str</em>) &#8211; description of Person, e.g. &#8220;squatting in the            corner&#8221;</li>
-<li><strong>on_speak</strong> &#8211; on_speak callback (see             text_game_maker.Person.set_on_speak description for more details)</li>
+<li><strong>on_speak</strong> &#8211; on_speak callback (see             text_game_maker.person.Person.set_on_speak description for more details)</li>
 <li><strong>alive</strong> (<em>bool</em>) &#8211; Initial living state of person .If True, person will            be alive. If false, person will be dead</li>
 <li><strong>coins</strong> (<em>int</em>) &#8211; Number of coins this person has</li>
 <li><strong>items</strong> (<em>dict</em>) &#8211; Items held by this person, where each dict item is            of the form {Item.name: Item}</li>
@@ -517,8 +551,8 @@ normally.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Person.buy_equipped_item">
-<code class="descname">buy_equipped_item</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person.buy_equipped_item" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.person.Person.buy_equipped_item">
+<code class="descname">buy_equipped_item</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.buy_equipped_item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ask player to buy equipped item. Expects player to have something
 equipped (so check before uing this method).</p>
 <p>If player&#8217;s equipped item costs more coins than this person has, the
@@ -528,19 +562,19 @@ amount, and can still buy the item if the player says yes.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>player</strong> (<a class="reference internal" href="#text_game_maker.Player" title="text_game_maker.Player"><em>text_game_maker.Player</em></a>) &#8211; player object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>player</strong> (<a class="reference internal" href="#text_game_maker.player.Player" title="text_game_maker.player.Player"><em>text_game_maker.player.Player</em></a>) &#8211; player object</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns the item if sale was successful, None otherwise</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#text_game_maker.Item" title="text_game_maker.Item">text_game_maker.Item</a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#text_game_maker.item.Item" title="text_game_maker.item.Item">text_game_maker.item.Item</a></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Person.die">
-<code class="descname">die</code><span class="sig-paren">(</span><em>msg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person.die" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.person.Person.die">
+<code class="descname">die</code><span class="sig-paren">(</span><em>msg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.die" title="Permalink to this definition">¶</a></dt>
 <dd><p>Kill this person, and print a message to inform the player
 of this person&#8217;s death.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -554,8 +588,8 @@ of this person&#8217;s death.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Person.is_alive">
-<code class="descname">is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person.is_alive" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.person.Person.is_alive">
+<code class="descname">is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test if this person is alive</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -570,8 +604,8 @@ of this person&#8217;s death.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Person.say">
-<code class="descname">say</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person.say" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.person.Person.say">
+<code class="descname">say</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.say" title="Permalink to this definition">¶</a></dt>
 <dd><p>Speak to the player</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -584,8 +618,8 @@ of this person&#8217;s death.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Person.set_on_speak">
-<code class="descname">set_on_speak</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person.set_on_speak" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.person.Person.set_on_speak">
+<code class="descname">set_on_speak</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.set_on_speak" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set a function to be invoked whenever the player talks to this person.
 The provided function should accept two arguments:</p>
 <blockquote>
@@ -594,8 +628,8 @@ The provided function should accept two arguments:</p>
 <dd>pass</dd>
 </dl>
 <ul class="simple">
-<li><em>person</em> (text_game_maker.Person): Person instance</li>
-<li><em>player</em> (text_game_maker.Player): Player instance</li>
+<li><em>person</em> (text_game_maker.person.Person): Person instance</li>
+<li><em>player</em> (text_game_maker.player.Player): Player instance</li>
 <li><em>Return value</em> (str): the text to be spoken in response to the
 player</li>
 </ul>
@@ -612,20 +646,23 @@ player</li>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-text_game_maker.player">
+<span id="text-game-maker-player-module"></span><h2>text_game_maker.player module<a class="headerlink" href="#module-text_game_maker.player" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="text_game_maker.Player">
-<em class="property">class </em><code class="descclassname">text_game_maker.</code><code class="descname">Player</code><span class="sig-paren">(</span><em>start_tile=None</em>, <em>input_prompt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player">
+<em class="property">class </em><code class="descclassname">text_game_maker.player.</code><code class="descname">Player</code><span class="sig-paren">(</span><em>start_tile=None</em>, <em>input_prompt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Base class to hold player related methods &amp; data</p>
 <dl class="method">
-<dt id="text_game_maker.Player.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>start_tile=None</em>, <em>input_prompt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>start_tile=None</em>, <em>input_prompt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>start_tile</strong> (<a class="reference internal" href="#text_game_maker.Tile" title="text_game_maker.Tile"><em>text_game_maker.Tile</em></a>) &#8211; Game starting tile</li>
+<li><strong>start_tile</strong> (<a class="reference internal" href="#text_game_maker.tile.Tile" title="text_game_maker.tile.Tile"><em>text_game_maker.tile.Tile</em></a>) &#8211; Game starting tile</li>
 <li><strong>input_prompt</strong> (<em>str</em>) &#8211; Custom string to prompt player for game input</li>
 </ul>
 </td>
@@ -635,8 +672,8 @@ player</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.clear_task">
-<code class="descname">clear_task</code><span class="sig-paren">(</span><em>task_id</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.clear_task" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.clear_task">
+<code class="descname">clear_task</code><span class="sig-paren">(</span><em>task_id</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.clear_task" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear a specific scheduled task by task ID</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -653,27 +690,27 @@ player</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.clear_tasks">
-<code class="descname">clear_tasks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.clear_tasks" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.clear_tasks">
+<code class="descname">clear_tasks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.clear_tasks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear all pending scheduled tasks (tasks which have been added but
 whose timers have not expired)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.current_state">
-<code class="descname">current_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.current_state" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.current_state">
+<code class="descname">current_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.current_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the full descriptive text for the current game state</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.delete_equipped">
-<code class="descname">delete_equipped</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.delete_equipped" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.delete_equipped">
+<code class="descname">delete_equipped</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.delete_equipped" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete currently equipped item from inventory, if there is one</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.has_equipped">
-<code class="descname">has_equipped</code><span class="sig-paren">(</span><em>item_name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.has_equipped" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.has_equipped">
+<code class="descname">has_equipped</code><span class="sig-paren">(</span><em>item_name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.has_equipped" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if player has specific item equipped</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -690,8 +727,8 @@ whose timers have not expired)</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.schedule_task">
-<code class="descname">schedule_task</code><span class="sig-paren">(</span><em>callback</em>, <em>seconds=10</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.schedule_task" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.schedule_task">
+<code class="descname">schedule_task</code><span class="sig-paren">(</span><em>callback</em>, <em>seconds=10</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.schedule_task" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a function that will be invoked whenever some player input is next
 received <em>and</em> a specific time has elapsed.</p>
 <p>The function should accept one argument:</p>
@@ -702,7 +739,7 @@ received <em>and</em> a specific time has elapsed.</p>
 </dl>
 </div></blockquote>
 <ul class="simple">
-<li><em>player</em> (text_game_maker.Player): player instance</li>
+<li><em>player</em> (text_game_maker.player.Player): player instance</li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -725,8 +762,8 @@ received <em>and</em> a specific time has elapsed.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.set_name">
-<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.set_name" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.set_name">
+<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.set_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set player name</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -739,8 +776,8 @@ received <em>and</em> a specific time has elapsed.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Player.set_title">
-<code class="descname">set_title</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.set_title" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.player.Player.set_title">
+<code class="descname">set_title</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.set_title" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set player title</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -754,14 +791,17 @@ received <em>and</em> a specific time has elapsed.</p>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-text_game_maker.tile">
+<span id="text-game-maker-tile-module"></span><h2>text_game_maker.tile module<a class="headerlink" href="#module-text_game_maker.tile" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="text_game_maker.Tile">
-<em class="property">class </em><code class="descclassname">text_game_maker.</code><code class="descname">Tile</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em>, <em>on_enter=None</em>, <em>on_exit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Tile" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.tile.Tile">
+<em class="property">class </em><code class="descclassname">text_game_maker.tile.</code><code class="descname">Tile</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em>, <em>on_enter=None</em>, <em>on_exit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.tile.Tile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Represents a single &#8216;tile&#8217; or &#8216;room&#8217; in the game</p>
 <dl class="method">
-<dt id="text_game_maker.Tile.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em>, <em>on_enter=None</em>, <em>on_exit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Tile.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.tile.Tile.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name=None</em>, <em>description=None</em>, <em>on_enter=None</em>, <em>on_exit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.tile.Tile.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialise a Tile instance</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -770,8 +810,8 @@ received <em>and</em> a specific time has elapsed.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> (<em>str</em>) &#8211; short description, e.g. &#8220;a dark cellar&#8221;</li>
 <li><strong>description</strong> (<em>str</em>) &#8211; long description, printed when player enters            the room e.g. &#8220;a dark, scary cellar with blah blah blah... &#8220;</li>
-<li><strong>on_enter</strong> &#8211; callback to be invoked when player attempts to enter            this tile (see documentation for            text_game_maker.MapBuilder.set_on_enter()</li>
-<li><strong>on_exit</strong> &#8211; callback to be invoked when player attempts to exit            this tile (see documentation for            text_game_maker.MapBuilder.set_on_exit()</li>
+<li><strong>on_enter</strong> &#8211; callback to be invoked when player attempts to enter            this tile (see documentation for            text_game_maker.map_builder.MapBuilder.set_on_enter()</li>
+<li><strong>on_exit</strong> &#8211; callback to be invoked when player attempts to exit            this tile (see documentation for            text_game_maker.map_builder.MapBuilder.set_on_exit()</li>
 </ul>
 </td>
 </tr>
@@ -780,33 +820,36 @@ received <em>and</em> a specific time has elapsed.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Tile.is_locked">
-<code class="descname">is_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Tile.is_locked" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.tile.Tile.is_locked">
+<code class="descname">is_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.tile.Tile.is_locked" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns true/false indicating whether this tile is locked.
 :return: True if tile is locked, False if unlocked.
 :rtype: bool</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Tile.set_locked">
-<code class="descname">set_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Tile.set_locked" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.tile.Tile.set_locked">
+<code class="descname">set_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.tile.Tile.set_locked" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lock this tile&#8211; player will only see a locked door</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Tile.set_unlocked">
-<code class="descname">set_unlocked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Tile.set_unlocked" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.tile.Tile.set_unlocked">
+<code class="descname">set_unlocked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.tile.Tile.set_unlocked" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unlock this tile&#8211; player can enter normally</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.Tile.summary">
-<code class="descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Tile.summary" title="Permalink to this definition">¶</a></dt>
+<dt id="text_game_maker.tile.Tile.summary">
+<code class="descname">summary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.tile.Tile.summary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a description of all available directions from this tile</p>
 </dd></dl>
 
 </dd></dl>
 
+</div>
+<div class="section" id="module-text_game_maker">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-text_game_maker" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="text_game_maker.ask_yes_no">
 <code class="descclassname">text_game_maker.</code><code class="descname">ask_yes_no</code><span class="sig-paren">(</span><em>prompt='[ continue (yes/no)? ]: '</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.ask_yes_no" title="Permalink to this definition">¶</a></dt>
@@ -896,6 +939,7 @@ For example, [&#8216;4 coins&#8217;, &#8216;an apple&#8217;, &#8216;a sausage&#8
 </table>
 </dd></dl>
 
+</div>
 </div>
 
 

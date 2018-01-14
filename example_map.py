@@ -1,5 +1,9 @@
 import sys
-import text_game_maker as gamemaker
+
+import text_game_maker
+from text_game_maker.item import Item 
+from text_game_maker.person import Person
+from text_game_maker.map_builder import MapBuilder
 
 alan_info = {
     'count': 0,
@@ -63,7 +67,7 @@ def alan_speak_callback(person, player):
         # Player has no item equipped: print basic controls
         # (if we've been fed...)
         if alan_info['eaten']:
-            return gamemaker.get_basic_controls()
+            return text_game_maker.get_basic_controls()
 
     if alan_info['count'] < len(alan_lines):
         alan_info['count'] += 1
@@ -72,7 +76,7 @@ def alan_speak_callback(person, player):
 
 def timed_closet_callback(player):
     if player.current.name == "a small closet":
-        gamemaker.game_print('\nYou died. This room kills you if you stay too '
+        text_game_maker.game_print('\nYou died. This room kills you if you stay too '
             'long. Ha, Ha!\n')
         sys.exit()
 
@@ -112,36 +116,28 @@ def enter_window_callback(player, src, dest):
     Enter callback for a tile that kills the player as soon as they enter.
     Called when player attempts to enter whichever room this callback is
     attached to.
-
-    Attach to current room with text_game_maker.set_on_enter()
-
-    :param text_game_maker.Player player: text_game_maker.Player object
-    :param text_game_maker.Tile src: source tile (the tile that player is\
-        trying to exit)
-    :param text_game_maker.Tile dest: destination tile (the tile that player\
-        is trying to enter)
     """
 
     # text_game_maker.game_print will print slowly, one character at a time,
     # unless player has typed 'print fast', in which case game_print will print
     # normally
-    gamemaker.game_print("\nYou are dead. You plummeted into the rocks "
+    text_game_maker.game_print("\nYou are dead. You plummeted into the rocks "
         "and the sea below the window.\n")
     sys.exit()
 
 def main():
-    builder = gamemaker.MapBuilder(
+    builder = MapBuilder(
         "the starting room",
         """in a small square room with stone walls and ceilings. The floor is
         dirt. The only light comes from the fire of the torches that line the
         walls."""
     )
 
-    builder.add_item(gamemaker.Item("a", "metal key", "on the floor", 25))
-    builder.add_item(gamemaker.Item("a", "sausage", "on the floor", 5))
+    builder.add_item(Item("a", "metal key", "on the floor", 25))
+    builder.add_item(Item("a", "sausage", "on the floor", 5))
 
     builder.add_person(
-        gamemaker.Person(
+        Person(
             "Alan", "standing in the corner", alan_speak_callback
         )
     )
@@ -168,13 +164,13 @@ def main():
     # Set the input prompt
     builder.set_input_prompt("[action?]: ")
 
-    name = gamemaker.read_line("What is your name? : ")
-    title = gamemaker.read_line("What is your title (sir, lady, etc...)? : ")
+    name = text_game_maker.read_line("What is your name? : ")
+    title = text_game_maker.read_line("What is your title (sir, lady, etc...)? : ")
 
     builder.set_player_name(name.title())
     builder.set_player_title(title.title())
 
-    print gamemaker.get_full_controls()
+    print text_game_maker.get_full_controls()
     # Start the game!
     builder.run_game()
 

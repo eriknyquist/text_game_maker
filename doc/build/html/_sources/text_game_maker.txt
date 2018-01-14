@@ -1,5 +1,52 @@
-text_game_maker module
-======================
+text_game_maker package
+=======================
+
+Submodules
+----------
+
+text_game_maker.item module
+---------------------------
+
+.. automodule:: text_game_maker.item
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+text_game_maker.map_builder module
+----------------------------------
+
+.. automodule:: text_game_maker.map_builder
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+text_game_maker.person module
+-----------------------------
+
+.. automodule:: text_game_maker.person
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+text_game_maker.player module
+-----------------------------
+
+.. automodule:: text_game_maker.player
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+text_game_maker.tile module
+---------------------------
+
+.. automodule:: text_game_maker.tile
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
 
 .. automodule:: text_game_maker
     :members:
