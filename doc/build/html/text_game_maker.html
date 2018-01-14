@@ -120,12 +120,12 @@
 <span id="text-game-maker-module"></span><h1>text_game_maker module<a class="headerlink" href="#module-text_game_maker" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="text_game_maker.Item">
-<em class="property">class </em><code class="descclassname">text_game_maker.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">text_game_maker.</code><code class="descname">Item</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description=None</em>, <em>value=None</em>, <em>on_take=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Base class for collectable item</p>
 <dl class="method">
 <dt id="text_game_maker.Item.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>prefix</em>, <em>name</em>, <em>description=None</em>, <em>value=None</em>, <em>on_take=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialises an Item instance</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -136,8 +136,82 @@
 <li><strong>name</strong> (<em>str</em>) &#8211; Item name, e.g. &#8220;apple&#8221;</li>
 <li><strong>description</strong> (<em>str</em>) &#8211; Item description, e.g. &#8220;on the floor&#8221;</li>
 <li><strong>value</strong> (<em>int</em>) &#8211; Item value in coins</li>
+<li><strong>on_take</strong> &#8211; callback function to invoke when player attempts to            add this item to their inventory</li>
 </ul>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Item.set_description">
+<code class="descname">set_description</code><span class="sig-paren">(</span><em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the description of the item&#8217;s location/sitation in the world,
+e.g. &#8220;on the floor&#8221;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>desc</strong> (<em>str</em>) &#8211; item description</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Item.set_name">
+<code class="descname">set_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name of this item</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; object name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Item.set_on_take">
+<code class="descname">set_on_take</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_on_take" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to be invoked when player attempts to add this
+item to their inventory. Callback should accept one argument:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>def callback(player)</dt>
+<dd>pass</dd>
+</dl>
+</div></blockquote>
+<ul class="simple">
+<li><em>player</em> (text_game_maker.Player): player instance</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> &#8211; callback function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Item.set_prefix">
+<code class="descname">set_prefix</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_prefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set item prefix word (usually &#8216;an&#8217; or &#8216;a&#8217;)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Item.set_value">
+<code class="descname">set_value</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Item.set_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of this item in coins</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>int</em>) &#8211; item value in coins</td>
 </tr>
 </tbody>
 </table>
@@ -337,11 +411,15 @@ current tile. The callback function should accept 3 arguments:</p>
 <blockquote>
 <div>callback(player, source, dest):</div></blockquote>
 <ul class="simple">
-<li><em>player</em>: text_game_maker.Player object, player instance</li>
-<li><em>source</em>: text_game_maker.Tile object, source tile (tile that player is
-trying to exit</li>
-<li><em>destination</em>: text_game_maker.Tile object, destination tile (tile that
-player is trying to enter</li>
+<li><em>player</em> (text_game_maker.Player object): player instance</li>
+<li><em>source</em> (text_game_maker.Tile object): source tile (tile that player
+is trying to exit</li>
+<li><em>destination</em> (text_game_maker.Tile object): destination tile (tile
+that player is trying to enter</li>
+<li><em>Return value</em> (bool): If False, player&#8217;s attempt to enter the
+current tile will be blocked (silently&#8211; up to you to print something
+if you need it here). If True, player will be allowed to continue
+normally</li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -361,11 +439,15 @@ current tile. The callback should accept three  arguments:</p>
 <blockquote>
 <div>callback(player, source, dest):</div></blockquote>
 <ul class="simple">
-<li><em>player</em>: text_game_maker.Player object, player instance</li>
-<li><em>source</em>: text_game_maker.Tile object, source tile (tile that player is
-trying to exit</li>
-<li><em>destination</em>: text_game_maker.Tile object, destination tile (tile that
-player is trying to enter</li>
+<li><em>player</em> (text_game_maker.Player object): player instance</li>
+<li><em>source</em> (text_game_maker.Tile object): source tile (tile that player
+is trying to exit</li>
+<li><em>destination</em> (text_game_maker.Tile object): destination tile (tile
+that player is trying to enter</li>
+<li><em>Return value</em> (bool): If False, player&#8217;s attempt to exit the
+current tile will be blocked (silently&#8211; up to you to print something
+if you need it here). If True, player will be allowed to continue
+normally.</li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -420,13 +502,15 @@ player is trying to enter</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> (<em>str</em>) &#8211; name of Person, e.g. &#8220;John&#8221;</li>
 <li><strong>description</strong> (<em>str</em>) &#8211; description of Person, e.g. &#8220;squatting in the            corner&#8221;</li>
+<li><strong>on_speak</strong> &#8211; on_speak callback (see             text_game_maker.Person.set_on_speak description for more details)</li>
+<li><strong>alive</strong> (<em>bool</em>) &#8211; Initial living state of person .If True, person will            be alive. If false, person will be dead</li>
+<li><strong>coins</strong> (<em>int</em>) &#8211; Number of coins this person has</li>
+<li><strong>items</strong> (<em>dict</em>) &#8211; Items held by this person, where each dict item is            of the form {Item.name: Item}</li>
 </ul>
 </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Param:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
@@ -499,6 +583,33 @@ of this person&#8217;s death.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="text_game_maker.Person.set_on_speak">
+<code class="descname">set_on_speak</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Person.set_on_speak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a function to be invoked whenever the player talks to this person.
+The provided function should accept two arguments:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>def callback(person, player):</dt>
+<dd>pass</dd>
+</dl>
+<ul class="simple">
+<li><em>person</em> (text_game_maker.Person): Person instance</li>
+<li><em>player</em> (text_game_maker.Player): Player instance</li>
+<li><em>Return value</em> (str): the text to be spoken in response to the
+player</li>
+</ul>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> &#8211; Callback function to be invoked whenever player            speaks to this person</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -521,6 +632,31 @@ of this person&#8217;s death.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Player.clear_task">
+<code class="descname">clear_task</code><span class="sig-paren">(</span><em>task_id</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.clear_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear a specific scheduled task by task ID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task_id</strong> (<em>int</em>) &#8211; task ID of the task to remove</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">False if the provided task ID was not found in the pending            scheduled tasks list, True otherwise</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Player.clear_tasks">
+<code class="descname">clear_tasks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.clear_tasks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear all pending scheduled tasks (tasks which have been added but
+whose timers have not expired)</p>
 </dd></dl>
 
 <dl class="method">
@@ -548,6 +684,41 @@ of this person&#8217;s death.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if player has item equipped, false otherwise</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Player.schedule_task">
+<code class="descname">schedule_task</code><span class="sig-paren">(</span><em>callback</em>, <em>seconds=10</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Player.schedule_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a function that will be invoked whenever some player input is next
+received <em>and</em> a specific time has elapsed.</p>
+<p>The function should accept one argument:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>def callback(player):</dt>
+<dd>pass</dd>
+</dl>
+</div></blockquote>
+<ul class="simple">
+<li><em>player</em> (text_game_maker.Player): player instance</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>str</em>) &#8211; function that returns the message to print</li>
+<li><strong>seconds</strong> (<em>float</em>) &#8211; time delay in seconds before the message can be            printed</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">task ID</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -599,13 +770,21 @@ of this person&#8217;s death.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> (<em>str</em>) &#8211; short description, e.g. &#8220;a dark cellar&#8221;</li>
 <li><strong>description</strong> (<em>str</em>) &#8211; long description, printed when player enters            the room e.g. &#8220;a dark, scary cellar with blah blah blah... &#8220;</li>
-<li><strong>on_enter</strong> &#8211; callback to be invoked when player attempts to enter            this tile (see documentation for Tile.add_on_enter()</li>
-<li><strong>on_exit</strong> &#8211; callback to be invoked when player attempts to exit            this tile (see documentation for Tile.add_on_exit()</li>
+<li><strong>on_enter</strong> &#8211; callback to be invoked when player attempts to enter            this tile (see documentation for            text_game_maker.MapBuilder.set_on_enter()</li>
+<li><strong>on_exit</strong> &#8211; callback to be invoked when player attempts to exit            this tile (see documentation for            text_game_maker.MapBuilder.set_on_exit()</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.Tile.is_locked">
+<code class="descname">is_locked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.Tile.is_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true/false indicating whether this tile is locked.
+:return: True if tile is locked, False if unlocked.
+:rtype: bool</p>
 </dd></dl>
 
 <dl class="method">
@@ -649,26 +828,34 @@ gives a valid answer</p>
 
 <dl class="function">
 <dt id="text_game_maker.game_print">
-<code class="descclassname">text_game_maker.</code><code class="descname">game_print</code><span class="sig-paren">(</span><em>msg</em>, <em>chardelay=0.02</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.game_print" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">text_game_maker.</code><code class="descname">game_print</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.game_print" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print one character at a time if player has set &#8216;print slow&#8217;, otherwise
 print normally</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>msg</strong> (<em>str</em>) &#8211; message to print</li>
-<li><strong>chardelay</strong> (<em>float</em>) &#8211; time in seconds to delay between each character if player        has set &#8216;print slow&#8217;</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<em>str</em>) &#8211; message to print</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
+<dt id="text_game_maker.get_basic_controls">
+<code class="descclassname">text_game_maker.</code><code class="descname">get_basic_controls</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.get_basic_controls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a basic overview of game command words</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="text_game_maker.get_full_controls">
+<code class="descclassname">text_game_maker.</code><code class="descname">get_full_controls</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.get_full_controls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a comprehensive listing of of all game command words</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="text_game_maker.list_to_english">
-<code class="descclassname">text_game_maker.</code><code class="descname">list_to_english</code><span class="sig-paren">(</span><em>strlist</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.list_to_english" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">text_game_maker.</code><code class="descname">list_to_english</code><span class="sig-paren">(</span><em>strlist</em>, <em>conj='and'</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.list_to_english" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a list of strings to description of the list in english.
 For example, [&#8216;4 coins&#8217;, &#8216;an apple&#8217;, &#8216;a sausage&#8217;] would be converted to
 &#8216;4 coins, an apple and a sausage&#8217;</p>
@@ -688,23 +875,22 @@ For example, [&#8216;4 coins&#8217;, &#8216;an apple&#8217;, &#8216;a sausage&#8
 
 <dl class="function">
 <dt id="text_game_maker.read_line">
-<code class="descclassname">text_game_maker.</code><code class="descname">read_line</code><span class="sig-paren">(</span><em>msg=''</em>, <em>allow_empty=False</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.read_line" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">text_game_maker.</code><code class="descname">read_line</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.read_line" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="text_game_maker.read_line_raw">
+<code class="descclassname">text_game_maker.</code><code class="descname">read_line_raw</code><span class="sig-paren">(</span><em>msg=''</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.read_line_raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a line of input from stdin</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>msg</strong> (<em>str</em>) &#8211; message to print before reading input</li>
-<li><strong>allow_empty</strong> (<em>bool</em>) &#8211; if True, prompt will be repeated until a non-empty        line is entered</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<em>str</em>) &#8211; message to print before reading input</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a line ending with either a newline or carriage return character</p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a line ending with either a newline or carriage return character</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
-</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
 </tr>
 </tbody>
 </table>
