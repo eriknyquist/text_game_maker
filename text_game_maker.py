@@ -4,8 +4,21 @@ import copy
 import threading
 import Queue
 
+# Might use this later...
+#
+#import nltk
+#
+#def get_nouns(text):
+#    tokens = nltk.word_tokenize(text)
+#    tagged = nltk.pos_tag(tokens)
+#    nouns = ['%s (%s)' % (word, pos) for word,pos in tagged
+#        if (pos == 'NNP' or pos == 'NNS' )]
+#    downcased = [x.lower() for x in nouns]
+#    return "\n".join(downcased)
+
 info = {
     'slow_printing': False,
+    'chardelay': 0.02,
     'sequence_count': None,
     'last_command': 'look'
 }
@@ -41,6 +54,11 @@ UNEQUIP_WORDS = [
 SPEAK_WORDS = [
     'speak with', 'speak to', 'talk to', 'chat to', 'chat with', 'talk with',
     'chat', 'speak', 'talk'
+]
+
+SHOW_COMMAND_LIST_WORDS = [
+    'show commands', 'show controls', 'show words', 'show wordlist',
+    'commands', 'controls', 'wordlist', 'words'
 ]
 
 LOOK_WORDS = [
@@ -115,7 +133,14 @@ Misc
 
 * Use 'print fast' to set printing mode to normal printing
 
-* Use 'help' or '?' to show this information"""
+* Use 'print delay <seconds>', where '<seconds>' is a float value reprenting
+  the number of seconds to delay between printing each charcter when slow
+  printing is enabled.
+
+* Use 'help' or '?' to show this information
+
+* Use 'controls' or 'commands' or 'words' or 'show words'... etc. to show a
+  comprehensive listing of game commands"""
 
 input_queue = Queue.Queue()
 
@@ -226,16 +251,13 @@ def _remove_leading_whitespace(string):
     trimmed = [s.strip() for s in string.splitlines()]
     return '\n'.join(trimmed)
 
-def game_print(msg, chardelay=0.02):
+def game_print(msg):
     """
     Print one character at a time if player has set 'print slow', otherwise
     print normally
 
     :param msg: message to print
     :type msg: str
-    :param chardelay: time in seconds to delay between each character if player\
-        has set 'print slow'
-    :type chardelay: float
     """
 
     if not info['slow_printing']:
@@ -255,7 +277,7 @@ def game_print(msg, chardelay=0.02):
 
         sys.stdout.write(msg[i])
         sys.stdout.flush()
-        time.sleep(chardelay)
+        time.sleep(info['chardelay'])
 
     print ''
 
@@ -273,9 +295,11 @@ class Tile(object):
         :param str description: long description, printed when player enters\
             the room e.g. "a dark, scary cellar with blah blah blah... "
         :param on_enter: callback to be invoked when player attempts to enter\
-            this tile (see documentation for Tile.add_on_enter()
+            this tile (see documentation for\
+            text_game_maker.MapBuilder.set_on_enter()
         :param on_exit: callback to be invoked when player attempts to exit\
-            this tile (see documentation for Tile.add_on_exit()
+            this tile (see documentation for\
+            text_game_maker.MapBuilder.set_on_exit()
         """
 
         self.name = name
@@ -331,6 +355,15 @@ class Tile(object):
 
         return '\n'.join(ret)
 
+    def is_locked(self):
+        """
+        Returns true/false indicating whether this tile is locked.
+        :return: True if tile is locked, False if unlocked.
+        :rtype: bool
+        """
+
+        return self.locked
+
     def set_locked(self):
         """
         Lock this tile-- player will only see a locked door
@@ -358,8 +391,15 @@ class Person(object):
         :param str name: name of Person, e.g. "John"
         :param str description: description of Person, e.g. "squatting in the\
             corner"
-        :param:
+        :param on_speak: on_speak callback (see \
+            text_game_maker.Person.set_on_speak description for more details)
+        :param bool alive: Initial living state of person .If True, person will\
+            be alive. If false, person will be dead
+        :param int coins: Number of coins this person has
+        :param dict items: Items held by this person, where each dict item is\
+            of the form {Item.name: Item}
         """
+
         self.name = name
         self.description = description
         self.on_speak = on_speak
@@ -387,6 +427,25 @@ class Person(object):
             msg = '\n%s has died.' % self.name
 
         game_print(msg)
+
+    def set_on_speak(self, callback):
+        """
+        Set a function to be invoked whenever the player talks to this person.
+        The provided function should accept two arguments:
+
+            def callback(person, player):
+                pass
+
+            * *person* (text_game_maker.Person): Person instance
+            * *player* (text_game_maker.Player): Player instance
+            * *Return value* (str): the text to be spoken in response to the
+              player
+
+        :param callback: Callback function to be invoked whenever player\
+            speaks to this person
+        """
+
+        self.on_speak = callback
 
     def is_alive(self):
         """
@@ -469,7 +528,8 @@ class Item(object):
     Base class for collectable item
     """
 
-    def __init__(self, prefix, name, description, value):
+    def __init__(self, prefix, name, description=None, value=None,
+            on_take=None):
         """
         Initialises an Item instance
 
@@ -477,12 +537,65 @@ class Item(object):
         :param str name: Item name, e.g. "apple"
         :param str description: Item description, e.g. "on the floor"
         :param int value: Item value in coins
+        :param on_take: callback function to invoke when player attempts to\
+            add this item to their inventory
         """
 
         self.value = value
         self.name = name
         self.prefix = prefix
         self.description = description
+        self.on_take = on_take
+
+    def set_prefix(self, prefix):
+        """
+        Set item prefix word (usually 'an' or 'a')
+        """
+
+        self.prefix = prefix
+
+    def set_name(self, name):
+        """
+        Set the name of this item
+
+        :param str name: object name
+        """
+
+        self.name = name
+
+    def set_description(self, desc):
+        """
+        Set the description of the item's location/sitation in the world,
+        e.g. "on the floor"
+
+        :param str desc: item description
+        """
+
+        self.description = desc
+
+    def set_value(self, value):
+        """
+        Set the value of this item in coins
+
+        :param int value: item value in coins
+        """
+
+        self.value = value
+
+    def set_on_take(self, callback):
+        """
+        Set callback function to be invoked when player attempts to add this
+        item to their inventory. Callback should accept one argument:
+
+            def callback(player)
+                pass
+
+        * *player* (text_game_maker.Player): player instance
+
+        :param callback: callback function
+        """
+
+        self.on_take = on_take
 
     def __str__(self):
         return '%s %s is %s' % (self.prefix, self.name, self.description)
@@ -501,6 +614,11 @@ class Player(object):
         self.start = start_tile
         self.current = start_tile
         self.prompt = input_prompt
+
+        self.max_task_id = 0xffff
+        self.task_id = 0
+        self.scheduled_tasks = {}
+
         self.coins = 0
         self.inventory_items = {'equipped': None}
         self.name = ""
@@ -569,6 +687,54 @@ class Player(object):
             del self.inventory_items[equipped.name]
             self.inventory_items['equipped'] = None
 
+    def schedule_task(self, callback, seconds=10):
+        """
+        Add a function that will be invoked whenever some player input is next
+        received *and* a specific time has elapsed.
+
+        The function should accept one argument:
+
+            def callback(player):
+                pass
+
+        * *player* (text_game_maker.Player): player instance
+
+        :param str callback: function that returns the message to print
+        :param float seconds: time delay in seconds before the message can be\
+            printed
+        :return: task ID
+        :rtype: int
+        """
+
+        ret = self.task_id
+        self.scheduled_tasks[self.task_id] = (callback, time.time() + seconds)
+        self.task_id = (self.task_id + 1) % self.max_task_id
+        return ret
+
+    def clear_tasks(self):
+        """
+        Clear all pending scheduled tasks (tasks which have been added but
+        whose timers have not expired)
+        """
+
+        self.scheduled_tasks.clear()
+
+    def clear_task(self, task_id):
+        """
+        Clear a specific scheduled task by task ID
+
+        :param int task_id: task ID of the task to remove
+        :return: False if the provided task ID was not found in the pending\
+            scheduled tasks list, True otherwise
+        :rtype: bool
+        """
+
+        if task_id not in self.scheduled_tasks:
+            return False
+
+        del self.scheduled_tasks[task_id]
+        return True
+
     def _loot(self, word, person):
         if not person.coins and not person.items:
             game_print('\nYou %s %s, and find nothing.' % (word, person.name))
@@ -597,6 +763,7 @@ class Player(object):
         items = []
 
         ret = "\nYou are %s" % self.current.description
+        #print get_nouns(self.current.description)
 
         if self.current.people:
             ret += "\n\n%s" % ('\n'.join([str(i) for i in self.current.people]))
@@ -644,13 +811,16 @@ def _do_take(player, word, item_name):
         return
 
     for i in range(len(player.current.items)):
-        if (player.current.items[i].name.startswith(item_name) or
-                (item_name in player.current.items[i].name)):
-            full = player.current.items[i].name
-            player.inventory_items[full] = player.current.items[i]
-            del player.current.items[i]
+        # Find the mentioned item in this tile's list of items
+        curr = player.current.items[i]
+        if (curr.name.startswith(item_name) or (item_name in curr.name)):
+            # If on_take callback returns false, abort adding this item
+            if curr.on_take and not curr.on_take(player):
+                return
 
-            game_print('\n%s added to inventory' % full)
+            player.inventory_items[curr.name] = curr
+            game_print('\n%s added to inventory' % curr.name)
+            del player.current.items[i]
             return
 
     print "\n%s: no such item" % item_name
@@ -754,6 +924,23 @@ def _do_set_print_speed(player, word, setting):
     elif 'fast'.startswith(setting):
         info['slow_printing'] = False
         print "\nOK, got it."
+    elif setting.startswith('delay'):
+        fields = setting.split()
+        if len(fields) < 2:
+            print("\n'delay' requires an extra argument. Please provide a delay"
+                " value in seconds (e.g. 0.01)")
+        else:
+            try:
+                info['chardelay'] = float(fields[1])
+            except ValueError:
+                print("\nDon't recognise that value for 'print delay'.\n"
+                    "Enter a delay value in seconds (e.g. 'print delay 0.1')")
+            else:
+                print ("\nOK, character print delay is set to %.2f seconds."
+                    % info['chardelay'])
+                if not info['slow_printing']:
+                    print("(but it won't do anything unless slow printing is\n"
+                        " enabled-- e.g. 'print slow' -- you fucking idiot)")
     else:
         print("\nUnrecognised print speed-- please say 'print fast' "
             "or 'print slow'")
@@ -780,6 +967,9 @@ def _do_inventory_listing(player, word, setting):
             print "{0:35}{1:1}({2})".format(msg, "", item.value)
 
     print"\n-----------------------------------------"
+
+def _do_show_command_list(player, word, setting):
+    print get_full_controls()
 
 def _do_help(player, word, setting):
     print basic_controls
@@ -808,10 +998,61 @@ command_table = [
     (UNEQUIP_WORDS, _do_unequip),
     (LOOT_WORDS, _do_loot),
     (KILL_WORDS, _do_quit),
+    (SHOW_COMMAND_LIST_WORDS, _do_show_command_list),
     (LOOK_WORDS, _do_look),
     (INVENTORY_WORDS, _do_inventory_listing),
     (HELP_WORDS, _do_help)
 ]
+
+listable_commands = [
+    (GO_WORDS, "<direction>",
+        "Words/phrases to move the player in specific direction (north, south, "
+        "east, west)"),
+    (EQUIP_WORDS, "<item>",
+        "Words/phrases to equip an item from player\'s inventory"),
+    (TAKE_WORDS, "<item>",
+        "Words/phrases to add an item to player's inventory"),
+    (DROP_WORDS, "<item>",
+        "Words/phrases to drop an item from player's inventory"),
+    (SPEAK_WORDS, "<person>",
+        "Words/phrases to speak with a person by name"),
+    (UNEQUIP_WORDS, "<item>",
+        "Words/phrases to unequip player's equipped item (if any)"),
+    (LOOT_WORDS, "<person>",
+        "Words/phrases to loot a person by name"),
+    (KILL_WORDS, "",
+        "Words/phrases to quit the game"),
+    (LOOK_WORDS, "",
+        "Words/phrases to examine your current surroundings"),
+    (INVENTORY_WORDS, "",
+        "Words/phrases to show player's inventory"),
+    (SHOW_COMMAND_LIST_WORDS, "",
+        "Words/phrases to show this list of command words"),
+    (HELP_WORDS, "",
+        "Words/phrases to show the basic 'help' screen")
+]
+
+def get_basic_controls():
+    """
+    Returns a basic overview of game command words
+    """
+
+    return basic_controls
+
+def _do_listing(word_list, arg, desc):
+    ret = '\n' + desc + '\n\n'
+    for w in word_list:
+        ret +='    "%s %s' % (w, arg)
+        ret = ret.rstrip() + '"\n'
+
+    return ret
+
+def get_full_controls():
+    """
+    Returns a comprehensive listing of of all game command words
+    """
+
+    return '\n'.join([_do_listing(*a) for a in listable_commands])
 
 def _parse_command(player, action):
     if action == '':
@@ -864,11 +1105,15 @@ class MapBuilder(object):
 
             callback(player, source, dest):
 
-        * *player*: text_game_maker.Player object, player instance
-        * *source*: text_game_maker.Tile object, source tile (tile that player is
-          trying to exit
-        * *destination*: text_game_maker.Tile object, destination tile (tile that
-          player is trying to enter
+        * *player* (text_game_maker.Player object): player instance
+        * *source* (text_game_maker.Tile object): source tile (tile that player
+          is trying to exit
+        * *destination* (text_game_maker.Tile object): destination tile (tile
+          that player is trying to enter
+        * *Return value* (bool): If False, player's attempt to enter the
+          current tile will be blocked (silently-- up to you to print something
+          if you need it here). If True, player will be allowed to continue
+          normally
 
         :param callback: the callback function
         """
@@ -882,11 +1127,16 @@ class MapBuilder(object):
 
             callback(player, source, dest):
 
-        * *player*: text_game_maker.Player object, player instance
-        * *source*: text_game_maker.Tile object, source tile (tile that player is
-          trying to exit
-        * *destination*: text_game_maker.Tile object, destination tile (tile that
-          player is trying to enter
+        * *player* (text_game_maker.Player object): player instance
+        * *source* (text_game_maker.Tile object): source tile (tile that player
+          is trying to exit
+        * *destination* (text_game_maker.Tile object): destination tile (tile
+          that player is trying to enter
+        * *Return value* (bool): If False, player's attempt to exit the
+          current tile will be blocked (silently-- up to you to print something
+          if you need it here). If True, player will be allowed to continue
+          normally.
+
 
         :param callback: the callback function
         """
@@ -1053,6 +1303,13 @@ class MapBuilder(object):
 
         info['sequence_count'] = None
 
+    def _do_scheduled_tasks(self, player):
+        for task_id in player.scheduled_tasks:
+            callback, expiration = player.scheduled_tasks[task_id]
+            if time.time() >= expiration:
+                callback(player)
+                del player.scheduled_tasks[task_id]
+
     def run_game(self):
         """
         Start running the game
@@ -1065,8 +1322,9 @@ class MapBuilder(object):
 
         while True:
             action = read_line_raw("\n%s" % player.prompt)
-            delim = self._get_command_delimiter(action)
+            self._do_scheduled_tasks(player)
 
+            delim = self._get_command_delimiter(action)
             if delim:
                 sequence = action.lstrip(delim).split(delim)
                 self._run_command_sequence(player, sequence)

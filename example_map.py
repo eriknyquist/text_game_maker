@@ -63,12 +63,18 @@ def alan_speak_callback(person, player):
         # Player has no item equipped: print basic controls
         # (if we've been fed...)
         if alan_info['eaten']:
-            return gamemaker.basic_controls
+            return gamemaker.get_basic_controls()
 
     if alan_info['count'] < len(alan_lines):
         alan_info['count'] += 1
 
     return alan_lines[alan_info['count'] - 1]
+
+def timed_closet_callback(player):
+    if player.current.name == "a small closet":
+        gamemaker.game_print('\nYou died. This room kills you if you stay too '
+            'long. Ha, Ha!\n')
+        sys.exit()
 
 def locked_room_enter_callback(player, src, dest):
     """
@@ -85,11 +91,20 @@ def locked_room_enter_callback(player, src, dest):
         is trying to enter)
     """
 
-    if player.has_equipped('metal key'):
+    if dest.is_locked() and player.has_equipped('metal key'):
+        # Player has key equipped-- delete it from player's inventory
+        # unlock the destination tile
         player.delete_equipped()
         dest.set_unlocked()
-        return True
 
+    if not dest.is_locked():
+        # Entering the room: add task to kill player after 10 seconds
+        player.schedule_task(timed_closet_callback, 10)
+
+    return True
+
+def locked_room_exit_callback(player, src, dest):
+    player.clear_tasks()
     return True
 
 def enter_window_callback(player, src, dest):
@@ -146,6 +161,7 @@ def main():
 
     builder.set_locked()
     builder.set_on_enter(locked_room_enter_callback)
+    builder.set_on_exit(locked_room_exit_callback)
 
     builder.move_west("a cellar", "a dark cellar")
 
@@ -158,6 +174,7 @@ def main():
     builder.set_player_name(name.title())
     builder.set_player_title(title.title())
 
+    print gamemaker.get_full_controls()
     # Start the game!
     builder.run_game()
 
