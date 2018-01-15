@@ -491,28 +491,24 @@ normally.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="text_game_maker.map_builder.MapBuilder.set_player_name">
-<code class="descname">set_player_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_player_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set player name</p>
+<dt id="text_game_maker.map_builder.MapBuilder.set_on_start">
+<code class="descname">set_on_start</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_on_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set callback function to be invoked when player starts a new game (i.e.
+not from a save file). Callback function should accept one argument:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>def callback(player):</dt>
+<dd>pass</dd>
+</dl>
+<ul class="simple">
+<li><em>player</em> (text_game_maker.player.Player): player instance</li>
+</ul>
+</div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; new player name</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="text_game_maker.map_builder.MapBuilder.set_player_title">
-<code class="descname">set_player_title</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.map_builder.MapBuilder.set_player_title" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set player title</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>title</strong> (<em>str</em>) &#8211; new player title</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> &#8211; callback function</td>
 </tr>
 </tbody>
 </table>
@@ -525,12 +521,12 @@ normally.</li>
 <span id="text-game-maker-person-module"></span><h2>text_game_maker.person module<a class="headerlink" href="#module-text_game_maker.person" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="text_game_maker.person.Person">
-<em class="property">class </em><code class="descclassname">text_game_maker.person.</code><code class="descname">Person</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">text_game_maker.person.</code><code class="descname">Person</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>items={}</em>, <em>alive=True</em>, <em>coins=50</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Represents a person that the player can interact with</p>
 <dl class="method">
 <dt id="text_game_maker.person.Person.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>alive=True</em>, <em>coins=50</em>, <em>items={}</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>description</em>, <em>on_speak=None</em>, <em>items={}</em>, <em>alive=True</em>, <em>coins=50</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialises a Person instance</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -545,6 +541,20 @@ normally.</li>
 <li><strong>items</strong> (<em>dict</em>) &#8211; Items held by this person, where each dict item is            of the form {Item.name: Item}</li>
 </ul>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="text_game_maker.person.Person.add_item">
+<code class="descname">add_item</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.person.Person.add_item" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an item to this person&#8217;s inventory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> (<a class="reference internal" href="#text_game_maker.item.Item" title="text_game_maker.item.Item"><em>text_game_maker.item.Item</em></a>) &#8211; item to add</td>
 </tr>
 </tbody>
 </table>
@@ -727,6 +737,11 @@ whose timers have not expired)</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="text_game_maker.player.Player.save_state">
+<code class="descname">save_state</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.save_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="text_game_maker.player.Player.schedule_task">
 <code class="descname">schedule_task</code><span class="sig-paren">(</span><em>callback</em>, <em>seconds=10</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.player.Player.schedule_task" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a function that will be invoked whenever some player input is next
@@ -850,6 +865,24 @@ received <em>and</em> a specific time has elapsed.</p>
 </div>
 <div class="section" id="module-text_game_maker">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-text_game_maker" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="text_game_maker.ask_multiple_choice">
+<code class="descclassname">text_game_maker.</code><code class="descname">ask_multiple_choice</code><span class="sig-paren">(</span><em>choices</em>, <em>msg=None</em>, <em>cancel_word='cancel'</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.ask_multiple_choice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ask the user a multiple-choice question, and return their selection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>choices</strong> (<em>[str]</em>) &#8211; choices to present to the player</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list index of player&#8217;s selection (-1 if user cancelled)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="function">
 <dt id="text_game_maker.ask_yes_no">
 <code class="descclassname">text_game_maker.</code><code class="descname">ask_yes_no</code><span class="sig-paren">(</span><em>prompt='[ continue (yes/no)? ]: '</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.ask_yes_no" title="Permalink to this definition">¶</a></dt>
