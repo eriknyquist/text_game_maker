@@ -1,5 +1,8 @@
 import time
 import sys
+import pickle
+import os
+import errno
 
 import text_game_maker
 from text_game_maker.tile import Tile
@@ -89,7 +92,7 @@ def _do_speak(player, word, name):
 def _do_quit(player, word, name):
     ret = "z"
     while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
-        ret = text_game_maker.read_line("[really stop playing? (yes/no)]: ")
+        ret = text_game_maker.read_line("\n[really stop playing? (yes/no)]: ")
 
         print ret
         if 'yes'.startswith(ret.lower()):
@@ -171,8 +174,21 @@ def _do_set_print_speed(player, word, setting):
 def _do_look(player, word, setting):
     print player.current_state()
 
+def _centre_line(string, line_width):
+    diff = line_width - len(string)
+    if diff <= 2:
+        return string
+
+    spaces = ' ' * (diff / 2)
+    return spaces + string + spaces
+
 def _do_inventory_listing(player, word, setting):
-    print "\n--------------- INVENTORY ---------------"
+    banner = "--------------- INVENTORY ---------------"
+    name_line = "%s %s's" % (player.title, player.name)
+
+    print '\n' + banner + '\n'
+    print _centre_line(name_line, len(banner))
+    print _centre_line('possessions', len(banner)) + '\n'
     print "\n{0:35}{1:1}({2})".format('COINS', "", player.coins)
 
     if len(player.inventory_items) > 1:
@@ -203,6 +219,78 @@ def _check_word_set(word, word_set):
             return w
 
     return None
+
+def _get_next_unused_save_id(save_dir):
+    default_num = 0
+    nums = [int(x.split('_')[2]) for x in os.listdir(save_dir)]
+
+    while default_num in nums:
+        default_num += 1
+
+    return default_num
+
+def _get_save_dir():
+    return os.path.join(os.path.expanduser("~"), '.text_game_maker_saves')
+
+def _do_load(player, word, setting):
+    filename = None
+    save_dir = _get_save_dir()
+
+    if os.path.exists:
+        files = os.listdir(save_dir)
+        files.append("None of these (let me enter the file path)")
+
+        index = text_game_maker.ask_multiple_choice(files,
+            "Which save file would you like to load?")
+
+        if index < 0:
+            return
+
+        if index < (len(files) - 1):
+            filename = os.path.join(save_dir, files[index])
+
+    if filename is None:
+        while True:
+            filename = text_game_maker.read_line("\nEnter name of file to load "
+                "(or 'cancel'): ")
+            if 'cancel'.startswith(filename):
+                return
+            elif os.path.exists(filename):
+                break
+            else:
+                print "\n%s: no such file" % filename
+
+    player.load_from_file = filename
+    print ("\nLoading game state from file %s." % player.load_from_file)
+
+def _do_save(player, word, setting):
+    filename = None
+    save_dir = _get_save_dir()
+
+    if not os.path.exists(save_dir):
+        try:
+            os.makedirs(save_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                print "\nError (%d) creating directory %s" % (e.errno, save_dir)
+                return
+
+    if player.loaded_file and (text_game_maker.ask_yes_no(
+            "[overwrite file %s (yes/no) ?]: "
+            % os.path.basename(player.loaded_file))):
+        filename = player.loaded_file
+    else:
+        save_id = _get_next_unused_save_id(save_dir)
+        default = "save_state_%03d" % save_id
+
+        filename = text_game_maker.read_line_raw(
+            "Enter name to use for save file [default: %s]: " % default)
+
+        if filename == "":
+            filename = os.path.join(save_dir, default)
+
+    player.save_state(filename)
+    text_game_maker.game_print("\nGame state saved in %s." % filename)
 
 def _is_shorthand_direction(word):
     for w in ['north', 'south', 'east', 'west']:
@@ -246,7 +334,9 @@ command_table = [
     (text_game_maker.SHOW_COMMAND_LIST_WORDS, _do_show_command_list),
     (text_game_maker.LOOK_WORDS, _do_look),
     (text_game_maker.INVENTORY_WORDS, _do_inventory_listing),
-    (text_game_maker.HELP_WORDS, _do_help)
+    (text_game_maker.HELP_WORDS, _do_help),
+    (text_game_maker.SAVE_WORDS, _do_save),
+    (text_game_maker.LOAD_WORDS, _do_load)
 ]
 
 class MapBuilder(object):
@@ -264,9 +354,7 @@ class MapBuilder(object):
         :param str description: short name for starting Tile
         """
 
-        self.player_title = "sir"
-        self.player_name = "john"
-
+        self.on_start = None
         self.start = Tile(name, description)
         self.current = self.start
         self.prompt = "[?]: "
@@ -316,23 +404,20 @@ class MapBuilder(object):
 
         self.current.on_exit = callback
 
-    def set_player_name(self, name):
+    def set_on_start(self, callback):
         """
-        Set player name
+        Set callback function to be invoked when player starts a new game (i.e.
+        not from a save file). Callback function should accept one argument:
 
-        :param str name: new player name
-        """
+            def callback(player):
+                pass
 
-        self.player_name = name
+            * *player* (text_game_maker.player.Player): player instance
 
-    def set_player_title(self, title):
-        """
-        Set player title
-
-        :param str title: new player title
+        :param callback: callback function
         """
 
-        self.player_title = title
+        self.on_start = callback
 
     def set_name(self, name):
         """
@@ -487,11 +572,29 @@ class MapBuilder(object):
         text_game_maker.info['sequence_count'] = None
 
     def _do_scheduled_tasks(self, player):
-        for task_id in player.scheduled_tasks:
-            callback, expiration = player.scheduled_tasks[task_id]
-            if time.time() >= expiration:
+        for task_id in list(player.scheduled_tasks):
+            callback, seconds, start = player.scheduled_tasks[task_id]
+            if time.time() >= (start + seconds):
                 callback(player)
                 del player.scheduled_tasks[task_id]
+
+    def _reset_scheduled_tasks(self, player):
+        new = {}
+        for i in player.scheduled_tasks:
+            callback, seconds, start = player.scheduled_tasks[i]
+            new[i] = (callback, seconds, time.time())
+
+        player.scheduled_tasks = new
+
+    def _load_state(self, player, filename):
+        loaded_file = player.load_from_file
+        with open(player.load_from_file, 'r') as fh:
+            ret = pickle.load(fh)
+
+        self._reset_scheduled_tasks(ret)
+        ret.loaded_file = loaded_file
+        ret.load_from_file = None
+        return ret
 
     def run_game(self):
         """
@@ -499,18 +602,43 @@ class MapBuilder(object):
         """
 
         player = Player(self.start, self.prompt)
-        player.set_name(self.player_name)
-        player.set_title(self.player_title)
-        text_game_maker.game_print(player.current_state())
+        menu_choices = ["New game", "Load game", "Controls"]
 
         while True:
-            action = text_game_maker.read_line_raw("\n%s" % player.prompt)
-            self._do_scheduled_tasks(player)
+            print "\n------------ MAIN MENU ------------\n"
+            choice = text_game_maker.ask_multiple_choice(menu_choices)
 
-            delim = self._get_command_delimiter(action)
-            if delim:
-                sequence = action.lstrip(delim).split(delim)
-                self._run_command_sequence(player, sequence)
-                continue
+            if choice < 0:
+                sys.exit()
 
-            _parse_command(player, action.strip().lower())
+            elif choice == 0:
+                if self.on_start:
+                    self.on_start(player)
+
+                text_game_maker.game_print(player.current_state())
+                break
+
+            elif choice == 1:
+                _do_load(player, '', '')
+                break
+
+            elif choice == 2:
+                print text_game_maker.get_full_controls()
+
+        while True:
+            while True:
+                if player.load_from_file:
+                    player = self._load_state(player, player.load_from_file)
+                    text_game_maker.game_print(player.current_state())
+                    break
+
+                action = text_game_maker.read_line_raw("\n%s" % player.prompt)
+                self._do_scheduled_tasks(player)
+
+                delim = self._get_command_delimiter(action)
+                if delim:
+                    sequence = action.lstrip(delim).split(delim)
+                    self._run_command_sequence(player, sequence)
+                    continue
+
+                _parse_command(player, action.strip().lower())

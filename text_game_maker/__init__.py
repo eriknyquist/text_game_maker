@@ -75,6 +75,14 @@ HELP_WORDS = [
     '?', 'help'
 ]
 
+SAVE_WORDS = [
+    'save'
+]
+
+LOAD_WORDS = [
+    'load'
+]
+
 basic_controls = """
 Movement
 --------
@@ -242,6 +250,41 @@ def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
 
     return 'yes'.startswith(ret)
 
+def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
+    """
+    Ask the user a multiple-choice question, and return their selection
+
+    :param [str] choices: choices to present to the player
+    :return: list index of player's selection (-1 if user cancelled)
+    :rtype: int
+    """
+
+    prompt = "Enter a number (or '%s'): " % cancel_word
+    lines = ['    %d. %s' % (i + 1, choices[i]) for i in range(len(choices))]
+
+    if msg:
+        print '\n' + msg + '\n'
+
+    print '\n' + '\n'.join(lines)
+
+    while True:
+        ret = read_line('\n' + prompt)
+        if 'cancel'.startswith(ret):
+            return -1
+
+        try:
+            number = int(ret)
+        except ValueError:
+            print "\n'%s' is not a number." % ret
+            continue
+
+        if (number < 1) or (number > len(choices)):
+            print ("\n'%d' is not a valid choice. Pick something bewtween "
+                "1-%d" % (number, len(choices)))
+            continue
+
+        return number - 1
+
 def _remove_leading_whitespace(string):
     trimmed = [s.strip() for s in string.splitlines()]
     return '\n'.join(trimmed)
@@ -301,7 +344,11 @@ listable_commands = [
     (SHOW_COMMAND_LIST_WORDS, "",
         "Words/phrases to show this list of command words"),
     (HELP_WORDS, "",
-        "Words/phrases to show the basic 'help' screen")
+        "Words/phrases to show the basic 'help' screen"),
+    (SAVE_WORDS, "",
+        "Words/phrases to save the current game state to a file"),
+    (LOAD_WORDS, "",
+        "Words/phrases to load a previously saved game state file")
 ]
 
 def get_basic_controls():

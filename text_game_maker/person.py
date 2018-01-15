@@ -7,8 +7,8 @@ class Person(object):
     Represents a person that the player can interact with
     """
 
-    def __init__(self, name, description, on_speak=None, alive=True, coins=50,
-            items={}):
+    def __init__(self, name, description, on_speak=None, items={}, alive=True,
+            coins=50):
         """
         Initialises a Person instance
 
@@ -51,6 +51,15 @@ class Person(object):
             msg = '\n%s has died.' % self.name
 
         text_game_maker.game_print(msg)
+
+    def add_item(self, item):
+        """
+        Add an item to this person's inventory
+
+        :param text_game_maker.item.Item item: item to add
+        """
+
+        self.items[item.name] = item
 
     def set_on_speak(self, callback):
         """

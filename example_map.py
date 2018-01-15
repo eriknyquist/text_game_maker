@@ -1,7 +1,7 @@
 import sys
 
 import text_game_maker
-from text_game_maker.item import Item 
+from text_game_maker.item import Item
 from text_game_maker.person import Person
 from text_game_maker.map_builder import MapBuilder
 
@@ -74,12 +74,6 @@ def alan_speak_callback(person, player):
 
     return alan_lines[alan_info['count'] - 1]
 
-def timed_closet_callback(player):
-    if player.current.name == "a small closet":
-        text_game_maker.game_print('\nYou died. This room kills you if you stay too '
-            'long. Ha, Ha!\n')
-        sys.exit()
-
 def locked_room_enter_callback(player, src, dest):
     """
     Enter callback for a room with a locked door that can only be unlocked by
@@ -101,10 +95,6 @@ def locked_room_enter_callback(player, src, dest):
         player.delete_equipped()
         dest.set_unlocked()
 
-    if not dest.is_locked():
-        # Entering the room: add task to kill player after 10 seconds
-        player.schedule_task(timed_closet_callback, 10)
-
     return True
 
 def locked_room_exit_callback(player, src, dest):
@@ -125,6 +115,13 @@ def enter_window_callback(player, src, dest):
         "and the sea below the window.\n")
     sys.exit()
 
+def on_start(player):
+    name = text_game_maker.read_line("What is your name? : ")
+    title = text_game_maker.read_line("What is your title (sir, lady, etc.)? : ")
+
+    player.set_name(name.title())
+    player.set_title(title.title())
+
 def main():
     builder = MapBuilder(
         "the starting room",
@@ -133,17 +130,19 @@ def main():
         walls."""
     )
 
-    builder.add_item(Item("a", "metal key", "on the floor", 25))
+    builder.add_item(Item("a", "metal key", "on the floor", 12))
     builder.add_item(Item("a", "sausage", "on the floor", 5))
 
+    crowbar = Item("a", "crowbar", "", 25)
     builder.add_person(
         Person(
-            "Alan", "standing in the corner", alan_speak_callback
+            "Alan", "standing in the corner", alan_speak_callback,
+            {crowbar.name: crowbar}
         )
     )
 
     builder.move_west(
-        "an open window, with nothing to be seen but darkness behind it", ""
+        "an open window, outside of which is pitch-black darkness", ""
     )
 
     builder.set_on_enter(enter_window_callback)
@@ -155,6 +154,9 @@ def main():
         upright"""
     )
 
+    builder.add_item(Item("a", "lemon", "in the corner", 8))
+    builder.add_item(Item("a", "treasure map", "on the wall", 2))
+
     builder.set_locked()
     builder.set_on_enter(locked_room_enter_callback)
     builder.set_on_exit(locked_room_exit_callback)
@@ -164,13 +166,9 @@ def main():
     # Set the input prompt
     builder.set_input_prompt("[action?]: ")
 
-    name = text_game_maker.read_line("What is your name? : ")
-    title = text_game_maker.read_line("What is your title (sir, lady, etc...)? : ")
+    # Set on_start callback to get player's name
+    builder.set_on_start(on_start)
 
-    builder.set_player_name(name.title())
-    builder.set_player_title(title.title())
-
-    print text_game_maker.get_full_controls()
     # Start the game!
     builder.run_game()
 

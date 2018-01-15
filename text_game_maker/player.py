@@ -1,4 +1,5 @@
 import time
+import pickle
 import text_game_maker
 
 class Player(object):
@@ -12,6 +13,8 @@ class Player(object):
         :param str input_prompt: Custom string to prompt player for game input
         """
 
+        self.loaded_file = None
+        self.load_from_file = None
         self.start = start_tile
         self.current = start_tile
         self.prompt = input_prompt
@@ -22,8 +25,12 @@ class Player(object):
 
         self.coins = 0
         self.inventory_items = {'equipped': None}
-        self.name = ""
-        self.title = ""
+        self.name = "john"
+        self.title = "sir"
+
+    def save_state(self, filename):
+        with open(filename, 'w') as fh:
+            pickle.dump(self, fh)
 
     def _move(self, dest, word, name):
         if dest is None:
@@ -118,7 +125,7 @@ class Player(object):
         """
 
         ret = self.task_id
-        self.scheduled_tasks[self.task_id] = (callback, time.time() + seconds)
+        self.scheduled_tasks[self.task_id] = (callback, seconds, time.time())
         self.task_id = (self.task_id + 1) % self.max_task_id
         return ret
 
