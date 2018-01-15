@@ -139,8 +139,13 @@ class Person(object):
             cost = self.coins
 
         self.say(msg)
-        if text_game_maker.ask_yes_no("\n[sell %s for %d coins? (yes/no)] : "
-                % (equipped.name, cost)):
+
+        ret = text_game_maker.ask_yes_no("sell %s for %d coins?"
+            % (equipped.name, cost))
+
+        if ret < 0:
+            return None
+        elif ret:
             # Transfer money
             player.coins += cost
             self.coins -= cost

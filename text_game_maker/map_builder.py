@@ -82,7 +82,7 @@ def _do_speak(player, word, name):
                 if response:
                     p.say(response)
             else:
-                text_game_maker.game_print('\n%s says nothing. %s is dead.'
+                text_game_maker.game_print('\n%s says nothing.'
                     % (p.name, p.name))
 
             return
@@ -92,13 +92,11 @@ def _do_speak(player, word, name):
 def _do_quit(player, word, name):
     ret = "z"
     while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
-        ret = text_game_maker.read_line("\n[really stop playing? (yes/no)]: ")
-
-        print ret
-        if 'yes'.startswith(ret.lower()):
-            sys.exit()
-        elif 'no'.startswith(ret.lower()):
+        ret = text_game_maker.ask_yes_no("really stop playing?")
+        if ret < 0:
             return
+        elif ret:
+            sys.exit()
 
 def _do_equip(player, word, item_name):
     if not item_name or item_name.strip() == "":
@@ -232,29 +230,44 @@ def _get_next_unused_save_id(save_dir):
 def _get_save_dir():
     return os.path.join(os.path.expanduser("~"), '.text_game_maker_saves')
 
-def _do_load(player, word, setting):
-    filename = None
+def _get_save_files():
+    ret = []
     save_dir = _get_save_dir()
 
-    if os.path.exists:
-        files = os.listdir(save_dir)
-        files.append("None of these (let me enter the file path)")
+    if os.path.exists(save_dir):
+        ret = [os.path.join(save_dir, x) for x in os.listdir(save_dir)]
+
+    return ret
+
+def _do_load(player, word, setting):
+    filename = None
+
+    ret = _get_save_files()
+    if ret:
+        files = [os.path.basename(x) for x in ret]
+        files.append("None of the above (let me enter the file path)")
 
         index = text_game_maker.ask_multiple_choice(files,
             "Which save file would you like to load?")
 
         if index < 0:
-            return
+            return False
 
         if index < (len(files) - 1):
-            filename = os.path.join(save_dir, files[index])
+            filename = ret[index]
+    else:
+        print "\nNo save files found. Put save files in %s," % _get_save_dir()
+        print "Otherwise you can enter the full path to an alternate save file."
+        ret = text_game_maker.ask_yes_no("Enter path to alternate save file?")
+        if ret <= 0:
+            return False
 
     if filename is None:
         while True:
-            filename = text_game_maker.read_line("\nEnter name of file to load "
-                "(or 'cancel'): ")
-            if 'cancel'.startswith(filename):
-                return
+            filename = text_game_maker.read_line("Enter name of file to load",
+                cancel_word="cancel")
+            if filename is None:
+                return False
             elif os.path.exists(filename):
                 break
             else:
@@ -262,6 +275,7 @@ def _do_load(player, word, setting):
 
     player.load_from_file = filename
     print ("\nLoading game state from file %s." % player.load_from_file)
+    return True
 
 def _do_save(player, word, setting):
     filename = None
@@ -275,19 +289,25 @@ def _do_save(player, word, setting):
                 print "\nError (%d) creating directory %s" % (e.errno, save_dir)
                 return
 
-    if player.loaded_file and (text_game_maker.ask_yes_no(
-            "[overwrite file %s (yes/no) ?]: "
-            % os.path.basename(player.loaded_file))):
+    if player.loaded_file:
+        ret = text_game_maker.ask_yes_no("overwrite file %s?"
+            % os.path.basename(player.loaded_file))
+        if ret < 0:
+            return
+
+    if player.loaded_file and ret:
         filename = player.loaded_file
     else:
         save_id = _get_next_unused_save_id(save_dir)
-        default = "save_state_%03d" % save_id
+        default_name = "save_state_%03d" % save_id
 
-        filename = text_game_maker.read_line_raw(
-            "Enter name to use for save file [default: %s]: " % default)
+        ret = text_game_maker.read_line_raw("Enter name to use for save file",
+            cancel_word="cancel", default=default_name)
 
-        if filename == "":
-            filename = os.path.join(save_dir, default)
+        if ret is None:
+            return
+
+        filename = os.path.join(save_dir, ret)
 
     player.save_state(filename)
     text_game_maker.game_print("\nGame state saved in %s." % filename)
@@ -566,7 +586,7 @@ class MapBuilder(object):
         text_game_maker.info['sequence_count'] = len(sequence)
 
         while text_game_maker.info['sequence_count'] > 0:
-            action = text_game_maker.read_line_raw("\n> ").strip().lower()
+            action = text_game_maker.read_line_raw("> ").strip().lower()
             _parse_command(player, action)
 
         text_game_maker.info['sequence_count'] = None
@@ -619,8 +639,8 @@ class MapBuilder(object):
                 break
 
             elif choice == 1:
-                _do_load(player, '', '')
-                break
+                if _do_load(player, '', ''):
+                    break
 
             elif choice == 2:
                 print text_game_maker.get_full_controls()
@@ -632,7 +652,7 @@ class MapBuilder(object):
                     text_game_maker.game_print(player.current_state())
                     break
 
-                action = text_game_maker.read_line_raw("\n%s" % player.prompt)
+                action = text_game_maker.read_line_raw("%s" % player.prompt)
                 self._do_scheduled_tasks(player)
 
                 delim = self._get_command_delimiter(action)

@@ -189,7 +189,7 @@ def _quit_hint():
     print ("\nUse %s to stop playing"
         % (list_to_english(['"%s"' % i for i in KILL_WORDS], conj='or')))
 
-def read_line_raw(msg=''):
+def read_line_raw(msg, cancel_word=None, default=None):
     """
     Read a line of input from stdin
 
@@ -200,8 +200,17 @@ def read_line_raw(msg=''):
 
     user_input = ""
     buf = ""
+    default_desc = ""
+    cancel_desc = ""
 
-    sys.stdout.write(msg)
+    if default:
+        default_desc = " [default: %s] " % default
+
+    if cancel_word:
+        cancel_desc = "(or '%s')" % cancel_word
+
+    prompt = "%s %s%s: " % (msg, cancel_desc, default_desc)
+    sys.stdout.write('\n' + prompt)
     sys.stdout.flush()
 
     c = ''
@@ -223,32 +232,44 @@ def read_line_raw(msg=''):
         info['sequence_count'] -= 1
         print user_input
 
+    if cancel_word and cancel_word.startswith(user_input):
+        return None
+
     return user_input
 
-def read_line(msg):
+def read_line(msg, cancel_word=None, default=None):
     ret = ""
     while ret == "":
-        ret = read_line_raw(msg)
+        ret = read_line_raw(msg, cancel_word, default)
 
     return ret
 
-def ask_yes_no(prompt="[ continue (yes/no)? ]: "):
+def ask_yes_no(msg, cancel_word="cancel"):
     """
     Ask player a yes/no question, and repeat the prompt until player
     gives a valid answer
 
-    :param prompt: prompt containing question to ask
-    :type prompt: str
+    :param str msg: message to print inside prompt to player
+    :param str cancel_word: player response that will cause this function\
+        to return -1
 
-    :return: player's response
-    :rtype: str
+    :return: 1 if player responded 'yes', 0 if they responded 'no', and -1\
+        if they cancelled
+    :rtype: int
     """
 
-    ret = "z"
-    while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
-        ret = read_line(prompt)
+    prompt = "%s (yes/no/%s)" % (msg, cancel_word)
 
-    return 'yes'.startswith(ret)
+    while True:
+        ret = read_line(prompt)
+        if cancel_word.startswith(ret):
+            return -1
+        elif 'yes'.startswith(ret):
+            return 1
+        elif 'no'.startswith(ret):
+            return 0
+
+    return 0
 
 def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
     """
@@ -259,7 +280,7 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
     :rtype: int
     """
 
-    prompt = "Enter a number (or '%s'): " % cancel_word
+    prompt = "Enter a number"
     lines = ['    %d. %s' % (i + 1, choices[i]) for i in range(len(choices))]
 
     if msg:
@@ -268,8 +289,8 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
     print '\n' + '\n'.join(lines)
 
     while True:
-        ret = read_line('\n' + prompt)
-        if 'cancel'.startswith(ret):
+        ret = read_line(prompt, cancel_word)
+        if ret is None:
             return -1
 
         try:

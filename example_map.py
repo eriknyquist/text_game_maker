@@ -116,8 +116,8 @@ def enter_window_callback(player, src, dest):
     sys.exit()
 
 def on_start(player):
-    name = text_game_maker.read_line("What is your name? : ")
-    title = text_game_maker.read_line("What is your title (sir, lady, etc.)? : ")
+    name = text_game_maker.read_line("What is your name?")
+    title = text_game_maker.read_line("What is your title (sir, lady, etc...)?")
 
     player.set_name(name.title())
     player.set_title(title.title())
@@ -164,7 +164,7 @@ def main():
     builder.move_west("a cellar", "a dark cellar")
 
     # Set the input prompt
-    builder.set_input_prompt("[action?]: ")
+    builder.set_input_prompt("[action?]")
 
     # Set on_start callback to get player's name
     builder.set_on_start(on_start)
