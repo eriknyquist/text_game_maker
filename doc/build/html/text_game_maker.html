@@ -885,18 +885,24 @@ received <em>and</em> a specific time has elapsed.</p>
 
 <dl class="function">
 <dt id="text_game_maker.ask_yes_no">
-<code class="descclassname">text_game_maker.</code><code class="descname">ask_yes_no</code><span class="sig-paren">(</span><em>prompt='[ continue (yes/no)? ]: '</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.ask_yes_no" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">text_game_maker.</code><code class="descname">ask_yes_no</code><span class="sig-paren">(</span><em>msg</em>, <em>cancel_word='cancel'</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.ask_yes_no" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ask player a yes/no question, and repeat the prompt until player
 gives a valid answer</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prompt</strong> (<em>str</em>) &#8211; prompt containing question to ask</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>msg</strong> (<em>str</em>) &#8211; message to print inside prompt to player</li>
+<li><strong>cancel_word</strong> (<em>str</em>) &#8211; player response that will cause this function        to return -1</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">player&#8217;s response</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">1 if player responded &#8216;yes&#8217;, 0 if they responded &#8216;no&#8217;, and -1        if they cancelled</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -951,12 +957,12 @@ For example, [&#8216;4 coins&#8217;, &#8216;an apple&#8217;, &#8216;a sausage&#8
 
 <dl class="function">
 <dt id="text_game_maker.read_line">
-<code class="descclassname">text_game_maker.</code><code class="descname">read_line</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.read_line" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">text_game_maker.</code><code class="descname">read_line</code><span class="sig-paren">(</span><em>msg</em>, <em>cancel_word=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.read_line" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="text_game_maker.read_line_raw">
-<code class="descclassname">text_game_maker.</code><code class="descname">read_line_raw</code><span class="sig-paren">(</span><em>msg=''</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.read_line_raw" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">text_game_maker.</code><code class="descname">read_line_raw</code><span class="sig-paren">(</span><em>msg</em>, <em>cancel_word=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#text_game_maker.read_line_raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a line of input from stdin</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
