@@ -71,7 +71,7 @@ class Item(object):
         :param callback: callback function
         """
 
-        self.on_take = on_take
+        self.on_take = callback
 
     def __str__(self):
         return '%s %s is %s' % (self.prefix, self.name, self.description)
