@@ -73,10 +73,12 @@ class Person(object):
     def set_on_speak(self, callback):
         """
         Set a function to be invoked whenever the player talks to this person.
-        The provided function should accept two arguments:
+        The provided function should accept two parameters, and return a string:
 
             def callback(person, player):
                 pass
+
+            Callback parameters:
 
             * *person* (text_game_maker.person.Person): Person instance
             * *player* (text_game_maker.player.Player): Player instance
@@ -92,14 +94,16 @@ class Person(object):
     def set_on_look(self, callback):
         """
         Set callback function to be invoked when player looks at/inspects this
-        person. Callback should accept one argument, and return a string:
+        person. Callback should accept two parameters, and return a string:
 
             def callback(person, player)
                 return 'It's %s!' % person.name
 
-        * *person* (text_game_maker.person.Person): person being looked at
-        * *player* (text_game_maker.player.Player): player instance
-        * *Return value* (str): text to be printed to player
+            Callback parameters:
+
+            * *person* (text_game_maker.person.Person): person being looked at
+            * *player* (text_game_maker.player.Player): player instance
+            * *Return value* (str): text to be printed to player
 
         :param callback: callback function
         """

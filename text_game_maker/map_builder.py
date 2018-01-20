@@ -178,7 +178,7 @@ def _do_set_print_speed(player, word, setting):
     elif setting.startswith('delay'):
         fields = setting.split()
         if len(fields) < 2:
-            print("\n'delay' requires an extra argument. Please provide a delay"
+            print("\n'delay' requires an extra parameter. Please provide a delay"
                 " value in seconds (e.g. 0.01)")
         else:
             try:
@@ -428,19 +428,23 @@ class MapBuilder(object):
     def set_on_enter(self, callback):
         """
         Set callback function to be invoked when player attempts to enter the
-        current tile. The callback function should accept 3 arguments:
+        current tile. The callback function should accept 3 parameters, and
+        return a bool:
 
-            callback(player, source, dest):
+            def callback(player, source, dest):
+                pass
 
-        * *player* (text_game_maker.player.Player object): player instance
-        * *source* (text_game_maker.tile.Tile object): source tile (tile that
-          player is trying to exit
-        * *destination* (text_game_maker.tile.Tile object): destination tile
-          (tile that player is trying to enter
-        * *Return value* (bool): If False, player's attempt to enter the
-          current tile will be blocked (silently-- up to you to print something
-          if you need it here). If True, player will be allowed to continue
-          normally
+            Callback parameters:
+
+            * *player* (text_game_maker.player.Player object): player instance
+            * *source* (text_game_maker.tile.Tile object): source tile (tile
+              that player is trying to exit
+            * *destination* (text_game_maker.tile.Tile object): destination tile
+              (tile that player is trying to enter
+            * *Return value* (bool): If False, player's attempt to enter the
+              current tile will be blocked (silently-- up to you to print
+              something if you need it here). If True, player will be allowed
+              to continue normally
 
         :param callback: the callback function
         """
@@ -449,21 +453,24 @@ class MapBuilder(object):
 
     def set_on_exit(self, callback):
         """
-        Set callback function to be invoked when player attempts to enter the
-        current tile. The callback should accept three  arguments:
+        Set callback function to be invoked when player attempts to exit the
+        current tile. The callback should accept three parameters, and return
+        a bool:
 
-            callback(player, source, dest):
+            def callback(player, source, dest):
+                pass
 
-        * *player* (text_game_maker.player.Player object): player instance
-        * *source* (text_game_maker.tile.Tile object): source tile (tile that
-          player is trying to exit
-        * *destination* (text_game_maker.tile.Tile object): destination tile
-          (tile that player is trying to enter
-        * *Return value* (bool): If False, player's attempt to exit the
-          current tile will be blocked (silently-- up to you to print something
-          if you need it here). If True, player will be allowed to continue
-          normally.
+            Callback parameters:
 
+            * *player* (text_game_maker.player.Player object): player instance
+            * *source* (text_game_maker.tile.Tile object): source tile (tile
+              that player is trying to exit
+            * *destination* (text_game_maker.tile.Tile object): destination tile
+              (tile that player is trying to enter
+            * *Return value* (bool): If False, player's attempt to exit the
+              current tile will be blocked (silently-- up to you to print
+              something if you need it here). If True, player will be allowed
+              to continue normally.
 
         :param callback: the callback function
         """
@@ -473,10 +480,12 @@ class MapBuilder(object):
     def set_on_start(self, callback):
         """
         Set callback function to be invoked when player starts a new game (i.e.
-        not from a save file). Callback function should accept one argument:
+        not from a save file). Callback function should accept one parameter:
 
             def callback(player):
                 pass
+
+            Callback parameters:
 
             * *player* (text_game_maker.player.Player): player instance
 

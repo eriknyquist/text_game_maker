@@ -110,12 +110,14 @@ class Player(object):
         Add a function that will be invoked whenever some player input is next
         received *and* a specific time has elapsed.
 
-        The function should accept one argument:
+        The function should accept one parameter:
 
             def callback(player):
                 pass
 
-        * *player* (text_game_maker.player.Player): player instance
+            Callback parameters:
+
+            * *player* (text_game_maker.player.Player): player instance
 
         :param str callback: function that returns the message to print
         :param float seconds: time delay in seconds before the message can be\

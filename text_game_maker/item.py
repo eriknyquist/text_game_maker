@@ -70,14 +70,16 @@ class Item(object):
     def set_on_look(self, callback):
         """
         Set callback function to be invoked when player looks at/inspects this
-        item. Callback should accept one argument, and return a string:
+        item. Callback should accept one parameter, and return a string:
 
             def callback(item, player)
                 return '%s %s.' % (item.prefix, item.name)
 
-        * *item* (text_game_maker.item.Item): item being looked at
-        * *player* (text_game_maker.player.Player): player instance
-        * *Return value* (str): text to be printed to player
+            Callback parameters:
+
+            * *item* (text_game_maker.item.Item): item being looked at
+            * *player* (text_game_maker.player.Player): player instance
+            * *Return value* (str): text to be printed to player
 
         :param callback: callback function
         """
@@ -87,12 +89,14 @@ class Item(object):
     def set_on_take(self, callback):
         """
         Set callback function to be invoked when player attempts to add this
-        item to their inventory. Callback should accept one argument:
+        item to their inventory. Callback should accept one parameter:
 
             def callback(player)
                 pass
 
-        * *player* (text_game_maker.player.Player): player instance
+            Callback parameters:
+
+            * *player* (text_game_maker.player.Player): player instance
 
         :param callback: callback function
         """
