@@ -29,25 +29,54 @@ def _do_move(player, word, direction):
     else:
         _unrecognised(player, direction)
 
+def _find_closest_match_item_index(player, name):
+    iter_items = range(len(player.current.items))
+
+    for i in iter_items:
+        curr = player.current.items[i]
+        if curr.name.lower().startswith(name.lower()):
+            return curr, i
+
+    for i in iter_items:
+        curr = player.current.items[i]
+        if name.lower() in curr.name.lower():
+            return curr, i
+
+    return None, -1
+
+def _find_closest_match_person_index(player, name):
+    iter_items = range(len(player.current.people))
+
+    for i in iter_items:
+        curr = player.current.people[i]
+        if curr.name.lower().startswith(name.lower()):
+            return curr, i
+
+    for i in iter_items:
+        curr = player.current.people[i]
+        if name.lower() in curr.name.lower():
+            return curr, i
+
+    return None, -1
+
 def _do_take(player, word, item_name):
     if not item_name or item_name.strip() == "":
         print "\nWhat do you want to take?"
         return
 
-    for i in range(len(player.current.items)):
-        # Find the mentioned item in this tile's list of items
-        curr = player.current.items[i]
-        if (curr.name.startswith(item_name) or (item_name in curr.name)):
-            # If on_take callback returns false, abort adding this item
-            if curr.on_take and not curr.on_take(player):
-                return
+    item, i = _find_closest_match_item_index(player, item_name)
+    if i < 0:
+        print "\n%s: no such item" % item_name
+        return
 
-            player.inventory_items[curr.name] = curr
-            text_game_maker.game_print('\n%s added to inventory' % curr.name)
-            del player.current.items[i]
-            return
+    # If on_take callback returns false, abort adding this item
+    if item.on_take and not item.on_take(player):
+        return
 
-    print "\n%s: no such item" % item_name
+    player.inventory_items[item.name] = item
+    text_game_maker.game_print('%s added to inventory' % item.name)
+    del player.current.items[i]
+    return
 
 def _do_drop(player, word, item_name):
     if not item_name or item_name.strip() == "":
@@ -65,7 +94,7 @@ def _do_drop(player, word, item_name):
                 player.inventory_items['equipped'] = None
 
             del player.inventory_items[i]
-            text_game_maker.game_print("\nDropped %s" % i)
+            text_game_maker.game_print("Dropped %s" % i)
             return
 
     print "\n%s: no such item in inventory" % item_name
@@ -75,19 +104,17 @@ def _do_speak(player, word, name):
         print "\nWho do you want to speak to?"
         return
 
-    for p in player.current.people:
-        if p.name.lower().startswith(name):
-            if p.is_alive():
-                response = p.on_speak(p, player)
-                if response:
-                    p.say(response)
-            else:
-                text_game_maker.game_print('\n%s says nothing.'
-                    % (p.name, p.name))
+    p, i = _find_closest_match_person_index(player, name)
+    if i < 0:
+        print "\n%s: no such person" % name
+        return
 
-            return
-
-    print "\n%s: no such person" % name
+    if p.is_alive():
+        response = p.on_speak(p, player)
+        if response:
+            p.say(response)
+    else:
+        text_game_maker.game_print('%s says nothing.' % p.name)
 
 def _do_quit(player, word, name):
     ret = "z"
@@ -105,7 +132,7 @@ def _do_equip(player, word, item_name):
 
     for i in player.inventory_items:
         if i.startswith(item_name) or item_name in i:
-            text_game_maker.game_print("\nEquipped %s" % i)
+            text_game_maker.game_print("Equipped %s" % i)
             player.inventory_items['equipped'] = player.inventory_items[i]
             return
 
@@ -114,10 +141,10 @@ def _do_equip(player, word, item_name):
 def _do_unequip(player, word, fields):
     equipped = player.inventory_items['equipped']
     if not equipped:
-        text_game_maker.game_print('\nNothing is currently equipped')
+        text_game_maker.game_print('Nothing is currently equipped')
     else:
         player.inventory_items['equipped'] = None
-        text_game_maker.game_print('\n%s unequipped' % equipped.name)
+        text_game_maker.game_print('%s unequipped' % equipped.name)
 
 def _do_loot(player, word, name):
     if not name or name.strip() == "":
@@ -127,10 +154,10 @@ def _do_loot(player, word, name):
     for p in player.current.people:
         if p.name.lower().startswith(name):
             if p.is_alive():
-                text_game_maker.game_print("\nYou are dead.")
-                text_game_maker.game_print("\nYou were caught trying to %s %s."
+                text_game_maker.game_print("You are dead.")
+                text_game_maker.game_print("You were caught trying to %s %s."
                     % (word, p.name))
-                text_game_maker.game_print("\n%s didn't like this, and killed "
+                text_game_maker.game_print("%s didn't like this, and killed "
                     "you.\n" % p.name)
                 sys.exit()
             else:
@@ -169,8 +196,26 @@ def _do_set_print_speed(player, word, setting):
         print("\nUnrecognised print speed-- please say 'print fast' "
             "or 'print slow'")
 
-def _do_look(player, word, setting):
-    print player.current_state()
+def _do_inspect(player, word, item):
+    if item == '':
+        _do_look(player, word, item)
+        return
+
+    target, i = _find_closest_match_item_index(player, item)
+    if i < 0:
+        target, i = _find_closest_match_person_index(player, item)
+        if i < 0:
+            print "\n%s: no such item or person" % item
+            return
+
+    text_game_maker.game_print(target.on_look(item, player))
+
+def _do_look(player, word, item):
+    if item != '':
+        _do_inspect(player, word, item)
+        return
+
+    text_game_maker.game_print(player.current_state())
 
 def _centre_line(string, line_width):
     diff = line_width - len(string)
@@ -310,7 +355,7 @@ def _do_save(player, word, setting):
         filename = os.path.join(save_dir, ret)
 
     player.save_state(filename)
-    text_game_maker.game_print("\nGame state saved in %s." % filename)
+    text_game_maker.game_print("Game state saved in %s." % filename)
 
 def _is_shorthand_direction(word):
     for w in ['north', 'south', 'east', 'west']:
@@ -352,6 +397,7 @@ command_table = [
     (text_game_maker.LOOT_WORDS, _do_loot),
     (text_game_maker.KILL_WORDS, _do_quit),
     (text_game_maker.SHOW_COMMAND_LIST_WORDS, _do_show_command_list),
+    (text_game_maker.INSPECT_WORDS, _do_inspect),
     (text_game_maker.LOOK_WORDS, _do_look),
     (text_game_maker.INVENTORY_WORDS, _do_inventory_listing),
     (text_game_maker.HELP_WORDS, _do_help),

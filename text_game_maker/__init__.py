@@ -59,6 +59,10 @@ SHOW_COMMAND_LIST_WORDS = [
     'commands', 'controls', 'wordlist', 'words'
 ]
 
+INSPECT_WORDS = [
+    'look at', 'inspect', 'examine'
+]
+
 LOOK_WORDS = [
     'look', 'peep', 'peek', 'show', 'viddy'
 ]
@@ -319,6 +323,7 @@ def game_print(msg):
     :type msg: str
     """
 
+    msg = '\n' + msg
     if not info['slow_printing']:
         print msg
         return
@@ -358,6 +363,8 @@ listable_commands = [
         "Words/phrases to loot a person by name"),
     (KILL_WORDS, "",
         "Words/phrases to quit the game"),
+    (INSPECT_WORDS, "<item>",
+        "Words/phrases to examine an item in more detail"),
     (LOOK_WORDS, "",
         "Words/phrases to examine your current surroundings"),
     (INVENTORY_WORDS, "",

@@ -7,8 +7,8 @@ class Person(object):
     Represents a person that the player can interact with
     """
 
-    def __init__(self, name, description, on_speak=None, items={}, alive=True,
-            coins=50):
+    def __init__(self, name, description, on_speak=None, on_look=None,
+            items={}, alive=True, coins=50):
         """
         Initialises a Person instance
 
@@ -16,7 +16,11 @@ class Person(object):
         :param str description: description of Person, e.g. "squatting in the\
             corner"
         :param on_speak: on_speak callback (see \
-            text_game_maker.person.Person.set_on_speak description for more details)
+            text_game_maker.person.Person.set_on_speak description for more\
+            details)
+        :param on_look: on_look callback (see \
+            text_game_maker.person.Person.set_on_look description for more\
+            details)
         :param bool alive: Initial living state of person .If True, person will\
             be alive. If false, person will be dead
         :param int coins: Number of coins this person has
@@ -26,10 +30,15 @@ class Person(object):
 
         self.name = name
         self.description = description
-        self.on_speak = on_speak
         self.alive = alive
         self.coins = coins
         self.items = items
+        self.on_speak = on_speak
+
+        if on_look:
+            self.on_look = on_look
+        else:
+            self.on_look = self._default_on_look
 
     def __str__(self):
         return '%s is %s' % (self.name, self.description)
@@ -48,7 +57,7 @@ class Person(object):
         self.description = "on the floor"
 
         if msg is None or msg == "":
-            msg = '\n%s has died.' % self.name
+            msg = '%s has died.' % self.name
 
         text_game_maker.game_print(msg)
 
@@ -80,6 +89,23 @@ class Person(object):
 
         self.on_speak = callback
 
+    def set_on_look(self, callback):
+        """
+        Set callback function to be invoked when player looks at/inspects this
+        person. Callback should accept one argument, and return a string:
+
+            def callback(person, player)
+                return 'It's %s!' % person.name
+
+        * *person* (text_game_maker.person.Person): person being looked at
+        * *player* (text_game_maker.player.Player): player instance
+        * *Return value* (str): text to be printed to player
+
+        :param callback: callback function
+        """
+
+        self.on_look = on_look
+
     def is_alive(self):
         """
         Test if this person is alive
@@ -101,14 +127,10 @@ class Person(object):
         lines = msg.splitlines()
         lines[-1] += '"'
 
-        sys.stdout.write('\n%s: "' % self.name)
-        sys.stdout.flush()
-        text_game_maker.game_print(lines[0])
+        line1 = '%s: "%s' % (self.name, lines[0])
 
-        for line in lines[1:]:
-            sys.stdout.write(' ' * (len(self.name) + 2))
-            sys.stdout.flush()
-            text_game_maker.game_print(line)
+        lines = [(' ' * (len(self.name) + 2)) + l for l in lines]
+        text_game_maker.game_print('\n'.join([line1] + lines))
 
     def buy_equipped_item(self, player):
         """
@@ -155,8 +177,11 @@ class Person(object):
             self.items[equipped_copy.name] = equipped_copy
 
             player.delete_equipped()
-            text_game_maker.game_print("\nSale completed.")
+            text_game_maker.game_print("Sale completed.")
             return equipped_copy
 
-        text_game_maker.game_print("\nSale cancelled")
+        text_game_maker.game_print("Sale cancelled")
         return None
+
+    def _default_on_look(self, person, player):
+        return "It's %s."  % self.name

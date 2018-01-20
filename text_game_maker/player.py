@@ -34,7 +34,7 @@ class Player(object):
 
     def _move(self, dest, word, name):
         if dest is None:
-            text_game_maker.game_print("\nCan't go %s from here." % name)
+            text_game_maker.game_print("Can't go %s from here." % name)
             return self.current
 
         # Save locked state of destination tile before & after user callbacks,
@@ -49,10 +49,10 @@ class Player(object):
             return
 
         locked_after = dest.is_locked()
-        move_message = "\nYou %s %s" % (word, name)
+        move_message = "You %s %s" % (word, name)
 
         if locked_after:
-            text_game_maker.game_print("\nCan't go through a locked door "
+            text_game_maker.game_print("Can't go through a locked door "
                 "without a key")
             return self.current
         elif locked_before:
@@ -171,7 +171,7 @@ class Player(object):
                 self.inventory_items.update(person.items)
                 person.items.clear()
 
-            text_game_maker.game_print("\nYou %s %s.\nYou find %s."
+            text_game_maker.game_print("You %s %s.\nYou find %s."
                 % (word, person.name,
                 text_game_maker.list_to_english(print_items)))
 
@@ -182,7 +182,7 @@ class Player(object):
 
         items = []
 
-        ret = "\nYou are %s" % self.current.description
+        ret = "You are %s" % self.current.description
         #print get_nouns(self.current.description)
 
         if self.current.people:

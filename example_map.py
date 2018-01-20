@@ -1,6 +1,6 @@
 import sys
 
-import text_game_maker
+import text_game_maker as gamemaker
 from text_game_maker.item import Item
 from text_game_maker.person import Person
 from text_game_maker.map_builder import MapBuilder
@@ -55,7 +55,7 @@ def alan_speak_callback(person, player):
             if item.name == 'sausage':
                 del person.items[item.name]
             else:
-                person.die('\n%s died from trying to eat a %s.'
+                person.die('%s died from trying to eat a %s.'
                     % (person.name, item.name))
 
             return None
@@ -67,7 +67,7 @@ def alan_speak_callback(person, player):
         # Player has no item equipped: print basic controls
         # (if we've been fed...)
         if alan_info['eaten']:
-            return text_game_maker.get_basic_controls()
+            return gamemaker.get_basic_controls()
 
     if alan_info['count'] < len(alan_lines):
         alan_info['count'] += 1
@@ -111,13 +111,13 @@ def enter_window_callback(player, src, dest):
     # text_game_maker.game_print will print slowly, one character at a time,
     # unless player has typed 'print fast', in which case game_print will print
     # normally
-    text_game_maker.game_print("\nYou are dead. You plummeted into the rocks "
-        "and the sea below the window.\n")
+    gamemaker.game_print("You are dead. You plummeted into the rocks "
+        "and the sea below the window.")
     sys.exit()
 
 def on_start(player):
-    name = text_game_maker.read_line("What is your name?")
-    title = text_game_maker.read_line("What is your title (sir, lady, etc...)?")
+    name = gamemaker.read_line("What is your name?")
+    title = gamemaker.read_line("What is your title (sir, lady, etc...)?")
 
     player.set_name(name.title())
     player.set_title(title.title())
@@ -136,8 +136,8 @@ def main():
     crowbar = Item("a", "crowbar", "", 25)
     builder.add_person(
         Person(
-            "Alan", "standing in the corner", alan_speak_callback,
-            {crowbar.name: crowbar}
+            "Alan", "standing in the corner", on_speak=alan_speak_callback,
+            items={crowbar.name: crowbar}
         )
     )
 
