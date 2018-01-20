@@ -76,5 +76,4 @@ Features overview
 Documentation
 =============
 
-View the full API documentation by cloning this repository and opening
-``doc/build/html/index.html`` with a web browser.
+`doc/build/html/index.html <http://htmlpreview.github.io/?https://github.com/eriknyquist/text_game_maker/blob/master/doc/build/html/index.html>`_
