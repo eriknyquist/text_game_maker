@@ -7,3 +7,4 @@
    example_map
    test
    text_game_maker
+   wtest
