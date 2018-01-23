@@ -1,5 +1,7 @@
 import sys
 import time
+import inspect
+import textwrap
 import threading
 import Queue
 
@@ -21,6 +23,9 @@ info = {
     'sequence_count': None,
     'last_command': 'look'
 }
+
+wrapper = textwrap.TextWrapper()
+wrapper.width = 60
 
 SET_PRINT_WORDS = ['print']
 
@@ -162,6 +167,20 @@ enter_thread = threading.Thread(target=_read_input_task)
 enter_thread.daemon = True
 enter_thread.start()
 
+def _verify_callback(obj):
+    if not inspect.isfunction(obj):
+        raise TypeError('callbacks must be top-level functions')
+
+def _remove_leading_whitespace(string):
+    trimmed = [s.strip() for s in string.splitlines()]
+    return '\n'.join(trimmed)
+
+def _wrap_text(text):
+    return wrapper.fill(text.replace('\n', ' ').replace('\r', ''))
+
+def _wrap_print(text):
+    print '\n' + _wrap_text(text)
+
 def list_to_english(strlist, conj='and'):
     """
     Convert a list of strings to description of the list in english.
@@ -190,7 +209,7 @@ def list_to_english(strlist, conj='and'):
     return msg + strlist[-1]
 
 def _quit_hint():
-    print ("\nUse %s to stop playing"
+    _wrap_print("Use %s to stop playing"
         % (list_to_english(['"%s"' % i for i in KILL_WORDS], conj='or')))
 
 def read_line_raw(msg, cancel_word=None, default=None):
@@ -229,6 +248,9 @@ def read_line_raw(msg, cancel_word=None, default=None):
         buf += c
 
     user_input = buf.strip()
+
+    if default and user_input == '':
+        return default
 
     # If we are in the middle of command chain, decrement the count
     # of commands remaining in the input queue
@@ -300,19 +322,15 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
         try:
             number = int(ret)
         except ValueError:
-            print "\n'%s' is not a number." % ret
+            _wrap_print("'%s' is not a number." % ret)
             continue
 
         if (number < 1) or (number > len(choices)):
-            print ("\n'%d' is not a valid choice. Pick something bewtween "
+            _wrap_print("'%d' is not a valid choice. Pick something bewtween "
                 "1-%d" % (number, len(choices)))
             continue
 
         return number - 1
-
-def _remove_leading_whitespace(string):
-    trimmed = [s.strip() for s in string.splitlines()]
-    return '\n'.join(trimmed)
 
 def game_print(msg):
     """
@@ -323,7 +341,7 @@ def game_print(msg):
     :type msg: str
     """
 
-    msg = '\n' + msg
+    msg = '\n' + _wrap_text(msg)
     if not info['slow_printing']:
         print msg
         return
@@ -347,36 +365,49 @@ def game_print(msg):
 
 listable_commands = [
     (GO_WORDS, "<direction>",
-        "Words/phrases to move the player in specific direction (north, south, "
-        "east, west)"),
+        "Words/phrases to move the player in\n"
+        "specific direction (north, south, east,\n"
+        "west)"),
     (EQUIP_WORDS, "<item>",
-        "Words/phrases to equip an item from player\'s inventory"),
+        "Words/phrases to equip an item from\n"
+        "player\'s inventory"),
     (TAKE_WORDS, "<item>",
-        "Words/phrases to add an item to player's inventory"),
+        "Words/phrases to add an item to player's\n"
+        "inventory"),
     (DROP_WORDS, "<item>",
-        "Words/phrases to drop an item from player's inventory"),
+        "Words/phrases to drop an item from\n"
+        "player's inventory"),
     (SPEAK_WORDS, "<person>",
-        "Words/phrases to speak with a person by name"),
+        "Words/phrases to speak with a person\n"
+        "by name"),
     (UNEQUIP_WORDS, "<item>",
-        "Words/phrases to unequip player's equipped item (if any)"),
+        "Words/phrases to unequip player's\n"
+        "equipped item (if any)"),
     (LOOT_WORDS, "<person>",
-        "Words/phrases to loot a person by name"),
+        "Words/phrases to loot a person by\n"
+        "name"),
     (KILL_WORDS, "",
         "Words/phrases to quit the game"),
     (INSPECT_WORDS, "<item>",
-        "Words/phrases to examine an item in more detail"),
+        "Words/phrases to examine an item in more\n"
+        "detail"),
     (LOOK_WORDS, "",
-        "Words/phrases to examine your current surroundings"),
+        "Words/phrases to examine your current\n"
+        "surroundings"),
     (INVENTORY_WORDS, "",
         "Words/phrases to show player's inventory"),
     (SHOW_COMMAND_LIST_WORDS, "",
-        "Words/phrases to show this list of command words"),
+        "Words/phrases to show this list of command\n"
+        "words"),
     (HELP_WORDS, "",
-        "Words/phrases to show the basic 'help' screen"),
+        "Words/phrases to show the basic 'help'\n"
+        "screen"),
     (SAVE_WORDS, "",
-        "Words/phrases to save the current game state to a file"),
+        "Words/phrases to save the current game state\n"
+        "to a file"),
     (LOAD_WORDS, "",
-        "Words/phrases to load a previously saved game state file")
+        "Words/phrases to load a previously saved game\n"
+        "state file")
 ]
 
 def get_basic_controls():
@@ -399,4 +430,16 @@ def get_full_controls():
     Returns a comprehensive listing of of all game command words
     """
 
-    return '\n'.join([_do_listing(*a) for a in listable_commands])
+    print_words = (
+    '\n\nWords/phrases to control how the game prints stuff\n\n'
+    '    "print slow" : print game output one character at\n'
+    '    a time\n\n'
+    '    "print fast" : print normally, with no delays\n\n'
+    '    "print delay <secs>" : Set number of seconds (e.g.\n'
+    '    0.02) to delay between characters when printing\n'
+    '    slow\n\n'
+    '    "print width <chars>": Set maximum line width for\n'
+    '    game output\n\n'
+    )
+
+    return '\n'.join([_do_listing(*a) for a in listable_commands]) + print_words

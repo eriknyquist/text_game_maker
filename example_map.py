@@ -55,7 +55,7 @@ def alan_speak_callback(person, player):
             if item.name == 'sausage':
                 del person.items[item.name]
             else:
-                person.die('%s died from trying to eat a %s.'
+                person.die(player, '%s died from trying to eat a %s.'
                     % (person.name, item.name))
 
             return None
@@ -158,6 +158,7 @@ def main():
     builder.add_item(Item("a", "treasure map", "on the wall", 2))
 
     builder.set_locked()
+
     builder.set_on_enter(locked_room_enter_callback)
     builder.set_on_exit(locked_room_exit_callback)
 

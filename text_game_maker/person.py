@@ -1,20 +1,25 @@
 import sys
 import copy
+
 import text_game_maker
+from text_game_maker import map_builder
+
+def _default_on_look(person, player):
+    return "It's %s."  % person.name
 
 class Person(object):
     """
     Represents a person that the player can interact with
     """
 
-    def __init__(self, name, description, on_speak=None, on_look=None,
+    def __init__(self, name, location, on_speak=None, on_look=None,
             items={}, alive=True, coins=50):
         """
         Initialises a Person instance
 
         :param str name: name of Person, e.g. "John"
-        :param str description: description of Person, e.g. "squatting in the\
-            corner"
+        :param str description: location description of Person, e.g.\
+            "squatting in the corner"
         :param on_speak: on_speak callback (see \
             text_game_maker.person.Person.set_on_speak description for more\
             details)
@@ -29,7 +34,7 @@ class Person(object):
         """
 
         self.name = name
-        self.description = description
+        self.location = location
         self.alive = alive
         self.coins = coins
         self.items = items
@@ -38,23 +43,31 @@ class Person(object):
         if on_look:
             self.on_look = on_look
         else:
-            self.on_look = self._default_on_look
+            self.on_look = _default_on_look
 
     def __str__(self):
-        return '%s is %s' % (self.name, self.description)
+        return self.name
 
-    def die(self, msg=None):
+    def die(self, player, msg=None):
         """
         Kill this person, and print a message to inform the player
         of this person's death.
 
-        :param msg: message to print informing player of person's death
-        :type msg: str
+        :param text_game_maker.player.Player player: player instance
+        :param str msg: message to print informing player of person's death
         """
+
+        p, loc, i = map_builder._find_closest_match_person_index(player,
+            self.name)
+        del player.current.people[loc][i]
+
+        if not player.current.people[loc]:
+            del player.current.people[loc]
 
         self.alive = False
         self.name = "%s's corpse" % self.name
-        self.description = "on the floor"
+        self.location = "on the floor"
+        player.current.add_person(self)
 
         if msg is None or msg == "":
             msg = '%s has died.' % self.name
@@ -89,6 +102,7 @@ class Person(object):
             speaks to this person
         """
 
+        text_game_maker._verify_callback(callback)
         self.on_speak = callback
 
     def set_on_look(self, callback):
@@ -108,6 +122,7 @@ class Person(object):
         :param callback: callback function
         """
 
+        text_game_maker._verify_callback(callback)
         self.on_look = on_look
 
     def is_alive(self):
@@ -128,13 +143,7 @@ class Person(object):
         :type msg: str
         """
 
-        lines = msg.splitlines()
-        lines[-1] += '"'
-
-        line1 = '%s: "%s' % (self.name, lines[0])
-
-        lines = [(' ' * (len(self.name) + 2)) + l for l in lines]
-        text_game_maker.game_print('\n'.join([line1] + lines))
+        text_game_maker.game_print('%s says:  "%s"' % (self.name, msg))
 
     def buy_equipped_item(self, player):
         """
@@ -186,6 +195,3 @@ class Person(object):
 
         text_game_maker.game_print("Sale cancelled")
         return None
-
-    def _default_on_look(self, person, player):
-        return "It's %s."  % self.name

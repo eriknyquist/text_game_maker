@@ -61,7 +61,7 @@ class Player(object):
         self.current = dest
 
         text_game_maker.game_print(move_message + ".")
-        text_game_maker.game_print("%s" % self.current_state())
+        text_game_maker.game_print(self.current_state())
 
         return dest
 
@@ -184,18 +184,20 @@ class Player(object):
 
         items = []
 
-        ret = "You are %s" % self.current.description
+        ret = "You are %s. " % self.current.description.rstrip('.')
         #print get_nouns(self.current.description)
-
-        if self.current.people:
-            ret += "\n\n%s" % ('\n'.join([str(i) for i in self.current.people]))
-
-        if self.current.items:
-            ret += "\n\n%s" % ('\n'.join([str(i) for i in self.current.items]))
 
         summary = self.current.summary()
         if summary:
-            ret += "\n\n%s" % summary
+            ret += "%s. " % summary
+
+        items = self.current.describe_items()
+        if items:
+            ret += items
+
+        people = self.current.describe_people()
+        if people:
+            ret += people
 
         return ret
 

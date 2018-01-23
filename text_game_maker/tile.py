@@ -35,10 +35,10 @@ class Tile(object):
         self.west = None
 
         # Items on this tile
-        self.items = []
+        self.items = {}
 
         # People on this tile
-        self.people = []
+        self.people = {}
 
         # Enter/exit callbacks
         self.on_enter = on_enter
@@ -54,6 +54,70 @@ class Tile(object):
             return "to the %s is %s" % (name, msg)
         else:
             return None
+
+    def _describe_locations(self, items):
+        if not items:
+            return None
+
+        ret = ""
+        for loc in items:
+            itemlist = [str(i) for i in items[loc]]
+
+            if not itemlist:
+                continue
+            elif len(itemlist) > 1:
+                english = gamemaker.list_to_english(itemlist)
+                sentence = '%s are %s. ' % (english, loc)
+            else:
+                sentence = '%s is %s. ' % (itemlist[0], loc)
+
+            ret += sentence
+
+        return ret
+
+    def set_on_enter(self, callback):
+        """
+        Set enter callback for this tile. Parameters are the same as
+        text_game_maker.map_builder.MapBuilder.set_on_enter
+        """
+
+        gamemaker._verify_callback(callback)
+        self.on_enter = callback
+
+    def set_on_exit(self, callback):
+        """
+        Set exit callback for this tile. Parameters are the same as
+        text_game_maker.map_builder.MapBuilder.set_on_exit
+        """
+
+        gamemaker._verify_callback(callback)
+        self.on_exit = callback
+
+    def describe_items(self):
+        """
+        Return sentences describing all item locations on this tile
+        """
+
+        return self._describe_locations(self.items)
+
+    def describe_people(self):
+        """
+        Return sentences describing all people on this tile
+        """
+
+        return self._describe_locations(self.people)
+
+    def add_item(self, item):
+        if item.location not in self.items:
+            self.items[item.location] = []
+
+        self.items[item.location].append(item)
+
+    def add_person(self, person):
+        if person.location not in self.people:
+            self.people[person.location] = []
+
+        self.people[person.location].append(person)
 
     def summary(self):
         """
@@ -72,7 +136,7 @@ class Tile(object):
         if east: ret.append(east)
         if west: ret.append(west)
 
-        return '\n'.join(ret)
+        return '. '.join(ret)
 
     def is_locked(self):
         """
@@ -96,4 +160,3 @@ class Tile(object):
         """
 
         self.locked = False
-

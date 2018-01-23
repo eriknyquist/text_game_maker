@@ -6,16 +6,19 @@ import errno
 
 import text_game_maker
 from text_game_maker.tile import Tile
+from text_game_maker.item import Item
 from text_game_maker.player import Player
 
+MIN_LINE_WIDTH = 50
+MAX_LINE_WIDTH = 120
 COMMAND_DELIMITERS = [',', ';', '/', '\\']
 
 def _unrecognised(player, val):
-    print '\nUnrecognised command "%s"' % val
+    text_game_maker._wrap_print('Unrecognised command "%s"' % val)
 
 def _do_move(player, word, direction):
     if not direction or direction.strip() == "":
-        print "\nWhere do you want to go?"
+        text_game_maker._wrap_print("Where do you want to go?")
         return
 
     if 'north'.startswith(direction):
@@ -30,43 +33,51 @@ def _do_move(player, word, direction):
         _unrecognised(player, direction)
 
 def _find_closest_match_item_index(player, name):
-    iter_items = range(len(player.current.items))
+    for loc in player.current.items:
+        itemlist = player.current.items[loc]
+        for i in range(len(itemlist)):
+            curr = itemlist[i]
 
-    for i in iter_items:
-        curr = player.current.items[i]
-        if curr.name.lower().startswith(name.lower()):
-            return curr, i
+            if curr.name.lower().startswith(name.lower()):
+                return curr, loc, i
 
-    for i in iter_items:
-        curr = player.current.items[i]
-        if name.lower() in curr.name.lower():
-            return curr, i
+    for loc in player.current.items:
+        itemlist = player.current.items[loc]
+        for i in range(len(itemlist)):
+            curr = itemlist[i]
 
-    return None, -1
+            if name.lower() in curr.name.lower():
+                return curr, loc, i
+
+    return None, None, -1
 
 def _find_closest_match_person_index(player, name):
-    iter_items = range(len(player.current.people))
+    for loc in player.current.people:
+        itemlist = player.current.people[loc]
+        for i in range(len(itemlist)):
+            curr = itemlist[i]
 
-    for i in iter_items:
-        curr = player.current.people[i]
-        if curr.name.lower().startswith(name.lower()):
-            return curr, i
+            if curr.name.lower().startswith(name.lower()):
+                return curr, loc, i
 
-    for i in iter_items:
-        curr = player.current.people[i]
-        if name.lower() in curr.name.lower():
-            return curr, i
+    for loc in player.current.people:
+        itemlist = player.current.people[loc]
+        for i in range(len(itemlist)):
+            curr = itemlist[i]
 
-    return None, -1
+            if name.lower() in curr.name.lower():
+                return curr, loc, i
+
+    return None, None, -1
 
 def _do_take(player, word, item_name):
     if not item_name or item_name.strip() == "":
-        print "\nWhat do you want to take?"
+        text_game_maker._wrap_print("What do you want to take?")
         return
 
-    item, i = _find_closest_match_item_index(player, item_name)
+    item, loc, i  = _find_closest_match_item_index(player, item_name)
     if i < 0:
-        print "\n%s: no such item" % item_name
+        text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
         return
 
     # If on_take callback returns false, abort adding this item
@@ -75,19 +86,19 @@ def _do_take(player, word, item_name):
 
     player.inventory_items[item.name] = item
     text_game_maker.game_print('%s added to inventory' % item.name)
-    del player.current.items[i]
+    del player.current.items[loc][i]
     return
 
 def _do_drop(player, word, item_name):
     if not item_name or item_name.strip() == "":
-        print "\nWhat do you want to drop?"
+        text_game_maker._wrap_print("What do you want to drop?")
         return
 
     for i in player.inventory_items:
         if i.startswith(item_name) or item_name in i:
             # Place item on the floor in current room
-            player.inventory_items[i].description = "on the floor"
-            player.current.items.append(player.inventory_items[i])
+            player.inventory_items[i].location = "on the floor"
+            player.current.add_item(player.inventory_items[i])
 
             # Clear equipped slot if dropped item was equipped
             if player.inventory_items['equipped'] == player.inventory_items[i]:
@@ -97,18 +108,20 @@ def _do_drop(player, word, item_name):
             text_game_maker.game_print("Dropped %s" % i)
             return
 
-    print "\n%s: no such item in inventory" % item_name
+    text_game_maker._wrap_print("No %s in your inventory to %s"
+        % (item_name, word))
 
 def _do_speak(player, word, name):
     if not name or name.strip() == "":
-        print "\nWho do you want to speak to?"
+        text_game_maker._wrap_print("Who do you want to speak to?")
         return
 
-    p, i = _find_closest_match_person_index(player, name)
+    p, loc, i = _find_closest_match_person_index(player, name)
     if i < 0:
-        print "\n%s: no such person" % name
+        text_game_maker._wrap_print("Don't know who %s is" % name)
         return
 
+    text_game_maker.game_print('You speak to %s.' % p.name)
     if p.is_alive():
         response = p.on_speak(p, player)
         if response:
@@ -127,7 +140,8 @@ def _do_quit(player, word, name):
 
 def _do_equip(player, word, item_name):
     if not item_name or item_name.strip() == "":
-        print "\nWhich inventory item do you want to equip?"
+        text_game_maker._wrap_print("Which inventory item do you want to %s?"
+            % word)
         return
 
     for i in player.inventory_items:
@@ -136,7 +150,8 @@ def _do_equip(player, word, item_name):
             player.inventory_items['equipped'] = player.inventory_items[i]
             return
 
-    print "\n%s: no such item in inventory" % item_name
+    text_game_maker._wrap_print("No %s in your inventory to %s"
+        % (item_name, word))
 
 def _do_unequip(player, word, fields):
     equipped = player.inventory_items['equipped']
@@ -148,67 +163,96 @@ def _do_unequip(player, word, fields):
 
 def _do_loot(player, word, name):
     if not name or name.strip() == "":
-        print "\nWho do you want to %s?" % word
+        text_game_maker._wrap_print("Who do you want to %s?" % word)
         return
 
-    for p in player.current.people:
-        if p.name.lower().startswith(name):
-            if p.is_alive():
-                text_game_maker.game_print("You are dead.")
-                text_game_maker.game_print("You were caught trying to %s %s."
-                    % (word, p.name))
-                text_game_maker.game_print("%s didn't like this, and killed "
-                    "you.\n" % p.name)
-                sys.exit()
-            else:
-                player._loot(word, p)
+    p, loc, i = _find_closest_match_person_index(player, name)
+    if p.is_alive():
+        text_game_maker.game_print("You are dead.")
+        text_game_maker.game_print("You were caught trying to %s %s."
+            % (word, p.name))
+        text_game_maker.game_print("%s didn't like this, and killed you.\n"
+            % p.name)
+        sys.exit()
+    else:
+        player._loot(word, p)
 
 def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
-        print ("\nWhat printing speed would you like? (e.g. "
-            "'print fast' or 'print slow')")
+        text_game_maker._wrap_print("What printing speed would you like? "
+            "(e.g. 'print fast' or 'print slow')")
         return
 
     if 'slow'.startswith(setting):
         text_game_maker.info['slow_printing'] = True
-        print "\nOK, will do."
+        text_game_maker._wrap_print("OK, will do.")
     elif 'fast'.startswith(setting):
         text_game_maker.info['slow_printing'] = False
-        print "\nOK, got it."
+        text_game_maker._wrap_print("OK, got it.")
     elif setting.startswith('delay'):
         fields = setting.split()
         if len(fields) < 2:
-            print("\n'delay' requires an extra parameter. Please provide a delay"
-                " value in seconds (e.g. 0.01)")
-        else:
-            try:
-                text_game_maker.info['chardelay'] = float(fields[1])
-            except ValueError:
-                print("\nDon't recognise that value for 'print delay'.\n"
-                    "Enter a delay value in seconds (e.g. 'print delay 0.1')")
-            else:
-                print ("\nOK, character print delay is set to %.2f seconds."
-                    % text_game_maker.info['chardelay'])
-                if not text_game_maker.info['slow_printing']:
-                    print("(but it won't do anything unless slow printing is\n"
-                        " enabled-- e.g. 'print slow' -- you fucking idiot)")
+            text_game_maker._wrap_print("'delay' requires an extra parameter. "
+                "Please provide a delay value in seconds (e.g. 'print delay "
+                "0.01')")
+            return
+
+        try:
+            text_game_maker.info['chardelay'] = float(fields[1])
+        except ValueError:
+            text_game_maker._wrap_print("Don't recognise that value for "
+                "'print delay'. Enter a delay value in seconds (e.g. 'print "
+                "delay 0.1')")
+            return
+
+        text_game_maker._wrap_print("OK, character print delay is set to %.2f "
+            "seconds." % text_game_maker.info['chardelay'])
+
+        if not text_game_maker.info['slow_printing']:
+            text_game_maker._wrap_print("(but it won't do anything unless "
+                "slow printing is enabled-- e.g. 'print slow' -- you fucking "
+                "idiot)")
+
+    elif setting.startswith('width'):
+        fields = setting.split()
+        if len(fields) < 2:
+            text_game_maker._wrap_print("'width' requires an extra parameter. "
+            "Please provide a line width between %d-%d (e.g. 'print width 60'"
+                % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
+            return
+
+        try:
+            val = int(fields[1])
+        except ValueError:
+            text_game_maker._wrap_print("Don't recognise that value for "
+                "'print width'. Enter a width value as an integer (e.g. "
+                "'print width 60'")
+            return
+
+        if (val < MIN_LINE_WIDTH) or (val > MAX_LINE_WIDTH):
+            text_game_maker._wrap_print("Please enter a line width between "
+                "%d-%d" % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
+            return
+
+        text_game_maker._wrap_print("OK, line width set to %d." % val)
+        text_game_maker.wrapper.width = val
+
     else:
-        print("\nUnrecognised print speed-- please say 'print fast' "
-            "or 'print slow'")
+        text_game_maker._wrap_print("Unrecognised print command")
 
 def _do_inspect(player, word, item):
     if item == '':
         _do_look(player, word, item)
         return
 
-    target, i = _find_closest_match_item_index(player, item)
+    target, loc, i = _find_closest_match_item_index(player, item)
     if i < 0:
-        target, i = _find_closest_match_person_index(player, item)
+        target, loc, i = _find_closest_match_person_index(player, item)
         if i < 0:
-            print "\n%s: no such item or person" % item
+            text_game_maker._wrap_print("No %s available to %s" % (item, word))
             return
 
-    text_game_maker.game_print(target.on_look(item, player))
+    text_game_maker.game_print(target.on_look(target, player))
 
 def _do_look(player, word, item):
     if item != '':
@@ -264,7 +308,7 @@ def _check_word_set(word, word_set):
     return None
 
 def _get_next_unused_save_id(save_dir):
-    default_num = 0
+    default_num = 1
     nums = [int(x.split('_')[2]) for x in os.listdir(save_dir)]
 
     while default_num in nums:
@@ -290,7 +334,8 @@ def _do_load(player, word, setting):
     ret = _get_save_files()
     if ret:
         files = [os.path.basename(x) for x in ret]
-        files.append("None of the above (let me enter the file path)")
+        files.sort()
+        files.append("None of these (let me enter a path)")
 
         index = text_game_maker.ask_multiple_choice(files,
             "Which save file would you like to load?")
@@ -301,8 +346,9 @@ def _do_load(player, word, setting):
         if index < (len(files) - 1):
             filename = ret[index]
     else:
-        print "\nNo save files found. Put save files in %s," % _get_save_dir()
-        print "Otherwise you can enter the full path to an alternate save file."
+        text_game_maker._wrap_print("No save files found. Put save files in "
+            "%s, otherwise you can enter the full path to an alternate save "
+            "file." % _get_save_dir())
         ret = text_game_maker.ask_yes_no("Enter path to alternate save file?")
         if ret <= 0:
             return False
@@ -316,10 +362,11 @@ def _do_load(player, word, setting):
             elif os.path.exists(filename):
                 break
             else:
-                print "\n%s: no such file" % filename
+                text_game_maker._wrap_print("%s: no such file" % filename)
 
     player.load_from_file = filename
-    print ("\nLoading game state from file %s." % player.load_from_file)
+    text_game_maker._wrap_print("Loading game state from file %s."
+        % player.load_from_file)
     return True
 
 def _do_save(player, word, setting):
@@ -331,7 +378,8 @@ def _do_save(player, word, setting):
             os.makedirs(save_dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                print "\nError (%d) creating directory %s" % (e.errno, save_dir)
+                text_game_maker._wrap_print("Error (%d) creating directory %s"
+                    % (e.errno, save_dir))
                 return
 
     if player.loaded_file:
@@ -449,7 +497,7 @@ class MapBuilder(object):
         :param callback: the callback function
         """
 
-        self.current.on_enter = callback
+        self.current.set_on_enter(callback)
 
     def set_on_exit(self, callback):
         """
@@ -475,7 +523,7 @@ class MapBuilder(object):
         :param callback: the callback function
         """
 
-        self.current.on_exit = callback
+        self.current.set_on_exit(callback)
 
     def set_on_start(self, callback):
         """
@@ -519,7 +567,10 @@ class MapBuilder(object):
         :param text_game_maker.item.Item item: the item to add
         """
 
-        self.current.items.append(item)
+        if item.location not in self.current.items:
+            self.current.items[item.location] = []
+
+        self.current.items[item.location].append(item)
 
     def add_person(self, person):
         """
@@ -528,7 +579,10 @@ class MapBuilder(object):
         :param text_game_maker.person.Person person: the person to add
         """
 
-        self.current.people.append(person)
+        if person.location not in self.current.people:
+            self.current.people[person.location] = []
+
+        self.current.people[person.location].append(person)
 
     def set_locked(self):
         """
