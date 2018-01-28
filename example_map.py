@@ -39,15 +39,15 @@ def alan_speak_callback(person, player):
         "Try using words like 'get' or 'take' to add items to your inventory.\n"
         "To offer a sale, equip the inventory item you want to sell and\n"
         "speak to me.",
-        "Use words like 'look', 'show' or '?' to print current description\n"
+        "Use words like 'look', 'show' or '?' to print current description.\n"
         "Say 'i' or 'inventory' to see what's in your inventory.\n"
         "Use words like 'get' or 'take' to add items to your inventory.\n"
         "To offer a sale, equip the inventory item you want to sell and\n"
         "speak to me.",
     ]
 
-    if player.inventory_items['equipped']:
-        # Player has an item equipped: try to buy it
+    # If player has an item equipped, try to buy it
+    if player.has_equipped():
         item = person.buy_equipped_item(player)
         if item:
             # Sale successful

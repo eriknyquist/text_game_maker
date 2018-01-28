@@ -83,17 +83,24 @@ class Player(object):
 
         self.title = title
 
-    def has_equipped(self, item_name):
+    def has_equipped(self, item_name=None):
         """
         Check if player has specific item equipped
 
-        :param str item_name: name of item to check for
+        :param str item_name: name of item to check for. If not set, function\
+            will return true if player has any item equipped.
         :return: True if player has item equipped, false otherwise
         :rtype: bool
         """
 
         equipped = self.inventory_items['equipped']
-        return (equipped and (equipped.name == item_name))
+        if not equipped:
+            return False
+
+        if not item_name:
+            return True
+
+        return equipped.name == item_name
 
     def delete_equipped(self):
         """

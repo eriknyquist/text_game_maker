@@ -2,6 +2,7 @@ import time
 import sys
 import pickle
 import os
+import fnmatch
 import errno
 
 import text_game_maker
@@ -51,6 +52,16 @@ def _find_closest_match_item_index(player, name):
 
     return None, None, -1
 
+def _find_wildcard_match(player, name):
+    ret = []
+    for loc in player.current.items:
+        itemlist = player.current.items[loc]
+        for i in range(len(itemlist)):
+            if fnmatch.fnmatch(itemlist[i].name, name):
+                return itemlist[i], loc, i
+
+    return None, None, None
+
 def _find_closest_match_person_index(player, name):
     for loc in player.current.people:
         itemlist = player.current.people[loc]
@@ -70,46 +81,99 @@ def _find_closest_match_person_index(player, name):
 
     return None, None, -1
 
+def _take(player, item, loc, i):
+    # If on_take callback returns false, abort adding this item
+    if item.on_take and not item.on_take(player):
+        return False
+
+    player.inventory_items[item.name] = item
+    del player.current.items[loc][i]
+    return True
+
 def _do_take(player, word, item_name):
     if not item_name or item_name.strip() == "":
         text_game_maker._wrap_print("What do you want to take?")
         return
 
-    item, loc, i  = _find_closest_match_item_index(player, item_name)
-    if i < 0:
-        text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
-        return
+    if '*' in item_name:
+        added = []
+        item = ' '
 
-    # If on_take callback returns false, abort adding this item
-    if item.on_take and not item.on_take(player):
-        return
+        while item:
+            item, loc, i = _find_wildcard_match(player, item_name)
+            if item and _take(player, item, loc, i):
+                added.append(item.name)
 
-    player.inventory_items[item.name] = item
-    text_game_maker.game_print('%s added to inventory' % item.name)
-    del player.current.items[loc][i]
+        if not added:
+            text_game_maker._wrap_print("No matcing items to %s" % word)
+            return
+
+        msg = text_game_maker.list_to_english(added)
+    else:
+        item, loc, i  = _find_closest_match_item_index(player, item_name)
+        if i < 0:
+            text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
+            return
+
+        msg = item.name
+        if not _take(player, item, loc, i):
+            return
+
+    text_game_maker.game_print('%s added to inventory' % msg)
     return
+
+def _find_inventory_wildcard(player, name):
+    for n in player.inventory_items:
+        if n != 'equipped' and fnmatch.fnmatch(n, name):
+            return player.inventory_items[n], n
+
+    return None, None
+
+def _drop(player, n):
+    # Place item on the floor in current room
+    player.inventory_items[n].location = "on the floor"
+    player.current.add_item(player.inventory_items[n])
+
+    # Clear equipped slot if dropped item was equipped
+    if player.inventory_items['equipped'] == player.inventory_items[n]:
+        player.inventory_items['equipped'] = None
+
+    del player.inventory_items[n]
 
 def _do_drop(player, word, item_name):
     if not item_name or item_name.strip() == "":
         text_game_maker._wrap_print("What do you want to drop?")
         return
 
-    for i in player.inventory_items:
-        if i.startswith(item_name) or item_name in i:
-            # Place item on the floor in current room
-            player.inventory_items[i].location = "on the floor"
-            player.current.add_item(player.inventory_items[i])
+    if '*' in item_name:
+        added = []
+        item = ' '
 
-            # Clear equipped slot if dropped item was equipped
-            if player.inventory_items['equipped'] == player.inventory_items[i]:
-                player.inventory_items['equipped'] = None
+        while item:
+            item, n = _find_inventory_wildcard(player, item_name)
+            if item:
+                added.append(n)
+                _drop(player, n)
 
-            del player.inventory_items[i]
-            text_game_maker.game_print("Dropped %s" % i)
+        if not added:
+            text_game_maker._wrap_print("No matching items to %s." % word)
             return
 
-    text_game_maker._wrap_print("No %s in your inventory to %s"
-        % (item_name, word))
+        msg = text_game_maker.list_to_english(added)
+    else:
+        msg = None
+        for i in player.inventory_items:
+            if i.startswith(item_name) or item_name in i:
+                msg = i
+                _drop(player, i)
+                break
+
+        if not msg:
+            text_game_maker._wrap_print("No %s in your inventory to %s"
+                % (item_name, word))
+            return
+
+    text_game_maker.game_print("Dropped %s" % msg)
 
 def _do_speak(player, word, name):
     if not name or name.strip() == "":
@@ -179,8 +243,8 @@ def _do_loot(player, word, name):
 
 def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
-        text_game_maker._wrap_print("What printing speed would you like? "
-            "(e.g. 'print fast' or 'print slow')")
+        print ("\nWhat do you want to change about printing?%s" %
+            text_game_maker.get_print_controls())
         return
 
     if 'slow'.startswith(setting):
@@ -217,7 +281,7 @@ def _do_set_print_speed(player, word, setting):
         fields = setting.split()
         if len(fields) < 2:
             text_game_maker._wrap_print("'width' requires an extra parameter. "
-            "Please provide a line width between %d-%d (e.g. 'print width 60'"
+            "Please provide a line width between %d-%d (e.g. 'print width 60')"
                 % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
             return
 
@@ -226,7 +290,7 @@ def _do_set_print_speed(player, word, setting):
         except ValueError:
             text_game_maker._wrap_print("Don't recognise that value for "
                 "'print width'. Enter a width value as an integer (e.g. "
-                "'print width 60'")
+                "'print width 60')")
             return
 
         if (val < MIN_LINE_WIDTH) or (val > MAX_LINE_WIDTH):

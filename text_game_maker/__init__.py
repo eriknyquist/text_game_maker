@@ -425,12 +425,8 @@ def _do_listing(word_list, arg, desc):
 
     return ret
 
-def get_full_controls():
-    """
-    Returns a comprehensive listing of of all game command words
-    """
-
-    print_words = (
+def get_print_controls():
+    return (
     '\n\nWords/phrases to control how the game prints stuff\n\n'
     '    "print slow" : print game output one character at\n'
     '    a time\n\n'
@@ -439,7 +435,13 @@ def get_full_controls():
     '    0.02) to delay between characters when printing\n'
     '    slow\n\n'
     '    "print width <chars>": Set maximum line width for\n'
-    '    game output\n\n'
+    '    game output'
     )
 
-    return '\n'.join([_do_listing(*a) for a in listable_commands]) + print_words
+def get_full_controls():
+    """
+    Returns a comprehensive listing of of all game command words
+    """
+
+    return ('\n'.join([_do_listing(*a) for a in listable_commands])
+        + get_print_controls() + '\n')
