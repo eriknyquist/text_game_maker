@@ -1,5 +1,9 @@
 
-SET_PRINT_WORDS = ['print']
+PRINT_SPEED_WORDS = ['print']
+
+PRINT_DELAY_WORDS = ['print delay']
+
+PRINT_WIDTH_WORDS = ['print width']
 
 KILL_WORDS = [
     'quit', 'stop', 'finish', 'end', 'exit'
@@ -62,53 +66,6 @@ SAVE_WORDS = [
 
 LOAD_WORDS = [
     'load'
-]
-
-listable_commands = [
-    (GO_WORDS, "<direction>",
-        "Words/phrases to move the player in\n"
-        "specific direction (north, south, east,\n"
-        "west)"),
-    (EQUIP_WORDS, "<item>",
-        "Words/phrases to equip an item from\n"
-        "player\'s inventory"),
-    (TAKE_WORDS, "<item>",
-        "Words/phrases to add an item to player's\n"
-        "inventory"),
-    (DROP_WORDS, "<item>",
-        "Words/phrases to drop an item from\n"
-        "player's inventory"),
-    (SPEAK_WORDS, "<person>",
-        "Words/phrases to speak with a person\n"
-        "by name"),
-    (UNEQUIP_WORDS, "<item>",
-        "Words/phrases to unequip player's\n"
-        "equipped item (if any)"),
-    (LOOT_WORDS, "<person>",
-        "Words/phrases to loot a person by\n"
-        "name"),
-    (KILL_WORDS, "",
-        "Words/phrases to quit the game"),
-    (INSPECT_WORDS, "<item>",
-        "Words/phrases to examine an item in more\n"
-        "detail"),
-    (LOOK_WORDS, "",
-        "Words/phrases to examine your current\n"
-        "surroundings"),
-    (INVENTORY_WORDS, "",
-        "Words/phrases to show player's inventory"),
-    (SHOW_COMMAND_LIST_WORDS, "",
-        "Words/phrases to show this list of command\n"
-        "words"),
-    (HELP_WORDS, "",
-        "Words/phrases to show the basic 'help'\n"
-        "screen"),
-    (SAVE_WORDS, "",
-        "Words/phrases to save the current game state\n"
-        "to a file"),
-    (LOAD_WORDS, "",
-        "Words/phrases to load a previously saved game\n"
-        "state file")
 ]
 
 class Node(object):

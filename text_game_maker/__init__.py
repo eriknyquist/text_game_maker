@@ -6,6 +6,7 @@ import threading
 import Queue
 
 import parser
+import map_builder
 
 # Might use this later...
 #
@@ -327,5 +328,9 @@ def get_full_controls():
     Returns a comprehensive listing of of all game command words
     """
 
-    return ('\n'.join([_do_listing(*a) for a in parser.listable_commands])
-        + get_print_controls() + '\n')
+    ret = ""
+    for word_set, callback, desc, fmt in map_builder.command_table:
+        cmd = map_builder.Command(word_set, callback, desc, fmt)
+        ret += '\n' + cmd.help_text()
+
+    return ret

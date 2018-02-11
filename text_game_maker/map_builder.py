@@ -15,7 +15,32 @@ MIN_LINE_WIDTH = 50
 MAX_LINE_WIDTH = 120
 COMMAND_DELIMITERS = [',', ';', '/', '\\']
 
-def _unrecognised(player, val):
+fsm = parser.SimpleTextFSM()
+
+class Command(object):
+    """
+    Container class for data needed to execute a particular game command
+    """
+
+    def __init__(self, word_list, callback, desc, phrase_fmt):
+        self.word_list = word_list
+        self.callback = callback
+        self.desc = desc
+
+        self.desc = self.desc[0].upper() + self.desc[1:]
+        if not phrase_fmt or phrase_fmt == "":
+            self.phrase_fmt = '%s'
+        else:
+            self.phrase_fmt = phrase_fmt
+
+    def help_text(self):
+        ret = '\n' + self.desc + ':\n\n'
+        for w in self.word_list:
+            ret += ('    "' + self.phrase_fmt + '"\n') % w
+
+        return ret
+
+def _unrecognised(val):
     text_game_maker._wrap_print('Unrecognised command "%s"' % val)
 
 def _do_move(player, word, direction):
@@ -32,7 +57,7 @@ def _do_move(player, word, direction):
     elif 'west'.startswith(direction):
         player._move_west(word)
     else:
-        _unrecognised(player, direction)
+        _unrecognised(direction)
 
 def _find_best_match_item_index(player, name):
     if name.startswith('the '):
@@ -258,8 +283,7 @@ def _do_loot(player, word, name):
 
 def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
-        print ("\nWhat do you want to change about printing?%s" %
-            text_game_maker.get_print_controls())
+        text_game_maker._wrap_print("Fast or slow? e.g. 'print fast'")
         return
 
     if 'slow'.startswith(setting):
@@ -268,56 +292,53 @@ def _do_set_print_speed(player, word, setting):
     elif 'fast'.startswith(setting):
         text_game_maker.info['slow_printing'] = False
         text_game_maker._wrap_print("OK, got it.")
-    elif setting.startswith('delay'):
-        fields = setting.split()
-        if len(fields) < 2:
-            text_game_maker._wrap_print("'delay' requires an extra parameter. "
-                "Please provide a delay value in seconds (e.g. 'print delay "
-                "0.01')")
-            return
-
-        try:
-            text_game_maker.info['chardelay'] = float(fields[1])
-        except ValueError:
-            text_game_maker._wrap_print("Don't recognise that value for "
-                "'print delay'. Enter a delay value in seconds (e.g. 'print "
-                "delay 0.1')")
-            return
-
-        text_game_maker._wrap_print("OK, character print delay is set to %.2f "
-            "seconds." % text_game_maker.info['chardelay'])
-
-        if not text_game_maker.info['slow_printing']:
-            text_game_maker._wrap_print("(but it won't do anything unless "
-                "slow printing is enabled-- e.g. 'print slow' -- you fucking "
-                "idiot)")
-
-    elif setting.startswith('width'):
-        fields = setting.split()
-        if len(fields) < 2:
-            text_game_maker._wrap_print("'width' requires an extra parameter. "
-            "Please provide a line width between %d-%d (e.g. 'print width 60')"
-                % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
-            return
-
-        try:
-            val = int(fields[1])
-        except ValueError:
-            text_game_maker._wrap_print("Don't recognise that value for "
-                "'print width'. Enter a width value as an integer (e.g. "
-                "'print width 60')")
-            return
-
-        if (val < MIN_LINE_WIDTH) or (val > MAX_LINE_WIDTH):
-            text_game_maker._wrap_print("Please enter a line width between "
-                "%d-%d" % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
-            return
-
-        text_game_maker._wrap_print("OK, line width set to %d." % val)
-        text_game_maker.wrapper.width = val
-
     else:
-        text_game_maker._wrap_print("Unrecognised print command")
+        text_game_maker._wrap_print("Unrecognised speed setting '%s'. Please "
+            "say 'fast' or 'slow'.")
+
+def _do_set_print_delay(player, word, setting):
+    if not setting or setting == "":
+        text_game_maker._wrap_print("Please provide a delay value in seconds "
+                "(e.g. 'print delay 0.01')")
+        return
+
+    try:
+        text_game_maker.info['chardelay'] = float(setting)
+    except ValueError:
+        text_game_maker._wrap_print("Don't recognise that value for "
+            "'print delay'. Enter a delay value in seconds (e.g. 'print "
+            "delay 0.1')")
+        return
+
+    text_game_maker._wrap_print("OK, character print delay is set to %.2f "
+        "seconds." % text_game_maker.info['chardelay'])
+
+    if not text_game_maker.info['slow_printing']:
+        text_game_maker._wrap_print("(but it won't do anything unless "
+            "slow printing is enabled-- e.g. 'print slow' -- you fucking "
+            "idiot)")
+
+def _do_set_print_width(player, word, setting):
+    if not setting or setting == "":
+        text_game_maker._wrap_print("Please provide a line width between "
+            "%d-%d (e.g. 'print width 60')" % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
+        return
+
+    try:
+        val = int(setting)
+    except ValueError:
+        text_game_maker._wrap_print("Don't recognise that value for "
+            "'print width'. Enter a width value as an integer (e.g. "
+            "'print width 60')")
+        return
+
+    if (val < MIN_LINE_WIDTH) or (val > MAX_LINE_WIDTH):
+        text_game_maker._wrap_print("Please enter a line width between "
+            "%d-%d" % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
+        return
+
+    text_game_maker._wrap_print("OK, line width set to %d." % val)
+    text_game_maker.wrapper.width = val
 
 def _do_inspect(player, word, item):
     if item == '':
@@ -377,7 +398,14 @@ def _do_show_command_list(player, word, setting):
     print text_game_maker.get_full_controls()
 
 def _do_help(player, word, setting):
-    print text_game_maker.basic_controls
+    if not setting or setting == "":
+        print text_game_maker.basic_controls
+    else:
+        i, cmd = fsm.run(setting)
+        if cmd:
+            print cmd.help_text().rstrip('\n')
+        else:
+            _unrecognised(setting)
 
 def _check_word_set(word, word_set):
     for w in word_set:
@@ -491,39 +519,71 @@ def _is_shorthand_direction(word):
 
     return None
 
-def _parse_command(fsm, player, action):
+def _parse_command(player, action):
     if action == '':
         action = text_game_maker.info['last_command']
         print '\n' + action
 
-    i, task = fsm.run(action)
-    if task:
-        task(player, action[:i].strip(), action[i:].strip())
+    i, cmd = fsm.run(action)
+    if cmd:
+        cmd.callback(player, action[:i].strip(), action[i:].strip())
     elif _is_shorthand_direction(action):
         _do_move(player, 'go', action)
     else:
-        _unrecognised(player, action.split()[0])
+        _unrecognised(action.split()[0])
         return
 
     text_game_maker.info['last_command'] = action
 
 command_table = [
-    (parser.SET_PRINT_WORDS, _do_set_print_speed),
-    (parser.GO_WORDS, _do_move),
-    (parser.EQUIP_WORDS, _do_equip),
-    (parser.TAKE_WORDS, _do_take),
-    (parser.DROP_WORDS, _do_drop),
-    (parser.SPEAK_WORDS, _do_speak),
-    (parser.UNEQUIP_WORDS, _do_unequip),
-    (parser.LOOT_WORDS, _do_loot),
-    (parser.KILL_WORDS, _do_quit),
-    (parser.SHOW_COMMAND_LIST_WORDS, _do_show_command_list),
-    (parser.INSPECT_WORDS, _do_inspect),
-    (parser.LOOK_WORDS, _do_look),
-    (parser.INVENTORY_WORDS, _do_inventory_listing),
-    (parser.HELP_WORDS, _do_help),
-    (parser.SAVE_WORDS, _do_save),
-    (parser.LOAD_WORDS, _do_load)
+    (parser.PRINT_SPEED_WORDS, _do_set_print_speed, "set printing speed",
+        "%s fast/slow"),
+
+    (parser.PRINT_DELAY_WORDS, _do_set_print_delay, "set the per-character "
+        " print delay when slow printing is enabled", "%s <seconds>"),
+
+    (parser.PRINT_WIDTH_WORDS, _do_set_print_width, "set the maximum line "
+        "width for game output", "%s <width>"),
+
+    (parser.GO_WORDS, _do_move, "move the player (north/south/east/west)",
+        "%s <direction>"),
+
+    (parser.EQUIP_WORDS, _do_equip, "equip an item from your inventory",
+        "%s <item>"),
+
+    (parser.TAKE_WORDS, _do_take, "add an item to your inventory",
+        "%s <item>"),
+
+    (parser.DROP_WORDS, _do_drop, "drop an item from your inventory",
+        "%s <item>"),
+
+    (parser.SPEAK_WORDS, _do_speak, "speak with a person by name",
+        "%s <person>"),
+
+    (parser.UNEQUIP_WORDS, _do_unequip, "unequip your equipped item (if any)",
+        "%s <item>"),
+
+    (parser.LOOT_WORDS, _do_loot, "attempt to loot a person by name",
+        "%s <person>"),
+
+    (parser.KILL_WORDS, _do_quit, "guit the game", ""),
+
+    (parser.SHOW_COMMAND_LIST_WORDS, _do_show_command_list, "show all game "
+        "commands", ""),
+
+    (parser.INSPECT_WORDS, _do_inspect, "examine an item in more detail",
+        "%s <item>"),
+
+    (parser.LOOK_WORDS, _do_look, "examine your current surroundings", ""),
+
+    (parser.INVENTORY_WORDS, _do_inventory_listing, "show player's inventory",
+        ""),
+
+    (parser.HELP_WORDS, _do_help, "show basic help information", ""),
+
+    (parser.SAVE_WORDS, _do_save, "save the current game state to a file", ""),
+
+    (parser.LOAD_WORDS, _do_load, "load a previously saved game state file", "")
 ]
 
 class MapBuilder(object):
@@ -757,7 +817,7 @@ class MapBuilder(object):
         for c in data:
             text_game_maker.input_queue.put(c)
 
-    def _run_command_sequence(self, fsm, player, sequence):
+    def _run_command_sequence(self, player, sequence):
         # Inject commands into the input queue
         lines = '\n'.join(sequence) + '\n'
         self.inject_input(lines)
@@ -769,7 +829,7 @@ class MapBuilder(object):
 
         while text_game_maker.info['sequence_count'] > 0:
             action = text_game_maker.read_line_raw("> ").strip().lower()
-            _parse_command(fsm, player, action)
+            _parse_command(player, action)
 
         text_game_maker.info['sequence_count'] = None
 
@@ -803,10 +863,10 @@ class MapBuilder(object):
         Start running the game
         """
 
-        fsm = parser.SimpleTextFSM()
-        for word_set, callback in command_table:
+        for word_set, callback, desc, fmt in command_table:
+            cmd = Command(word_set, callback, desc, fmt)
             for word in word_set:
-                fsm.add_token(word, callback)
+                fsm.add_token(word, cmd)
 
         player = Player(self.start, self.prompt)
         menu_choices = ["New game", "Load game", "Controls"]
@@ -846,7 +906,7 @@ class MapBuilder(object):
                 delim = self._get_command_delimiter(action)
                 if delim:
                     sequence = action.lstrip(delim).split(delim)
-                    self._run_command_sequence(fsm, player, sequence)
+                    self._run_command_sequence(player, sequence)
                     continue
 
-                _parse_command(fsm, player, action.strip().lower())
+                _parse_command(player, action.strip().lower())
