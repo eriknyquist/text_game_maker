@@ -5,6 +5,8 @@ import textwrap
 import threading
 import Queue
 
+import parser
+
 # Might use this later...
 #
 #import nltk
@@ -26,71 +28,6 @@ info = {
 
 wrapper = textwrap.TextWrapper()
 wrapper.width = 60
-
-SET_PRINT_WORDS = ['print']
-
-KILL_WORDS = [
-    'quit', 'stop', 'finish', 'end', 'exit'
-]
-
-GO_WORDS = [
-    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip', 'jump',
-    'dance', 'creep', 'sneak', 'tiptoe'
-]
-
-TAKE_WORDS = [
-    'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
-]
-
-DROP_WORDS = [
-    'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete', 'undock'
-]
-
-EQUIP_WORDS = [
-    'equip', 'use', 'whip out', 'take out', 'brandish'
-]
-
-UNEQUIP_WORDS = [
-    'unequip', 'put away', 'stop using'
-]
-
-SPEAK_WORDS = [
-    'speak with', 'speak to', 'talk to', 'chat to', 'chat with', 'talk with',
-    'chat', 'speak', 'talk'
-]
-
-SHOW_COMMAND_LIST_WORDS = [
-    'show commands', 'show controls', 'show words', 'show wordlist',
-    'commands', 'controls', 'wordlist', 'words'
-]
-
-INSPECT_WORDS = [
-    'look at', 'inspect', 'examine'
-]
-
-LOOK_WORDS = [
-    'look', 'peep', 'peek', 'show', 'viddy'
-]
-
-LOOT_WORDS = [
-    'loot', 'search', 'rob', 'pickpocket'
-]
-
-INVENTORY_WORDS = [
-    'i', 'inventory'
-]
-
-HELP_WORDS = [
-    '?', 'help'
-]
-
-SAVE_WORDS = [
-    'save'
-]
-
-LOAD_WORDS = [
-    'load'
-]
 
 basic_controls = """
 Movement
@@ -210,7 +147,7 @@ def list_to_english(strlist, conj='and'):
 
 def _quit_hint():
     _wrap_print("Use %s to stop playing"
-        % (list_to_english(['"%s"' % i for i in KILL_WORDS], conj='or')))
+        % (list_to_english(['"%s"' % i for i in parser.KILL_WORDS], conj='or')))
 
 def read_line_raw(msg, cancel_word=None, default=None):
     """
@@ -363,53 +300,6 @@ def game_print(msg):
 
     print ''
 
-listable_commands = [
-    (GO_WORDS, "<direction>",
-        "Words/phrases to move the player in\n"
-        "specific direction (north, south, east,\n"
-        "west)"),
-    (EQUIP_WORDS, "<item>",
-        "Words/phrases to equip an item from\n"
-        "player\'s inventory"),
-    (TAKE_WORDS, "<item>",
-        "Words/phrases to add an item to player's\n"
-        "inventory"),
-    (DROP_WORDS, "<item>",
-        "Words/phrases to drop an item from\n"
-        "player's inventory"),
-    (SPEAK_WORDS, "<person>",
-        "Words/phrases to speak with a person\n"
-        "by name"),
-    (UNEQUIP_WORDS, "<item>",
-        "Words/phrases to unequip player's\n"
-        "equipped item (if any)"),
-    (LOOT_WORDS, "<person>",
-        "Words/phrases to loot a person by\n"
-        "name"),
-    (KILL_WORDS, "",
-        "Words/phrases to quit the game"),
-    (INSPECT_WORDS, "<item>",
-        "Words/phrases to examine an item in more\n"
-        "detail"),
-    (LOOK_WORDS, "",
-        "Words/phrases to examine your current\n"
-        "surroundings"),
-    (INVENTORY_WORDS, "",
-        "Words/phrases to show player's inventory"),
-    (SHOW_COMMAND_LIST_WORDS, "",
-        "Words/phrases to show this list of command\n"
-        "words"),
-    (HELP_WORDS, "",
-        "Words/phrases to show the basic 'help'\n"
-        "screen"),
-    (SAVE_WORDS, "",
-        "Words/phrases to save the current game state\n"
-        "to a file"),
-    (LOAD_WORDS, "",
-        "Words/phrases to load a previously saved game\n"
-        "state file")
-]
-
 def get_basic_controls():
     """
     Returns a basic overview of game command words
@@ -443,5 +333,5 @@ def get_full_controls():
     Returns a comprehensive listing of of all game command words
     """
 
-    return ('\n'.join([_do_listing(*a) for a in listable_commands])
+    return ('\n'.join([_do_listing(*a) for a in parser.listable_commands])
         + get_print_controls() + '\n')

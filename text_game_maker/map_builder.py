@@ -5,6 +5,7 @@ import os
 import fnmatch
 import errno
 
+import parser
 import text_game_maker
 from text_game_maker.tile import Tile
 from text_game_maker.item import Item
@@ -18,7 +19,7 @@ def _unrecognised(player, val):
     text_game_maker._wrap_print('Unrecognised command "%s"' % val)
 
 def _do_move(player, word, direction):
-    if not direction or direction.strip() == "":
+    if not direction or direction == "":
         text_game_maker._wrap_print("Where do you want to go?")
         return
 
@@ -91,7 +92,7 @@ def _take(player, item, loc, i):
     return True
 
 def _do_take(player, word, item_name):
-    if not item_name or item_name.strip() == "":
+    if not item_name or item_name == "":
         text_game_maker._wrap_print("What do you want to take?")
         return
 
@@ -141,7 +142,7 @@ def _drop(player, n):
     del player.inventory_items[n]
 
 def _do_drop(player, word, item_name):
-    if not item_name or item_name.strip() == "":
+    if not item_name or item_name == "":
         text_game_maker._wrap_print("What do you want to drop?")
         return
 
@@ -176,7 +177,7 @@ def _do_drop(player, word, item_name):
     text_game_maker.game_print("Dropped %s" % msg)
 
 def _do_speak(player, word, name):
-    if not name or name.strip() == "":
+    if not name or name == "":
         text_game_maker._wrap_print("Who do you want to speak to?")
         return
 
@@ -203,7 +204,7 @@ def _do_quit(player, word, name):
             sys.exit()
 
 def _do_equip(player, word, item_name):
-    if not item_name or item_name.strip() == "":
+    if not item_name or item_name == "":
         text_game_maker._wrap_print("Which inventory item do you want to %s?"
             % word)
         return
@@ -226,7 +227,7 @@ def _do_unequip(player, word, fields):
         text_game_maker.game_print('%s unequipped' % equipped.name)
 
 def _do_loot(player, word, name):
-    if not name or name.strip() == "":
+    if not name or name == "":
         text_game_maker._wrap_print("Who do you want to %s?" % word)
         return
 
@@ -476,45 +477,39 @@ def _is_shorthand_direction(word):
 
     return None
 
-def _parse_command(player, action):
+def _parse_command(fsm, player, action):
     if action == '':
         action = text_game_maker.info['last_command']
         print '\n' + action
 
-    fields = [f.strip() for f in action.split()]
-
-    for word_set, task in command_table:
-        ret = _check_word_set(action, word_set)
-        if ret:
-            task(player, ret, action[len(ret):].strip())
-            text_game_maker.info['last_command'] = action
-            return
-
-    if _is_shorthand_direction(action):
+    i, task = fsm.run(action)
+    if task:
+        task(player, action[:i].strip(), action[i:].strip())
+    elif _is_shorthand_direction(action):
         _do_move(player, 'go', action)
     else:
-        _unrecognised(player, fields[0])
+        _unrecognised(player, action.split()[0])
         return
 
     text_game_maker.info['last_command'] = action
 
 command_table = [
-    (text_game_maker.SET_PRINT_WORDS, _do_set_print_speed),
-    (text_game_maker.GO_WORDS, _do_move),
-    (text_game_maker.EQUIP_WORDS, _do_equip),
-    (text_game_maker.TAKE_WORDS, _do_take),
-    (text_game_maker.DROP_WORDS, _do_drop),
-    (text_game_maker.SPEAK_WORDS, _do_speak),
-    (text_game_maker.UNEQUIP_WORDS, _do_unequip),
-    (text_game_maker.LOOT_WORDS, _do_loot),
-    (text_game_maker.KILL_WORDS, _do_quit),
-    (text_game_maker.SHOW_COMMAND_LIST_WORDS, _do_show_command_list),
-    (text_game_maker.INSPECT_WORDS, _do_inspect),
-    (text_game_maker.LOOK_WORDS, _do_look),
-    (text_game_maker.INVENTORY_WORDS, _do_inventory_listing),
-    (text_game_maker.HELP_WORDS, _do_help),
-    (text_game_maker.SAVE_WORDS, _do_save),
-    (text_game_maker.LOAD_WORDS, _do_load)
+    (parser.SET_PRINT_WORDS, _do_set_print_speed),
+    (parser.GO_WORDS, _do_move),
+    (parser.EQUIP_WORDS, _do_equip),
+    (parser.TAKE_WORDS, _do_take),
+    (parser.DROP_WORDS, _do_drop),
+    (parser.SPEAK_WORDS, _do_speak),
+    (parser.UNEQUIP_WORDS, _do_unequip),
+    (parser.LOOT_WORDS, _do_loot),
+    (parser.KILL_WORDS, _do_quit),
+    (parser.SHOW_COMMAND_LIST_WORDS, _do_show_command_list),
+    (parser.INSPECT_WORDS, _do_inspect),
+    (parser.LOOK_WORDS, _do_look),
+    (parser.INVENTORY_WORDS, _do_inventory_listing),
+    (parser.HELP_WORDS, _do_help),
+    (parser.SAVE_WORDS, _do_save),
+    (parser.LOAD_WORDS, _do_load)
 ]
 
 class MapBuilder(object):
@@ -748,7 +743,7 @@ class MapBuilder(object):
         for c in data:
             text_game_maker.input_queue.put(c)
 
-    def _run_command_sequence(self, player, sequence):
+    def _run_command_sequence(self, fsm, player, sequence):
         # Inject commands into the input queue
         lines = '\n'.join(sequence) + '\n'
         self.inject_input(lines)
@@ -760,7 +755,7 @@ class MapBuilder(object):
 
         while text_game_maker.info['sequence_count'] > 0:
             action = text_game_maker.read_line_raw("> ").strip().lower()
-            _parse_command(player, action)
+            _parse_command(fsm, player, action)
 
         text_game_maker.info['sequence_count'] = None
 
@@ -793,6 +788,11 @@ class MapBuilder(object):
         """
         Start running the game
         """
+
+        fsm = parser.SimpleTextFSM()
+        for word_set, callback in command_table:
+            for word in word_set:
+                fsm.add_token(word, callback)
 
         player = Player(self.start, self.prompt)
         menu_choices = ["New game", "Load game", "Controls"]
@@ -831,7 +831,7 @@ class MapBuilder(object):
                 delim = self._get_command_delimiter(action)
                 if delim:
                     sequence = action.lstrip(delim).split(delim)
-                    self._run_command_sequence(player, sequence)
+                    self._run_command_sequence(fsm, player, sequence)
                     continue
 
-                _parse_command(player, action.strip().lower())
+                _parse_command(fsm, player, action.strip().lower())
