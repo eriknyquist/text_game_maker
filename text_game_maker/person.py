@@ -57,7 +57,7 @@ class Person(object):
         :param str msg: message to print informing player of person's death
         """
 
-        p, loc, i = map_builder._find_closest_match_person_index(player,
+        p, loc, i = map_builder._find_best_match_person_index(player,
             self.name)
         del player.current.people[loc][i]
 

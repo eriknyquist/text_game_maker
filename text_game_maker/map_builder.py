@@ -34,7 +34,10 @@ def _do_move(player, word, direction):
     else:
         _unrecognised(player, direction)
 
-def _find_closest_match_item_index(player, name):
+def _find_best_match_item_index(player, name):
+    if name.startswith('the '):
+        name = name[4:]
+
     for loc in player.current.items:
         itemlist = player.current.items[loc]
         for i in range(len(itemlist)):
@@ -54,6 +57,9 @@ def _find_closest_match_item_index(player, name):
     return None, None, -1
 
 def _find_wildcard_match(player, name):
+    if name.startswith('the '):
+        name = name[4:]
+
     ret = []
     for loc in player.current.items:
         itemlist = player.current.items[loc]
@@ -63,7 +69,7 @@ def _find_wildcard_match(player, name):
 
     return None, None, None
 
-def _find_closest_match_person_index(player, name):
+def _find_best_match_person_index(player, name):
     for loc in player.current.people:
         itemlist = player.current.people[loc]
         for i in range(len(itemlist)):
@@ -81,6 +87,16 @@ def _find_closest_match_person_index(player, name):
                 return curr, loc, i
 
     return None, None, -1
+
+def _find_best_match_inventory_item(player, name):
+    if name.startswith('the '):
+        name = name[4:]
+
+    for n in player.inventory_items:
+        if n.startswith(name) or name in n:
+            return n
+
+    return None
 
 def _take(player, item, loc, i):
     # If on_take callback returns false, abort adding this item
@@ -111,7 +127,7 @@ def _do_take(player, word, item_name):
 
         msg = text_game_maker.list_to_english(added)
     else:
-        item, loc, i  = _find_closest_match_item_index(player, item_name)
+        item, loc, i  = _find_best_match_item_index(player, item_name)
         if i < 0:
             text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
             return
@@ -146,6 +162,7 @@ def _do_drop(player, word, item_name):
         text_game_maker._wrap_print("What do you want to drop?")
         return
 
+    msg = None
     if '*' in item_name:
         added = []
         item = ' '
@@ -162,17 +179,14 @@ def _do_drop(player, word, item_name):
 
         msg = text_game_maker.list_to_english(added)
     else:
-        msg = None
-        for i in player.inventory_items:
-            if i.startswith(item_name) or item_name in i:
-                msg = i
-                _drop(player, i)
-                break
-
-        if not msg:
+        n = _find_best_match_inventory_item(player, item_name)
+        if not n:
             text_game_maker._wrap_print("No %s in your inventory to %s"
                 % (item_name, word))
             return
+
+        _drop(player, n)
+        msg = n
 
     text_game_maker.game_print("Dropped %s" % msg)
 
@@ -181,7 +195,7 @@ def _do_speak(player, word, name):
         text_game_maker._wrap_print("Who do you want to speak to?")
         return
 
-    p, loc, i = _find_closest_match_person_index(player, name)
+    p, loc, i = _find_best_match_person_index(player, name)
     if i < 0:
         text_game_maker._wrap_print("Don't know who %s is" % name)
         return
@@ -209,14 +223,14 @@ def _do_equip(player, word, item_name):
             % word)
         return
 
-    for i in player.inventory_items:
-        if i.startswith(item_name) or item_name in i:
-            text_game_maker.game_print("Equipped %s" % i)
-            player.inventory_items['equipped'] = player.inventory_items[i]
-            return
+    n = _find_best_match_inventory_item(player, item_name)
+    if not n:
+        text_game_maker._wrap_print("No %s in your inventory to %s"
+            % (item_name, word))
+        return
 
-    text_game_maker._wrap_print("No %s in your inventory to %s"
-        % (item_name, word))
+    text_game_maker.game_print("Equipped %s" % n)
+    player.inventory_items['equipped'] = player.inventory_items[n]
 
 def _do_unequip(player, word, fields):
     equipped = player.inventory_items['equipped']
@@ -231,7 +245,7 @@ def _do_loot(player, word, name):
         text_game_maker._wrap_print("Who do you want to %s?" % word)
         return
 
-    p, loc, i = _find_closest_match_person_index(player, name)
+    p, loc, i = _find_best_match_person_index(player, name)
     if p.is_alive():
         text_game_maker.game_print("You are dead.")
         text_game_maker.game_print("You were caught trying to %s %s."
@@ -310,9 +324,9 @@ def _do_inspect(player, word, item):
         _do_look(player, word, item)
         return
 
-    target, loc, i = _find_closest_match_item_index(player, item)
+    target, loc, i = _find_best_match_item_index(player, item)
     if i < 0:
-        target, loc, i = _find_closest_match_person_index(player, item)
+        target, loc, i = _find_best_match_person_index(player, item)
         if i < 0:
             text_game_maker._wrap_print("No %s available to %s" % (item, word))
             return
@@ -825,7 +839,8 @@ class MapBuilder(object):
                     text_game_maker.game_print(player.current_state())
                     break
 
-                action = text_game_maker.read_line_raw("%s" % player.prompt)
+                raw = text_game_maker.read_line_raw("%s" % player.prompt)
+                action = ' '.join(raw.split())
                 self._do_scheduled_tasks(player)
 
                 delim = self._get_command_delimiter(action)

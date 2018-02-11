@@ -80,16 +80,10 @@ Misc
 
 * Use words like 'look' or 'show' to be reminded of your current surroundings
 
-* Use 'print slow' to set printing mode to print one character at a time
-  (looks cool for about 3 seconds)
+* Use 'help' or '?' to show this printout
 
-* Use 'print fast' to set printing mode to normal printing
-
-* Use 'print delay <seconds>', where '<seconds>' is a float value reprenting
-  the number of seconds to delay between printing each charcter when slow
-  printing is enabled.
-
-* Use 'help' or '?' to show this information
+* Use 'help' with a game command, e.g. 'help speak', to show information about
+  that particular command
 
 * Use 'controls' or 'commands' or 'words' or 'show words'... etc. to show a
   comprehensive listing of game commands"""
