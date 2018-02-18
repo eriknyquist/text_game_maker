@@ -1,5 +1,5 @@
 
-PRINT_SPEED_WORDS = ['print']
+PRINT_SPEED_WORDS = ['print speed']
 
 PRINT_DELAY_WORDS = ['print delay']
 
@@ -23,7 +23,7 @@ DROP_WORDS = [
 ]
 
 EQUIP_WORDS = [
-    'equip', 'use', 'whip out', 'take out', 'brandish'
+    'equip', 'use', 'whip out', 'brandish'
 ]
 
 UNEQUIP_WORDS = [
@@ -69,10 +69,12 @@ LOAD_WORDS = [
 ]
 
 class Node(object):
-    def __init__(self, char, token=None):
+    def __init__(self, char, token=None, text=None):
         self.char = char
         self.children = {}
+        self.parent = None
         self.token = token
+        self.text = text
 
     def __str__(self):
         return self.char
@@ -83,8 +85,9 @@ class Node(object):
 class SimpleTextFSM(object):
     def __init__(self):
         self.start = Node('')
+        self.current = self.start
 
-    def add_token(self, string, token):
+    def _extend_fsm(self, string, token):
         current = self.start
         for c in string:
             if c not in current.children:
@@ -93,27 +96,52 @@ class SimpleTextFSM(object):
             current = current.children[c]
         
         current.token = token
+        current.text = string
 
-    def _dump(self, node):
+    def add_token(self, string, token):
+        self._extend_fsm(string, token)
+        self._extend_fsm(string + ' ', token)
+
+    def _dump_json(self, node):
         ret = {}
         for c in node.children:
-            ret[c] = self._dump(node.children[c])
+            ret[c] = self._dump_json(node.children[c])
 
         return ret
 
     def dump_tree(self):
         return json.dumps(self._dump(self.start), indent=2)
 
+    def _dump_text(self, node):
+        ret = []
+        for c in node.children:
+            child = node.children[c]
+            if not child.text or child.text == "":
+                ret.extend(self._dump_text(child))
+            else:
+                ret.append(child.text)
+
+        return ret
+
+    def get_children(self):
+        ret = []
+
+        if self.current.text and self.current.text != "":
+            ret.append(self.current.text)
+
+        ret.extend(self._dump_text(self.current))
+        return ret
+
     def run(self, input_string):
-        current = self.start
+        self.current = self.start
         i = 0
 
         for c in input_string:
             try:
-                current = current.children[c]
+                self.current = self.current.children[c]
             except KeyError, AttributeError:
-                return i, current.token
+                return i, self.current.token
 
             i += 1
 
-        return i, current.token
+        return i, self.current.token

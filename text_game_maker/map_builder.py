@@ -43,6 +43,33 @@ class Command(object):
 def _unrecognised(val):
     text_game_maker._wrap_print('Unrecognised command "%s"' % val)
 
+def _parser_suggestions(text, i):
+    _unrecognised(text)
+
+    if i > 0:
+        print ('\nDid you mean...\n\n%s'
+            % ('\n'.join(['  %s' % w for w in fsm.get_children()])))
+
+def _find_word_end(string, i):
+    while i < len(string):
+        if string[i] == ' ':
+            return i
+
+        i += 1
+
+    return len(string)
+
+def _run_fsm(action):
+    i, cmd = fsm.run(action)
+    if  i > 0 and i < len(action) and action[i - 1] != ' ':
+        _parser_suggestions(action[:_find_word_end(action, i)], i)
+        return i, None
+    elif not cmd:
+        _parser_suggestions(action, i)
+        return i, None
+
+    return i, cmd
+
 def _do_move(player, word, direction):
     if not direction or direction == "":
         text_game_maker._wrap_print("Where do you want to go?")
@@ -401,11 +428,9 @@ def _do_help(player, word, setting):
     if not setting or setting == "":
         print text_game_maker.basic_controls
     else:
-        i, cmd = fsm.run(setting)
+        i, cmd = _run_fsm(setting)
         if cmd:
             print cmd.help_text().rstrip('\n')
-        else:
-            _unrecognised(setting)
 
 def _check_word_set(word, word_set):
     for w in word_set:
@@ -524,14 +549,12 @@ def _parse_command(player, action):
         action = text_game_maker.info['last_command']
         print '\n' + action
 
-    i, cmd = fsm.run(action)
-    if cmd:
-        cmd.callback(player, action[:i].strip(), action[i:].strip())
-    elif _is_shorthand_direction(action):
+    if _is_shorthand_direction(action):
         _do_move(player, 'go', action)
     else:
-        _unrecognised(action.split()[0])
-        return
+        i, cmd = _run_fsm(action)
+        if cmd:
+            cmd.callback(player, action[:i].strip(), action[i:].strip())
 
     text_game_maker.info['last_command'] = action
 
