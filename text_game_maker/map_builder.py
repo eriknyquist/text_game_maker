@@ -8,7 +8,7 @@ import errno
 import parser
 import text_game_maker
 from text_game_maker.tile import Tile
-from text_game_maker.item import Item
+from text_game_maker.items import Item
 from text_game_maker.player import Player
 
 MIN_LINE_WIDTH = 50
@@ -39,6 +39,13 @@ class Command(object):
             ret += ('    "' + self.phrase_fmt + '"\n') % w
 
         return ret
+
+def _translate(val, min1, max1, min2, max2):
+    span1 = max1 - min1
+    span2 = max2 - min2
+
+    scaled = float(val - min1) / float(span1)
+    return min2 + (scaled * span2)
 
 def _unrecognised(val):
     text_game_maker._wrap_print('Unrecognised command "%s"' % val)
@@ -146,7 +153,7 @@ def _find_best_match_inventory_item(player, name):
 
     for n in player.inventory_items:
         if n.startswith(name) or name in n:
-            return n
+                return player.inventory_items[n]
 
     return None
 
@@ -156,12 +163,48 @@ def _take(player, item, loc, i):
         return False
 
     player.inventory_items[item.name] = item
-    del player.current.items[loc][i]
+    player.current.delete_item(item)
     return True
+
+def _do_eat(player, word, item_name):
+    if not item_name or item_name == "":
+        text_game_maker._wrap_print("What do you want to %s?" % word)
+        return
+
+    inventory_item = True
+    item = _find_best_match_inventory_item(player, item_name)
+    if not item:
+        item, loc, i  = _find_best_match_item_index(player, item_name)
+        if i < 0:
+            text_game_maker._wrap_print("No %s available to %s" % (item_name,
+                word))
+            return
+        else:
+            inventory_item = False
+
+    if item.edible:
+        msg = "You %s the %s and gain %d energy points" % (word, item.name,
+            item.energy)
+
+        if inventory_item:
+            player.delete_item(item)
+        else:
+            player.current.delete_item(item)
+
+        player.increment_energy(item.energy)
+
+    else:
+        msg = ("You try your best to %s the %s, but you fail, and injure "
+            "yourself. You lose %d health points" % (word, item.name,
+            item.damage))
+
+        player.decrement_health(item.damage)
+
+    text_game_maker.game_print(msg)
 
 def _do_take(player, word, item_name):
     if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to take?")
+        text_game_maker._wrap_print("What do you want to %s?" % word)
         return
 
     if '*' in item_name:
@@ -200,14 +243,10 @@ def _find_inventory_wildcard(player, name):
 
 def _drop(player, n):
     # Place item on the floor in current room
-    player.inventory_items[n].location = "on the floor"
-    player.current.add_item(player.inventory_items[n])
-
-    # Clear equipped slot if dropped item was equipped
-    if player.inventory_items['equipped'] == player.inventory_items[n]:
-        player.inventory_items['equipped'] = None
-
-    del player.inventory_items[n]
+    item = player.inventory_items[n]
+    item.location = "on the floor"
+    player.current.add_item(item)
+    player.delete_item(item)
 
 def _do_drop(player, word, item_name):
     if not item_name or item_name == "":
@@ -231,14 +270,14 @@ def _do_drop(player, word, item_name):
 
         msg = text_game_maker.list_to_english(added)
     else:
-        n = _find_best_match_inventory_item(player, item_name)
-        if not n:
+        item = _find_best_match_inventory_item(player, item_name)
+        if not item:
             text_game_maker._wrap_print("No %s in your inventory to %s"
                 % (item_name, word))
             return
 
-        _drop(player, n)
-        msg = n
+        _drop(player, item.name)
+        msg = item.name
 
     text_game_maker.game_print("Dropped %s" % msg)
 
@@ -275,14 +314,14 @@ def _do_equip(player, word, item_name):
             % word)
         return
 
-    n = _find_best_match_inventory_item(player, item_name)
-    if not n:
+    item = _find_best_match_inventory_item(player, item_name)
+    if not item:
         text_game_maker._wrap_print("No %s in your inventory to %s"
             % (item_name, word))
         return
 
-    text_game_maker.game_print("Equipped %s" % n)
-    player.inventory_items['equipped'] = player.inventory_items[n]
+    text_game_maker.game_print("Equipped %s" % item.name)
+    player.inventory_items['equipped'] = player.inventory_items[item.name]
 
 def _do_unequip(player, word, fields):
     equipped = player.inventory_items['equipped']
@@ -396,14 +435,32 @@ def _centre_line(string, line_width):
     spaces = ' ' * (diff / 2)
     return spaces + string + spaces
 
+def _int_meter(name, val, maxval):
+    hp_width = 17
+    scaled = int(_translate(val, 1, maxval, 1, hp_width))
+
+    nums = "(%d/%d)" % (val, maxval)
+    bar = "[" + ('=' * scaled) + (' ' * (hp_width - scaled)) + "]"
+
+    return "%-10s%-10s %10s" % (name, nums, bar)
+
+def _player_health_listing(player):
+    return (
+        _int_meter("health", player.health, player.max_health) + '\n'
+        + _int_meter("energy", player.energy, player.max_energy) + '\n'
+        + _int_meter("power", player.power, player.max_power)
+    )
+
 def _do_inventory_listing(player, word, setting):
-    banner = "--------------- INVENTORY ---------------"
+    banner = "--------------- INVENTORY --------------"
     name_line = "%s %s's" % (player.title, player.name)
 
     print '\n' + banner + '\n'
+    print _player_health_listing(player) + '\n'
+
     print _centre_line(name_line, len(banner))
-    print _centre_line('possessions', len(banner)) + '\n'
-    print "\n{0:35}{1:1}({2})".format('COINS', "", player.coins)
+    print _centre_line('possessions', len(banner))
+    print "\n{0:33}{1:1}({2})".format('COINS', "", player.coins)
 
     if len(player.inventory_items) > 1:
         print ''
@@ -417,9 +474,9 @@ def _do_inventory_listing(player, word, setting):
             if player.inventory_items[i] is player.inventory_items['equipped']:
                 msg += " (equipped)"
 
-            print "{0:35}{1:1}({2})".format(msg, "", item.value)
+            print "{0:33}{1:1}({2})".format(msg, "", item.value)
 
-    print"\n-----------------------------------------"
+    print"\n----------------------------------------"
 
 def _do_show_command_list(player, word, setting):
     print text_game_maker.get_full_controls()
@@ -431,13 +488,6 @@ def _do_help(player, word, setting):
         i, cmd = _run_fsm(setting)
         if cmd:
             print cmd.help_text().rstrip('\n')
-
-def _check_word_set(word, word_set):
-    for w in word_set:
-        if word.startswith(w):
-            return w
-
-    return None
 
 def _get_next_unused_save_id(save_dir):
     default_num = 1
@@ -467,7 +517,7 @@ def _do_load(player, word, setting):
     if ret:
         files = [os.path.basename(x) for x in ret]
         files.sort()
-        files.append("None of these (let me enter a path)")
+        files.append("None of these (let me enter a path to a save file)")
 
         index = text_game_maker.ask_multiple_choice(files,
             "Which save file would you like to load?")
@@ -476,7 +526,7 @@ def _do_load(player, word, setting):
             return False
 
         if index < (len(files) - 1):
-            filename = ret[index]
+            filename = os.path.join(_get_save_dir(), files[index])
     else:
         text_game_maker._wrap_print("No save files found. Put save files in "
             "%s, otherwise you can enter the full path to an alternate save "
@@ -557,6 +607,7 @@ def _parse_command(player, action):
             cmd.callback(player, action[:i].strip(), action[i:].strip())
 
     text_game_maker.info['last_command'] = action
+    player.turns += 1
 
 command_table = [
     (parser.PRINT_SPEED_WORDS, _do_set_print_speed, "set printing speed",
@@ -585,6 +636,8 @@ command_table = [
 
     (parser.UNEQUIP_WORDS, _do_unequip, "unequip your equipped item (if any)",
         "%s <item>"),
+
+    (parser.EAT_WORDS, _do_eat, "eat something", "%s <item>"),
 
     (parser.LOOT_WORDS, _do_loot, "attempt to loot a person by name",
         "%s <person>"),
@@ -858,25 +911,19 @@ class MapBuilder(object):
 
     def _do_scheduled_tasks(self, player):
         for task_id in list(player.scheduled_tasks):
-            callback, seconds, start = player.scheduled_tasks[task_id]
-            if time.time() >= (start + seconds):
-                callback(player)
-                del player.scheduled_tasks[task_id]
-
-    def _reset_scheduled_tasks(self, player):
-        new = {}
-        for i in player.scheduled_tasks:
-            callback, seconds, start = player.scheduled_tasks[i]
-            new[i] = (callback, seconds, time.time())
-
-        player.scheduled_tasks = new
+            callback, turns, start = player.scheduled_tasks[task_id]
+            if player.turns >= (start + turns):
+                if callback(player):
+                    new = (callback, turns, player.turns)
+                    player.scheduled_tasks[task_id] = new
+                else:
+                    del player.scheduled_tasks[task_id]
 
     def _load_state(self, player, filename):
         loaded_file = player.load_from_file
         with open(player.load_from_file, 'r') as fh:
             ret = pickle.load(fh)
 
-        self._reset_scheduled_tasks(ret)
         ret.loaded_file = loaded_file
         ret.load_from_file = None
         return ret

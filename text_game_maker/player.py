@@ -2,6 +2,8 @@ import time
 import pickle
 import text_game_maker
 
+MOVE_ENERGY_COST = 0.25
+
 class Player(object):
     """
     Base class to hold player related methods & data
@@ -12,6 +14,15 @@ class Player(object):
         :param text_game_maker.tile.Tile start_tile: Game starting tile
         :param str input_prompt: Custom string to prompt player for game input
         """
+
+        self.turns = 0
+        self.max_health = 100
+        self.max_energy = 100
+        self.max_power = 100
+
+        self.health = self.max_health
+        self.energy = 25
+        self.power = 10
 
         self.loaded_file = None
         self.load_from_file = None
@@ -27,6 +38,52 @@ class Player(object):
         self.inventory_items = {'equipped': None}
         self.name = "john"
         self.title = "sir"
+
+    def _dec_clamp(self, curr, val, min_val):
+        if curr == min_val:
+            return 0
+
+        if curr - val < min_val:
+            return min_val + curr
+
+        return val
+
+    def _inc_clamp(self, curr, val, max_val):
+        if  curr == max_val:
+            return 0
+
+        if curr + val > max_val:
+            return max_val - curr
+
+        return val
+
+    def increment_energy(self, val=1):
+        inc = self._inc_clamp(self.energy, val, self.max_energy)
+        if inc > 0:
+            self.energy += inc
+
+        return inc
+
+    def decrement_energy(self, val=1):
+        dec = self._dec_clamp(self.energy, val, 0)
+        if dec > 0:
+            self.energy -= dec
+
+        return dec
+
+    def increment_health(self, val=1):
+        inc = self._inc_clamp(self.health, val, self.max_health)
+        if inc > 0:
+            self.health += inc
+
+        return inc
+
+    def decrement_health(self, val=1):
+        dec = self._dec_clamp(self.health, val, 0)
+        if dec > 0:
+            self.health -= dec
+
+        return dec
 
     def save_state(self, filename):
         with open(filename, 'w') as fh:
@@ -63,7 +120,20 @@ class Player(object):
         text_game_maker.game_print(move_message + ".")
         text_game_maker.game_print(self.current_state())
 
+        self.decrement_energy(MOVE_ENERGY_COST)
         return dest
+
+    def delete_item(self, item):
+        """
+        Delete an item from the player's inventory
+
+        :param text_game_maker.items.Item item: item to delete
+        """
+
+        if item.name in self.inventory_items:
+            del self.inventory_items[item.name]
+            if self.inventory_items['equipped'] == item:
+                self.inventory_items['equipped'] = None
 
     def set_name(self, name):
         """
@@ -112,12 +182,12 @@ class Player(object):
             del self.inventory_items[equipped.name]
             self.inventory_items['equipped'] = None
 
-    def schedule_task(self, callback, seconds=10):
+    def schedule_task(self, callback, turns=1):
         """
-        Add a function that will be invoked whenever some player input is next
-        received *and* a specific time has elapsed.
+        Add a function that will be invoked after the player has taken some
+        number of turns
 
-        The function should accept one parameter:
+        The function should accept one parameter, and return a bool:
 
             def callback(player):
                 pass
@@ -125,6 +195,9 @@ class Player(object):
             Callback parameters:
 
             * *player* (text_game_maker.player.Player): player instance
+
+            * *Return value* (bool): if True, this task will be scheduled
+              again with the same number of turns
 
         :param str callback: function that returns the message to print
         :param float seconds: time delay in seconds before the message can be\
@@ -134,7 +207,7 @@ class Player(object):
         """
 
         ret = self.task_id
-        self.scheduled_tasks[self.task_id] = (callback, seconds, time.time())
+        self.scheduled_tasks[self.task_id] = (callback, turns, self.turns)
         self.task_id = (self.task_id + 1) % self.max_task_id
         return ret
 

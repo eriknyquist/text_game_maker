@@ -113,6 +113,19 @@ class Tile(object):
 
         self.items[item.location].append(item)
 
+    def delete_item(self, item):
+        if item.location not in self.items:
+            return
+
+        for i in range(len(self.items[item.location])):
+            if item == self.items[item.location][i]:
+                del self.items[item.location][i]
+
+                if not self.items[item.location]:
+                    del self.items[item.location]
+
+                return
+
     def add_person(self, person):
         if person.location not in self.people:
             self.people[person.location] = []

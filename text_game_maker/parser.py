@@ -1,4 +1,3 @@
-
 PRINT_SPEED_WORDS = ['print speed']
 
 PRINT_DELAY_WORDS = ['print delay']
@@ -14,6 +13,10 @@ GO_WORDS = [
     'dance', 'creep', 'sneak', 'tiptoe'
 ]
 
+EAT_WORDS = [
+    'eat', 'scoff', 'swallow', 'ingest', 'consume'
+]
+
 TAKE_WORDS = [
     'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
 ]
@@ -23,7 +26,7 @@ DROP_WORDS = [
 ]
 
 EQUIP_WORDS = [
-    'equip', 'use', 'whip out', 'brandish'
+    'equip', 'use', 'whip out', 'brandish', 'take out', 'get out'
 ]
 
 UNEQUIP_WORDS = [
@@ -116,10 +119,11 @@ class SimpleTextFSM(object):
         ret = []
         for c in node.children:
             child = node.children[c]
-            if not child.text or child.text == "":
-                ret.extend(self._dump_text(child))
-            else:
+
+            if child.text and child.text != "" and c != ' ':
                 ret.append(child.text)
+
+            ret.extend(self._dump_text(child))
 
         return ret
 

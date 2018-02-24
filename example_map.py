@@ -1,7 +1,7 @@
 import sys
 
 import text_game_maker as gamemaker
-from text_game_maker.item import Item
+from text_game_maker.items import Item, Food, Weapon
 from text_game_maker.person import Person
 from text_game_maker.map_builder import MapBuilder
 
@@ -131,9 +131,9 @@ def main():
     )
 
     builder.add_item(Item("a", "metal key", "on the floor", 12))
-    builder.add_item(Item("a", "sausage", "on the floor", 5))
+    builder.add_item(Food("a", "sausage", "on the floor", 5, 10))
 
-    crowbar = Item("a", "crowbar", "", 25)
+    crowbar = Weapon("a", "crowbar", "", 25, 15)
     builder.add_person(
         Person(
             "Alan", "standing in the corner", on_speak=alan_speak_callback,
@@ -154,7 +154,7 @@ def main():
         upright"""
     )
 
-    builder.add_item(Item("a", "lemon", "in the corner", 8))
+    builder.add_item(Food("a", "lemon", "in the corner", 8, 5))
     builder.add_item(Item("a", "treasure map", "on the wall", 2))
 
     builder.set_locked()

@@ -8,8 +8,7 @@ class Item(object):
     Base class for collectable item
     """
 
-    def __init__(self, prefix, name, location=None, value=None,
-            on_take=None, on_look=None):
+    def __init__(self, prefix, name, location, value):
         """
         Initialises an Item instance
 
@@ -25,16 +24,15 @@ class Item(object):
             details)
         """
 
+        self.edible = True
+        self.energy = 0
+        self.damage = 1
         self.value = value
         self.name = name
         self.prefix = prefix
         self.location = location
-        self.on_take = on_take
-
-        if on_look:
-            self.on_look = on_look
-        else:
-            self.on_look = _default_on_look
+        self.on_take = None
+        self.on_look = _default_on_look
 
     def set_prefix(self, prefix):
         """
@@ -111,5 +109,31 @@ class Item(object):
         text_game_maker._verify_callback(callback)
         self.on_take = callback
 
+    def __eq__(self, other):
+        return other and self.name == other.name
+
+    def __neq__(self, other):
+        return not self.__eq__(other)
+
     def __str__(self):
         return '%s %s' % (self.prefix, self.name)
+
+class Weapon(Item):
+    """
+    Class to represent a weapon
+    """
+
+    def __init__(self, prefix, name, location, value, damage):
+        super(Weapon, self).__init__(prefix, name, location, value)
+        self.edible = False
+        self.damage = damage
+
+class Food(Item):
+    """
+    Class to represent a food item
+    """
+
+    def __init__(self, prefix, name, location, value, energy):
+        super(Food, self).__init__(prefix, name, location, value)
+        self.energy = energy
+
