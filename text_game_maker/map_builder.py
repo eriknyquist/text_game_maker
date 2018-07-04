@@ -287,17 +287,24 @@ def _do_speak(player, word, name):
         return
 
     p, loc, i = _find_best_match_person_index(player, name)
-    if i < 0:
-        text_game_maker._wrap_print("Don't know who %s is" % name)
-        return
+    if i >= 0:
+        itemname = p.name
+    else:
+        p, loc, i = _find_best_match_item_index(player, name)
+        if i < 0:
+            text_game_maker._wrap_print("Don't know who %s is" % name)
+            return
 
-    text_game_maker.game_print('You speak to %s.' % p.name)
+        itemname = 'the ' + p.name
+
+    text_game_maker.game_print('You speak to %s.' % itemname)
     if p.is_alive():
         response = p.on_speak(p, player)
         if response:
             p.say(response)
     else:
-        text_game_maker.game_print('%s says nothing.' % p.name)
+        text_game_maker.game_print('%s says nothing.' % itemname)
+
 
 def _do_quit(player, word, name):
     ret = text_game_maker.ask_yes_no("really stop playing?")

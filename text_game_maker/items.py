@@ -34,6 +34,9 @@ class Item(object):
         self.on_take = None
         self.on_look = _default_on_look
 
+    def is_alive(self):
+        return False
+
     def set_prefix(self, prefix):
         """
         Set item prefix word (usually 'an' or 'a')
