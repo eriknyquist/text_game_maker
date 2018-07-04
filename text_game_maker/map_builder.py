@@ -300,13 +300,11 @@ def _do_speak(player, word, name):
         text_game_maker.game_print('%s says nothing.' % p.name)
 
 def _do_quit(player, word, name):
-    ret = "z"
-    while (not 'yes'.startswith(ret)) and (not 'no'.startswith(ret)):
-        ret = text_game_maker.ask_yes_no("really stop playing?")
-        if ret < 0:
-            return
-        elif ret:
-            sys.exit()
+    ret = text_game_maker.ask_yes_no("really stop playing?")
+    if ret < 0:
+        return
+    elif ret:
+        sys.exit()
 
 def _do_equip(player, word, item_name):
     if not item_name or item_name == "":
