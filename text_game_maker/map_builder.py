@@ -99,21 +99,12 @@ def _find_best_match_item_index(player, name):
 
     for loc in player.current.items:
         itemlist = player.current.items[loc]
-        for i in range(len(itemlist)):
-            curr = itemlist[i]
+        for item in itemlist:
+            if (item.name.lower().startswith(name.lower())
+                    or name.lower() in item.name.lower()):
+                return item
 
-            if curr.name.lower().startswith(name.lower()):
-                return curr, loc, i
-
-    for loc in player.current.items:
-        itemlist = player.current.items[loc]
-        for i in range(len(itemlist)):
-            curr = itemlist[i]
-
-            if name.lower() in curr.name.lower():
-                return curr, loc, i
-
-    return None, None, -1
+    return None
 
 def _find_wildcard_match(player, name):
     if name.startswith('the '):
@@ -121,49 +112,45 @@ def _find_wildcard_match(player, name):
 
     ret = []
     for loc in player.current.items:
-        itemlist = player.current.items[loc]
-        for i in range(len(itemlist)):
-            if fnmatch.fnmatch(itemlist[i].name, name):
-                return itemlist[i], loc, i
+        for item in player.current.items[loc]:
+            if fnmatch.fnmatch(item.name, name):
+                return item
 
-    return None, None, None
+    return None
 
 def _find_best_match_person_index(player, name):
     for loc in player.current.people:
         itemlist = player.current.people[loc]
-        for i in range(len(itemlist)):
-            curr = itemlist[i]
+        for item in itemlist:
+            if (item.name.lower().startswith(name.lower())
+                    or name.lower() in item.name.lower()):
+                return item
 
-            if curr.name.lower().startswith(name.lower()):
-                return curr, loc, i
-
-    for loc in player.current.people:
-        itemlist = player.current.people[loc]
-        for i in range(len(itemlist)):
-            curr = itemlist[i]
-
-            if name.lower() in curr.name.lower():
-                return curr, loc, i
-
-    return None, None, -1
+    return None
 
 def _find_best_match_inventory_item(player, name):
     if name.startswith('the '):
         name = name[4:]
 
-    for n in player.inventory_items:
-        if n.startswith(name) or name in n:
-                return player.inventory_items[n]
+    for item in player.inventory['equipped']:
+        if item.name.startswith(name) or name in item.name:
+                return item
+
+    for item in player.inventory['unequipped']:
+        if item.name.startswith(name) or name in item.name:
+                return item
 
     return None
 
-def _take(player, item, loc, i):
+def _take(player, item):
     # If on_take callback returns false, abort adding this item
-    if item.on_take and not item.on_take(player):
+    if not item.on_take(player):
         return False
 
-    player.inventory_items[item.name] = item
-    player.current.delete_item(item)
+    player.inventory['unequipped'].append(item)
+    item.delete()
+
+    item.home = player.inventory['unequipped']
     return True
 
 def _do_eat(player, word, item_name):
@@ -171,36 +158,19 @@ def _do_eat(player, word, item_name):
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
 
-    inventory_item = True
     item = _find_best_match_inventory_item(player, item_name)
     if not item:
-        item, loc, i  = _find_best_match_item_index(player, item_name)
-        if i < 0:
-            text_game_maker._wrap_print("No %s available to %s" % (item_name,
-                word))
-            return
-        else:
-            inventory_item = False
+        item = _find_best_match_item_index(player, item_name)
+        if not item:
+            item  = _find_best_match_person_index(player, item_name)
+            if not item:
+                text_game_maker._wrap_print("No %s available to %s"
+                    % (item_name, word))
+                return
 
-    if item.edible:
-        msg = "You %s the %s and gain %d energy points" % (word, item.name,
-            item.energy)
-
-        if inventory_item:
-            player.delete_item(item)
-        else:
-            player.current.delete_item(item)
-
-        player.increment_energy(item.energy)
-
-    else:
-        msg = ("You try your best to %s the %s, but you fail, and injure "
-            "yourself. You lose %d health points" % (word, item.name,
-            item.damage))
-
-        player.decrement_health(item.damage)
-
-    text_game_maker.game_print(msg)
+    msg = item.on_eat(player, word)
+    if msg:
+        text_game_maker.game_print(msg)
 
 def _do_take(player, word, item_name):
     if not item_name or item_name == "":
@@ -212,41 +182,45 @@ def _do_take(player, word, item_name):
         item = ' '
 
         while item:
-            item, loc, i = _find_wildcard_match(player, item_name)
-            if item and _take(player, item, loc, i):
+            item = _find_wildcard_match(player, item_name)
+            if item and _take(player, item):
                 added.append(item.name)
 
         if not added:
-            text_game_maker._wrap_print("No matcing items to %s" % word)
+            text_game_maker._wrap_print("No matching items to %s" % word)
             return
 
         msg = text_game_maker.list_to_english(added)
     else:
-        item, loc, i  = _find_best_match_item_index(player, item_name)
-        if i < 0:
+        item = _find_best_match_item_index(player, item_name)
+        if not item:
             text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
             return
 
         msg = item.name
-        if not _take(player, item, loc, i):
+        if not _take(player, item):
             return
 
     text_game_maker.game_print('%s added to inventory' % msg)
     return
 
 def _find_inventory_wildcard(player, name):
-    for n in player.inventory_items:
-        if n != 'equipped' and fnmatch.fnmatch(n, name):
-            return player.inventory_items[n], n
+    for item in player.inventory['unequipped']:
+        if fnmatch.fnmatch(item.name, name):
+            return item
 
-    return None, None
+    return None
 
 def _drop(player, n):
     # Place item on the floor in current room
-    item = player.inventory_items[n]
+    item = _find_best_match_inventory_item(player, n)
+    if not item:
+        return
+
+    item.delete()
+
     item.location = "on the floor"
     player.current.add_item(item)
-    player.delete_item(item)
 
 def _do_drop(player, word, item_name):
     if not item_name or item_name == "":
@@ -259,10 +233,10 @@ def _do_drop(player, word, item_name):
         item = ' '
 
         while item:
-            item, n = _find_inventory_wildcard(player, item_name)
+            item = _find_inventory_wildcard(player, item_name)
             if item:
-                added.append(n)
-                _drop(player, n)
+                added.append(item.name)
+                _drop(player, item.name)
 
         if not added:
             text_game_maker._wrap_print("No matching items to %s." % word)
@@ -286,24 +260,20 @@ def _do_speak(player, word, name):
         text_game_maker._wrap_print("Who do you want to speak to?")
         return
 
-    p, loc, i = _find_best_match_person_index(player, name)
-    if i >= 0:
-        itemname = p.name
-    else:
-        p, loc, i = _find_best_match_item_index(player, name)
-        if i < 0:
-            text_game_maker._wrap_print("Don't know who %s is" % name)
+    p = _find_best_match_person_index(player, name)
+    if not p:
+        p = _find_best_match_item_index(player, name)
+        if not p:
+            text_game_maker._wrap_print("Don't know how to %s %s" % (word, name))
             return
 
-        itemname = 'the ' + p.name
-
-    text_game_maker.game_print('You speak to %s.' % itemname)
-    if p.is_alive():
-        response = p.on_speak(p, player)
+    text_game_maker.game_print('You speak to %s.' % p.prep)
+    if p.alive:
+        response = p.on_speak(player)
         if response:
             p.say(response)
     else:
-        text_game_maker.game_print('%s says nothing.' % itemname)
+        text_game_maker.game_print('%s says nothing.' % p.prep)
 
 
 def _do_quit(player, word, name):
@@ -325,24 +295,48 @@ def _do_equip(player, word, item_name):
             % (item_name, word))
         return
 
-    text_game_maker.game_print("Equipped %s" % item.name)
-    player.inventory_items['equipped'] = player.inventory_items[item.name]
+    if item in player.inventory['equipped']:
+        text_game_maker.game_print("%s is already equipped." % item.name)
+        return
+
+    # Move any already-equipped items back to unequipped
+    if player.inventory['equipped']:
+        equipped = player.inventory['equipped'][0]
+        player.inventory['unequipped'].append(equipped)
+        equipped.delete()
+        equipped.home = player.inventory['unequipped']
+        
+    item.delete()
+
+    player.inventory['equipped'] = [item]
+    item.home = player.inventory['equipped']
+
+    text_game_maker.game_print("Equipped %s." % item.name)
 
 def _do_unequip(player, word, fields):
-    equipped = player.inventory_items['equipped']
-    if not equipped:
-        text_game_maker.game_print('Nothing is currently equipped')
-    else:
-        player.inventory_items['equipped'] = None
-        text_game_maker.game_print('%s unequipped' % equipped.name)
+    if not player.inventory['equipped']:
+        text_game_maker.game_print('Nothing is currently equipped.')
+        return
+    
+    equipped = player.inventory['equipped'][0]
+    player.inventory['unequipped'].append(equipped)
+    equipped.delete()
+    equipped.home = player.inventory['unequipped']
+    text_game_maker.game_print('%s unequipped' % equipped.name)
 
 def _do_loot(player, word, name):
     if not name or name == "":
         text_game_maker._wrap_print("Who do you want to %s?" % word)
         return
 
-    p, loc, i = _find_best_match_person_index(player, name)
-    if p.is_alive():
+    p = _find_best_match_person_index(player, name)
+    if not p:
+        p = _find_best_match_item_index(player, name)
+        if not p:
+            text_game_maker.game_print("Not sure how to %s %s" % (word, name))
+            return
+
+    if p.alive:
         text_game_maker.game_print("You are dead.")
         text_game_maker.game_print("You were caught trying to %s %s."
             % (word, p.name))
@@ -416,14 +410,14 @@ def _do_inspect(player, word, item):
         _do_look(player, word, item)
         return
 
-    target, loc, i = _find_best_match_item_index(player, item)
-    if i < 0:
-        target, loc, i = _find_best_match_person_index(player, item)
-        if i < 0:
+    target = _find_best_match_item_index(player, item)
+    if not target:
+        target = _find_best_match_person_index(player, item)
+        if not target:
             text_game_maker._wrap_print("No %s available to %s" % (item, word))
             return
 
-    text_game_maker.game_print(target.on_look(target, player))
+    text_game_maker.game_print(target.on_look(player))
 
 def _do_look(player, word, item):
     if item != '':
@@ -459,27 +453,23 @@ def _player_health_listing(player):
 def _do_inventory_listing(player, word, setting):
     banner = "--------------- INVENTORY --------------"
     name_line = "%s %s's" % (player.title, player.name)
+    fmt = "{0:33}{1:1}({2})"
 
     print '\n' + banner + '\n'
     print _player_health_listing(player) + '\n'
 
     print _centre_line(name_line, len(banner))
     print _centre_line('possessions', len(banner))
-    print "\n{0:33}{1:1}({2})".format('COINS', "", player.coins)
+    print ("\n" + fmt).format('COINS', "", player.coins)
 
-    if len(player.inventory_items) > 1:
+    if player.inventory['equipped']:
+        item = player.inventory['equipped'][0]
+        print ("\n" + fmt).format(item.name + " (equipped)", "", item.value)
+
+    if player.inventory['unequipped']:
         print ''
-        for i in player.inventory_items:
-            if i == 'equipped':
-                continue
-
-            item = player.inventory_items[i]
-            msg = item.name
-
-            if player.inventory_items[i] is player.inventory_items['equipped']:
-                msg += " (equipped)"
-
-            print "{0:33}{1:1}({2})".format(msg, "", item.value)
+        for item in player.inventory['unequipped']:
+            print (fmt).format(item.name, "", item.value)
 
     print"\n----------------------------------------"
 
@@ -784,6 +774,8 @@ class MapBuilder(object):
         if item.location not in self.current.items:
             self.current.items[item.location] = []
 
+        item.delete()
+        item.home = self.current.items[item.location]
         self.current.items[item.location].append(item)
 
     def add_person(self, person):
@@ -796,6 +788,8 @@ class MapBuilder(object):
         if person.location not in self.current.people:
             self.current.people[person.location] = []
 
+        person.delete()
+        person.home = self.current.people[person.location]
         self.current.people[person.location].append(person)
 
     def set_locked(self):
@@ -815,13 +809,13 @@ class MapBuilder(object):
 
         self.prompt = prompt
 
-    def __do_move(self, dest, name, description):
+    def __do_move(self, dest, name, description, tileclass):
         if dest is None:
-            dest = Tile(name, description)
+            dest = tileclass(name, description)
 
         return self.current, dest
 
-    def move_west(self, name=None, description=None):
+    def move_west(self, name=None, description=None, tileclass=Tile):
         """
         Create a new tile to the west of the current tile, and set the new
         tile as the current tile
@@ -830,12 +824,12 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.west, name, description)
+        old, new = self.__do_move(self.current.west, name, description, tileclass)
         self.current.west = new
         self.current = self.current.west
         self.current.east = old
 
-    def move_east(self, name=None, description=None):
+    def move_east(self, name=None, description=None, tileclass=Tile):
         """
         Create a new tile to the east of the current tile, and set the new
         tile as the current tile
@@ -844,12 +838,12 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.east, name, description)
+        old, new = self.__do_move(self.current.east, name, description, tileclass)
         self.current.east = new
         self.current = self.current.east
         self.current.west = old
 
-    def move_north(self, name=None, description=None):
+    def move_north(self, name=None, description=None, tileclass=Tile):
         """
         Create a new tile to the north of the current tile, and set the new
         tile as the current tile
@@ -858,12 +852,12 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.north, name, description)
+        old, new = self.__do_move(self.current.north, name, description, tileclass)
         self.current.north = new
         self.current = self.current.north
         self.current.south = old
 
-    def move_south(self, name=None, description=None):
+    def move_south(self, name=None, description=None, tileclass=Tile):
         """
         Create a new tile to the south of the current tile, and set the new
         tile as the current tile
@@ -872,7 +866,7 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.south, name, description)
+        old, new = self.__do_move(self.current.south, name, description, tileclass)
         self.current.south = new
         self.current = self.current.south
         self.current.north = old

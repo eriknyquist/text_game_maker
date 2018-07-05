@@ -144,6 +144,11 @@ def _quit_hint():
     _wrap_print("Use %s to stop playing"
         % (list_to_english(['"%s"' % i for i in parser.KILL_WORDS], conj='or')))
 
+def del_from_lists(item, *lists):
+    for l in lists:
+        if item in l:
+            del l[l.index(item)]
+
 def read_line_raw(msg, cancel_word=None, default=None):
     """
     Read a line of input from stdin

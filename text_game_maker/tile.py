@@ -5,20 +5,13 @@ class Tile(object):
     Represents a single 'tile' or 'room' in the game
     """
 
-    def __init__(self, name=None, description=None, on_enter=None,
-            on_exit=None):
+    def __init__(self, name=None, description=None):
         """
         Initialise a Tile instance
 
         :param str name: short description, e.g. "a dark cellar"
         :param str description: long description, printed when player enters\
             the room e.g. "a dark, scary cellar with blah blah blah... "
-        :param on_enter: callback to be invoked when player attempts to enter\
-            this tile (see documentation for\
-            text_game_maker.map_builder.MapBuilder.set_on_enter()
-        :param on_exit: callback to be invoked when player attempts to exit\
-            this tile (see documentation for\
-            text_game_maker.map_builder.MapBuilder.set_on_exit()
         """
 
         self.name = name
@@ -40,9 +33,12 @@ class Tile(object):
         # People on this tile
         self.people = {}
 
-        # Enter/exit callbacks
-        self.on_enter = on_enter
-        self.on_exit = on_exit
+    # Enter/exit methods
+    def on_enter(self, player, src, dest):
+        return True
+
+    def on_exit(self, player, src, dest):
+        return True
 
     def _get_name(self, tile, name):
         if tile:
@@ -75,24 +71,6 @@ class Tile(object):
 
         return ret
 
-    def set_on_enter(self, callback):
-        """
-        Set enter callback for this tile. Parameters are the same as
-        text_game_maker.map_builder.MapBuilder.set_on_enter
-        """
-
-        gamemaker._verify_callback(callback)
-        self.on_enter = callback
-
-    def set_on_exit(self, callback):
-        """
-        Set exit callback for this tile. Parameters are the same as
-        text_game_maker.map_builder.MapBuilder.set_on_exit
-        """
-
-        gamemaker._verify_callback(callback)
-        self.on_exit = callback
-
     def describe_items(self):
         """
         Return sentences describing all item locations on this tile
@@ -111,25 +89,14 @@ class Tile(object):
         if item.location not in self.items:
             self.items[item.location] = []
 
+        item.home = self.items[item.location]
         self.items[item.location].append(item)
-
-    def delete_item(self, item):
-        if item.location not in self.items:
-            return
-
-        for i in range(len(self.items[item.location])):
-            if item == self.items[item.location][i]:
-                del self.items[item.location][i]
-
-                if not self.items[item.location]:
-                    del self.items[item.location]
-
-                return
 
     def add_person(self, person):
         if person.location not in self.people:
             self.people[person.location] = []
 
+        person.home = self.people[person.location]
         self.people[person.location].append(person)
 
     def summary(self):

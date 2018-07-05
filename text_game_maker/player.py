@@ -35,7 +35,7 @@ class Player(object):
         self.scheduled_tasks = {}
 
         self.coins = 0
-        self.inventory_items = {'equipped': None}
+        self.inventory = {'equipped': [], 'unequipped': []}
         self.name = "john"
         self.title = "sir"
 
@@ -123,18 +123,6 @@ class Player(object):
         self.decrement_energy(MOVE_ENERGY_COST)
         return dest
 
-    def delete_item(self, item):
-        """
-        Delete an item from the player's inventory
-
-        :param text_game_maker.items.Item item: item to delete
-        """
-
-        if item.name in self.inventory_items:
-            del self.inventory_items[item.name]
-            if self.inventory_items['equipped'] == item:
-                self.inventory_items['equipped'] = None
-
     def set_name(self, name):
         """
         Set player name
@@ -153,34 +141,11 @@ class Player(object):
 
         self.title = title
 
-    def has_equipped(self, item_name=None):
-        """
-        Check if player has specific item equipped
+    def get_equipped(self):
+        if not self.inventory['equipped']:
+            return None
 
-        :param str item_name: name of item to check for. If not set, function\
-            will return true if player has any item equipped.
-        :return: True if player has item equipped, false otherwise
-        :rtype: bool
-        """
-
-        equipped = self.inventory_items['equipped']
-        if not equipped:
-            return False
-
-        if not item_name:
-            return True
-
-        return equipped.name == item_name
-
-    def delete_equipped(self):
-        """
-        Delete currently equipped item from inventory, if there is one
-        """
-
-        equipped = self.inventory_items['equipped']
-        if equipped:
-            del self.inventory_items[equipped.name]
-            self.inventory_items['equipped'] = None
+        return self.inventory['equipped'][0]
 
     def schedule_task(self, callback, turns=1):
         """
@@ -247,11 +212,12 @@ class Player(object):
                 person.coins = 0
 
             if person.items:
-                for n, i in person.items.items():
-                    print_items.append('%s %s' % (i.prefix, n))
+                for item in person.items:
+                    print_items.append('%s %s' % (item.prefix, item.name))
+                    self.inventory['unequipped'].append(item)
+                    item.home = self.inventory['unequipped']
 
-                self.inventory_items.update(person.items)
-                person.items.clear()
+                person.items = []
 
             text_game_maker.game_print("You %s %s.\nYou find %s."
                 % (word, person.name,

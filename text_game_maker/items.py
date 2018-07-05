@@ -1,9 +1,7 @@
 import text_game_maker
+from text_game_maker.base import GameEntity
 
-def _default_on_look(item, player):
-    return "%s %s." % (item.prefix, item.name)
-
-class Item(object):
+class Item(GameEntity):
     """
     Base class for collectable item
     """
@@ -16,26 +14,21 @@ class Item(object):
         :param str name: Item name, e.g. "apple"
         :param str location: Item location, e.g. "on the floor"
         :param int value: Item value in coins
-        :param on_take: on_take callback function (see \
-            text_game_maker.item.Item.set_on_take description for more\
-            details)
-        :param on_look: on_look callback function (see \
-            text_game_maker.item.Item.set_on_look description for more\
-            details)
         """
 
+        super(Item, self).__init__()
+
+        self.inanimate = True
         self.edible = True
-        self.energy = 0
-        self.damage = 1
         self.value = value
         self.name = name
+        self.prep = 'the ' + name
+
         self.prefix = prefix
         self.location = location
-        self.on_take = None
-        self.on_look = _default_on_look
 
-    def is_alive(self):
-        return False
+    def on_look(self, player):
+        return "%s %s." % (self.prefix, self.name)
 
     def set_prefix(self, prefix):
         """
@@ -73,44 +66,6 @@ class Item(object):
         """
 
         self.value = value
-
-    def set_on_look(self, callback):
-        """
-        Set callback function to be invoked when player looks at/inspects this
-        item. Callback should accept one parameter, and return a string:
-
-            def callback(item, player)
-                return '%s %s.' % (item.prefix, item.name)
-
-            Callback parameters:
-
-            * *item* (text_game_maker.item.Item): item being looked at
-            * *player* (text_game_maker.player.Player): player instance
-            * *Return value* (str): text to be printed to player
-
-        :param callback: callback function
-        """
-
-        text_game_maker._verify_callback(callback)
-        self.on_look = on_look
-
-    def set_on_take(self, callback):
-        """
-        Set callback function to be invoked when player attempts to add this
-        item to their inventory. Callback should accept one parameter:
-
-            def callback(player)
-                pass
-
-            Callback parameters:
-
-            * *player* (text_game_maker.player.Player): player instance
-
-        :param callback: callback function
-        """
-
-        text_game_maker._verify_callback(callback)
-        self.on_take = callback
 
     def __eq__(self, other):
         return other and self.name == other.name
