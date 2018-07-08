@@ -105,7 +105,7 @@ class SimpleTextFSM(object):
     def dump_json(self):
         return json.dumps(self._dump(self.start), indent=2)
 
-    def dump_nodes(self, node=None):
+    def iterate(self, node=None):
         if node is None:
             node = self.start
 
@@ -113,7 +113,7 @@ class SimpleTextFSM(object):
             yield node.token
 
         for c in node.children:
-            for token in self.dump_nodes(node.children[c]):
+            for token in self.iterate(node.children[c]):
                 yield token
 
     def _dump_text(self, node):

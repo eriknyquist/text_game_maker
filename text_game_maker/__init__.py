@@ -336,7 +336,7 @@ def get_full_controls(fsm):
     descs = []
 
     ret = ""
-    for cmd in fsm.dump_nodes():
+    for cmd in fsm.iterate():
         text = cmd.help_text()
         if text not in descs:
             ret += '\n' + text
