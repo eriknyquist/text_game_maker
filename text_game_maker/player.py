@@ -15,6 +15,7 @@ class Player(object):
         :param str input_prompt: Custom string to prompt player for game input
         """
 
+        self.fsm = None
         self.turns = 0
         self.max_health = 100
         self.max_energy = 100

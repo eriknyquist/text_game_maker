@@ -87,7 +87,7 @@ class SimpleTextFSM(object):
                 current.children[c] = Node(c)
 
             current = current.children[c]
-        
+
         current.token = token
         current.text = string
 
@@ -102,8 +102,19 @@ class SimpleTextFSM(object):
 
         return ret
 
-    def dump_tree(self):
+    def dump_json(self):
         return json.dumps(self._dump(self.start), indent=2)
+
+    def dump_nodes(self, node=None):
+        if node is None:
+            node = self.start
+
+        if node.token:
+            yield node.token
+
+        for c in node.children:
+            for token in self.dump_nodes(node.children[c]):
+                yield token
 
     def _dump_text(self, node):
         ret = []

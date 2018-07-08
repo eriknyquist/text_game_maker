@@ -328,14 +328,18 @@ def get_print_controls():
     '    game output'
     )
 
-def get_full_controls():
+def get_full_controls(fsm):
     """
     Returns a comprehensive listing of of all game command words
     """
 
+    descs = []
+
     ret = ""
-    for word_set, callback, desc, fmt in map_builder.command_table:
-        cmd = map_builder.Command(word_set, callback, desc, fmt)
-        ret += '\n' + cmd.help_text()
+    for cmd in fsm.dump_nodes():
+        text = cmd.help_text()
+        if text not in descs:
+            ret += '\n' + text
+            descs.append(text)
 
     return ret

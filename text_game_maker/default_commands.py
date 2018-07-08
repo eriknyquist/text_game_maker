@@ -9,10 +9,10 @@ def _do_quit(player, word, name):
     elif ret:
         sys.exit()
 
-def _do_show_command_list(self, player, word, setting):
-    print text_game_maker.get_full_controls()
+def _do_show_command_list(player, word, setting):
+    print text_game_maker.get_full_controls(player.fsm)
 
-def _do_help(self, player, word, setting):
+def _do_help(player, word, setting):
     if not setting or setting == "":
         print text_game_maker.basic_controls
     else:

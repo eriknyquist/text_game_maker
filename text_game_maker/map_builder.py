@@ -504,6 +504,7 @@ class MapBuilder(object):
         """
 
         player = Player(self.start, self.prompt)
+        player.fsm = self.fsm
         menu_choices = ["New game", "Load game", "Controls"]
 
         while True:
