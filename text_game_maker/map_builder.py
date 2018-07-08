@@ -7,6 +7,7 @@ import errno
 
 import parser
 import text_game_maker
+from text_game_maker import default_commands as defaults
 from text_game_maker.tile import Tile
 from text_game_maker.items import Item
 from text_game_maker.player import Player
@@ -14,31 +15,6 @@ from text_game_maker.player import Player
 MIN_LINE_WIDTH = 50
 MAX_LINE_WIDTH = 120
 COMMAND_DELIMITERS = [',', ';', '/', '\\']
-
-fsm = parser.SimpleTextFSM()
-
-class Command(object):
-    """
-    Container class for data needed to execute a particular game command
-    """
-
-    def __init__(self, word_list, callback, desc, phrase_fmt):
-        self.word_list = word_list
-        self.callback = callback
-        self.desc = desc
-
-        self.desc = self.desc[0].upper() + self.desc[1:]
-        if not phrase_fmt or phrase_fmt == "":
-            self.phrase_fmt = '%s'
-        else:
-            self.phrase_fmt = phrase_fmt
-
-    def help_text(self):
-        ret = '\n' + self.desc + ':\n\n'
-        for w in self.word_list:
-            ret += ('    "' + self.phrase_fmt + '"\n') % w
-
-        return ret
 
 def _translate(val, min1, max1, min2, max2):
     span1 = max1 - min1
@@ -50,14 +26,7 @@ def _translate(val, min1, max1, min2, max2):
 def _unrecognised(val):
     text_game_maker._wrap_print('Unrecognised command "%s"' % val)
 
-def _parser_suggestions(text, i):
-    _unrecognised(text)
-
-    if i > 0:
-        print ('\nDid you mean...\n\n%s'
-            % ('\n'.join(['  %s' % w for w in fsm.get_children()])))
-
-def _find_word_end(string, i):
+def find_word_end(string, i):
     while i < len(string):
         if string[i] == ' ':
             return i
@@ -66,34 +35,7 @@ def _find_word_end(string, i):
 
     return len(string)
 
-def _run_fsm(action):
-    i, cmd = fsm.run(action)
-    if  i > 0 and i < len(action) and action[i - 1] != ' ':
-        _parser_suggestions(action[:_find_word_end(action, i)], i)
-        return i, None
-    elif not cmd:
-        _parser_suggestions(action, i)
-        return i, None
-
-    return i, cmd
-
-def _do_move(player, word, direction):
-    if not direction or direction == "":
-        text_game_maker._wrap_print("Where do you want to go?")
-        return
-
-    if 'north'.startswith(direction):
-        player._move_north(word)
-    elif 'south'.startswith(direction):
-        player._move_south(word)
-    elif 'east'.startswith(direction):
-        player._move_east(word)
-    elif 'west'.startswith(direction):
-        player._move_west(word)
-    else:
-        _unrecognised(direction)
-
-def _find_best_match_item_index(player, name):
+def find_item(player, name):
     if name.startswith('the '):
         name = name[4:]
 
@@ -106,7 +48,7 @@ def _find_best_match_item_index(player, name):
 
     return None
 
-def _find_wildcard_match(player, name):
+def find_item_wildcard(player, name):
     if name.startswith('the '):
         name = name[4:]
 
@@ -118,7 +60,7 @@ def _find_wildcard_match(player, name):
 
     return None
 
-def _find_best_match_person_index(player, name):
+def find_person(player, name):
     for loc in player.current.people:
         itemlist = player.current.people[loc]
         for item in itemlist:
@@ -128,7 +70,7 @@ def _find_best_match_person_index(player, name):
 
     return None
 
-def _find_best_match_inventory_item(player, name):
+def find_inventory_item(player, name):
     if name.startswith('the '):
         name = name[4:]
 
@@ -142,209 +84,12 @@ def _find_best_match_inventory_item(player, name):
 
     return None
 
-def _take(player, item):
-    # If on_take callback returns false, abort adding this item
-    if not item.on_take(player):
-        return False
-
-    player.inventory['unequipped'].append(item)
-    item.delete()
-
-    item.home = player.inventory['unequipped']
-    return True
-
-def _do_eat(player, word, item_name):
-    if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
-        return
-
-    item = _find_best_match_inventory_item(player, item_name)
-    if not item:
-        item = _find_best_match_item_index(player, item_name)
-        if not item:
-            item  = _find_best_match_person_index(player, item_name)
-            if not item:
-                text_game_maker._wrap_print("No %s available to %s"
-                    % (item_name, word))
-                return
-
-    msg = item.on_eat(player, word)
-    if msg:
-        text_game_maker.game_print(msg)
-
-def _do_take(player, word, item_name):
-    if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
-        return
-
-    if '*' in item_name:
-        added = []
-        item = ' '
-
-        while item:
-            item = _find_wildcard_match(player, item_name)
-            if item and _take(player, item):
-                added.append(item.name)
-
-        if not added:
-            text_game_maker._wrap_print("No matching items to %s" % word)
-            return
-
-        msg = text_game_maker.list_to_english(added)
-    else:
-        item = _find_best_match_item_index(player, item_name)
-        if not item:
-            text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
-            return
-
-        msg = item.name
-        if not _take(player, item):
-            return
-
-    text_game_maker.game_print('%s added to inventory' % msg)
-    return
-
-def _find_inventory_wildcard(player, name):
+def find_inventory_wildcard(player, name):
     for item in player.inventory['unequipped']:
         if fnmatch.fnmatch(item.name, name):
             return item
 
     return None
-
-def _drop(player, n):
-    # Place item on the floor in current room
-    item = _find_best_match_inventory_item(player, n)
-    if not item:
-        return
-
-    item.delete()
-
-    item.location = "on the floor"
-    player.current.add_item(item)
-
-def _do_drop(player, word, item_name):
-    if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to drop?")
-        return
-
-    msg = None
-    if '*' in item_name:
-        added = []
-        item = ' '
-
-        while item:
-            item = _find_inventory_wildcard(player, item_name)
-            if item:
-                added.append(item.name)
-                _drop(player, item.name)
-
-        if not added:
-            text_game_maker._wrap_print("No matching items to %s." % word)
-            return
-
-        msg = text_game_maker.list_to_english(added)
-    else:
-        item = _find_best_match_inventory_item(player, item_name)
-        if not item:
-            text_game_maker._wrap_print("No %s in your inventory to %s"
-                % (item_name, word))
-            return
-
-        _drop(player, item.name)
-        msg = item.name
-
-    text_game_maker.game_print("Dropped %s" % msg)
-
-def _do_speak(player, word, name):
-    if not name or name == "":
-        text_game_maker._wrap_print("Who do you want to speak to?")
-        return
-
-    p = _find_best_match_person_index(player, name)
-    if not p:
-        p = _find_best_match_item_index(player, name)
-        if not p:
-            text_game_maker._wrap_print("Don't know how to %s %s" % (word, name))
-            return
-
-    text_game_maker.game_print('You speak to %s.' % p.prep)
-    if p.alive:
-        response = p.on_speak(player)
-        if response:
-            p.say(response)
-    else:
-        text_game_maker.game_print('%s says nothing.' % p.prep)
-
-
-def _do_quit(player, word, name):
-    ret = text_game_maker.ask_yes_no("really stop playing?")
-    if ret < 0:
-        return
-    elif ret:
-        sys.exit()
-
-def _do_equip(player, word, item_name):
-    if not item_name or item_name == "":
-        text_game_maker._wrap_print("Which inventory item do you want to %s?"
-            % word)
-        return
-
-    item = _find_best_match_inventory_item(player, item_name)
-    if not item:
-        text_game_maker._wrap_print("No %s in your inventory to %s"
-            % (item_name, word))
-        return
-
-    if item in player.inventory['equipped']:
-        text_game_maker.game_print("%s is already equipped." % item.name)
-        return
-
-    # Move any already-equipped items back to unequipped
-    if player.inventory['equipped']:
-        equipped = player.inventory['equipped'][0]
-        player.inventory['unequipped'].append(equipped)
-        equipped.delete()
-        equipped.home = player.inventory['unequipped']
-        
-    item.delete()
-
-    player.inventory['equipped'] = [item]
-    item.home = player.inventory['equipped']
-
-    text_game_maker.game_print("Equipped %s." % item.name)
-
-def _do_unequip(player, word, fields):
-    if not player.inventory['equipped']:
-        text_game_maker.game_print('Nothing is currently equipped.')
-        return
-    
-    equipped = player.inventory['equipped'][0]
-    player.inventory['unequipped'].append(equipped)
-    equipped.delete()
-    equipped.home = player.inventory['unequipped']
-    text_game_maker.game_print('%s unequipped' % equipped.name)
-
-def _do_loot(player, word, name):
-    if not name or name == "":
-        text_game_maker._wrap_print("Who do you want to %s?" % word)
-        return
-
-    p = _find_best_match_person_index(player, name)
-    if not p:
-        p = _find_best_match_item_index(player, name)
-        if not p:
-            text_game_maker.game_print("Not sure how to %s %s" % (word, name))
-            return
-
-    if p.alive:
-        text_game_maker.game_print("You are dead.")
-        text_game_maker.game_print("You were caught trying to %s %s."
-            % (word, p.name))
-        text_game_maker.game_print("%s didn't like this, and killed you.\n"
-            % p.name)
-        sys.exit()
-    else:
-        player._loot(word, p)
 
 def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
@@ -405,27 +150,6 @@ def _do_set_print_width(player, word, setting):
     text_game_maker._wrap_print("OK, line width set to %d." % val)
     text_game_maker.wrapper.width = val
 
-def _do_inspect(player, word, item):
-    if item == '':
-        _do_look(player, word, item)
-        return
-
-    target = _find_best_match_item_index(player, item)
-    if not target:
-        target = _find_best_match_person_index(player, item)
-        if not target:
-            text_game_maker._wrap_print("No %s available to %s" % (item, word))
-            return
-
-    text_game_maker.game_print(target.on_look(player))
-
-def _do_look(player, word, item):
-    if item != '':
-        _do_inspect(player, word, item)
-        return
-
-    text_game_maker.game_print(player.current_state())
-
 def _centre_line(string, line_width):
     diff = line_width - len(string)
     if diff <= 2:
@@ -473,196 +197,12 @@ def _do_inventory_listing(player, word, setting):
 
     print"\n----------------------------------------"
 
-def _do_show_command_list(player, word, setting):
-    print text_game_maker.get_full_controls()
-
-def _do_help(player, word, setting):
-    if not setting or setting == "":
-        print text_game_maker.basic_controls
-    else:
-        i, cmd = _run_fsm(setting)
-        if cmd:
-            print cmd.help_text().rstrip('\n')
-
-def _get_next_unused_save_id(save_dir):
-    default_num = 1
-    nums = [int(x.split('_')[2]) for x in os.listdir(save_dir)]
-
-    while default_num in nums:
-        default_num += 1
-
-    return default_num
-
-def _get_save_dir():
-    return os.path.join(os.path.expanduser("~"), '.text_game_maker_saves')
-
-def _get_save_files():
-    ret = []
-    save_dir = _get_save_dir()
-
-    if os.path.exists(save_dir):
-        ret = [os.path.join(save_dir, x) for x in os.listdir(save_dir)]
-
-    return ret
-
-def _do_load(player, word, setting):
-    filename = None
-
-    ret = _get_save_files()
-    if ret:
-        files = [os.path.basename(x) for x in ret]
-        files.sort()
-        files.append("None of these (let me enter a path to a save file)")
-
-        index = text_game_maker.ask_multiple_choice(files,
-            "Which save file would you like to load?")
-
-        if index < 0:
-            return False
-
-        if index < (len(files) - 1):
-            filename = os.path.join(_get_save_dir(), files[index])
-    else:
-        text_game_maker._wrap_print("No save files found. Put save files in "
-            "%s, otherwise you can enter the full path to an alternate save "
-            "file." % _get_save_dir())
-        ret = text_game_maker.ask_yes_no("Enter path to alternate save file?")
-        if ret <= 0:
-            return False
-
-    if filename is None:
-        while True:
-            filename = text_game_maker.read_line("Enter name of file to load",
-                cancel_word="cancel")
-            if filename is None:
-                return False
-            elif os.path.exists(filename):
-                break
-            else:
-                text_game_maker._wrap_print("%s: no such file" % filename)
-
-    player.load_from_file = filename
-    text_game_maker._wrap_print("Loading game state from file %s."
-        % player.load_from_file)
-    return True
-
-def _do_save(player, word, setting):
-    filename = None
-    save_dir = _get_save_dir()
-
-    if not os.path.exists(save_dir):
-        try:
-            os.makedirs(save_dir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                text_game_maker._wrap_print("Error (%d) creating directory %s"
-                    % (e.errno, save_dir))
-                return
-
-    if player.loaded_file:
-        ret = text_game_maker.ask_yes_no("overwrite file %s?"
-            % os.path.basename(player.loaded_file))
-        if ret < 0:
-            return
-
-    if player.loaded_file and ret:
-        filename = player.loaded_file
-    else:
-        save_id = _get_next_unused_save_id(save_dir)
-        default_name = "save_state_%03d" % save_id
-
-        ret = text_game_maker.read_line_raw("Enter name to use for save file",
-            cancel_word="cancel", default=default_name)
-
-        if ret is None:
-            return
-
-        filename = os.path.join(save_dir, ret)
-
-    player.save_state(filename)
-    text_game_maker.game_print("Game state saved in %s." % filename)
-
-def _is_shorthand_direction(word):
-    for w in ['north', 'south', 'east', 'west']:
-        if w.startswith(word):
-            return w
-
-    return None
-
-def _parse_command(player, action):
-    if action == '':
-        action = text_game_maker.info['last_command']
-        print '\n' + action
-
-    if _is_shorthand_direction(action):
-        _do_move(player, 'go', action)
-    else:
-        i, cmd = _run_fsm(action)
-        if cmd:
-            cmd.callback(player, action[:i].strip(), action[i:].strip())
-
-    text_game_maker.info['last_command'] = action
-    player.turns += 1
-
-command_table = [
-    (parser.PRINT_SPEED_WORDS, _do_set_print_speed, "set printing speed",
-        "%s fast/slow"),
-
-    (parser.PRINT_DELAY_WORDS, _do_set_print_delay, "set the per-character "
-        " print delay when slow printing is enabled", "%s <seconds>"),
-
-    (parser.PRINT_WIDTH_WORDS, _do_set_print_width, "set the maximum line "
-        "width for game output", "%s <width>"),
-
-    (parser.GO_WORDS, _do_move, "move the player (north/south/east/west)",
-        "%s <direction>"),
-
-    (parser.EQUIP_WORDS, _do_equip, "equip an item from your inventory",
-        "%s <item>"),
-
-    (parser.TAKE_WORDS, _do_take, "add an item to your inventory",
-        "%s <item>"),
-
-    (parser.DROP_WORDS, _do_drop, "drop an item from your inventory",
-        "%s <item>"),
-
-    (parser.SPEAK_WORDS, _do_speak, "speak with a person by name",
-        "%s <person>"),
-
-    (parser.UNEQUIP_WORDS, _do_unequip, "unequip your equipped item (if any)",
-        "%s <item>"),
-
-    (parser.EAT_WORDS, _do_eat, "eat something", "%s <item>"),
-
-    (parser.LOOT_WORDS, _do_loot, "attempt to loot a person by name",
-        "%s <person>"),
-
-    (parser.KILL_WORDS, _do_quit, "guit the game", ""),
-
-    (parser.SHOW_COMMAND_LIST_WORDS, _do_show_command_list, "show all game "
-        "commands", ""),
-
-    (parser.INSPECT_WORDS, _do_inspect, "examine an item in more detail",
-        "%s <item>"),
-
-    (parser.LOOK_WORDS, _do_look, "examine your current surroundings", ""),
-
-    (parser.INVENTORY_WORDS, _do_inventory_listing, "show player's inventory",
-        ""),
-
-    (parser.HELP_WORDS, _do_help, "show basic help information", ""),
-
-    (parser.SAVE_WORDS, _do_save, "save the current game state to a file", ""),
-
-    (parser.LOAD_WORDS, _do_load, "load a previously saved game state file", "")
-]
-
 class MapBuilder(object):
     """
     Base class for building a tile-based map
     """
 
-    def __init__(self, name=None, description=None):
+    def __init__(self, parser, name=None, description=None):
         """
         Initialises a MapBuilder instance. When you create a MapBuilder
         object, it automatically creates the first tile, and sets it as the
@@ -673,9 +213,50 @@ class MapBuilder(object):
         """
 
         self.on_start = None
+        self.fsm = parser
         self.start = Tile(name, description)
         self.current = self.start
         self.prompt = "[?]: "
+
+    def _run_fsm(self, action):
+        i, cmd = self.fsm.run(action)
+        if  i > 0 and i < len(action) and action[i - 1] != ' ':
+            self._parser_suggestions(action[:find_word_end(action, i)], i)
+            return i, None
+        elif not cmd:
+            self._parser_suggestions(action, i)
+            return i, None
+
+        return i, cmd
+
+    def _parser_suggestions(self, text, i):
+        _unrecognised(text)
+
+        if i > 0:
+            print ('\nDid you mean...\n\n%s'
+                % ('\n'.join(['  %s' % w for w in self.fsm.get_children()])))
+
+    def _is_shorthand_direction(self, word):
+        for w in ['north', 'south', 'east', 'west']:
+            if w.startswith(word):
+                return w
+
+        return None
+
+    def _parse_command(self, player, action):
+        if action == '':
+            action = text_game_maker.info['last_command']
+            print '\n' + action
+
+        if self._is_shorthand_direction(action):
+            defaults._do_move(player, 'go', action)
+        else:
+            i, cmd = self._run_fsm(action)
+            if cmd:
+                cmd.callback(player, action[:i].strip(), action[i:].strip())
+
+        text_game_maker.info['last_command'] = action
+        player.turns += 1
 
     def set_on_enter(self, callback):
         """
@@ -904,7 +485,7 @@ class MapBuilder(object):
 
         while text_game_maker.info['sequence_count'] > 0:
             action = text_game_maker.read_line_raw("> ").strip().lower()
-            _parse_command(player, action)
+            self._parse_command(player, action)
 
         text_game_maker.info['sequence_count'] = None
 
@@ -932,11 +513,6 @@ class MapBuilder(object):
         Start running the game
         """
 
-        for word_set, callback, desc, fmt in command_table:
-            cmd = Command(word_set, callback, desc, fmt)
-            for word in word_set:
-                fsm.add_token(word, cmd)
-
         player = Player(self.start, self.prompt)
         menu_choices = ["New game", "Load game", "Controls"]
 
@@ -955,7 +531,7 @@ class MapBuilder(object):
                 break
 
             elif choice == 1:
-                if _do_load(player, '', ''):
+                if defaults._do_load(player, '', ''):
                     break
 
             elif choice == 2:
@@ -978,4 +554,4 @@ class MapBuilder(object):
                     self._run_command_sequence(player, sequence)
                     continue
 
-                _parse_command(player, action.strip().lower())
+                self._parse_command(player, action.strip().lower())

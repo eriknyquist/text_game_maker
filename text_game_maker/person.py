@@ -52,7 +52,7 @@ class Person(GameEntity):
         :param str msg: message to print informing player of person's death
         """
 
-        p = map_builder._find_best_match_person_index(player, self.name)
+        p = map_builder.find_person(player, self.name)
         p.delete()
 
         self.alive = False

@@ -1,3 +1,7 @@
+import text_game_maker
+from text_game_maker import map_builder
+from text_game_maker import default_commands as defaults
+
 PRINT_SPEED_WORDS = ['print speed']
 
 PRINT_DELAY_WORDS = ['print delay']
@@ -13,50 +17,9 @@ GO_WORDS = [
     'dance', 'creep', 'sneak', 'tiptoe'
 ]
 
-EAT_WORDS = [
-    'eat', 'scoff', 'swallow', 'ingest', 'consume'
-]
-
-TAKE_WORDS = [
-    'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
-]
-
-DROP_WORDS = [
-    'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete', 'undock'
-]
-
-EQUIP_WORDS = [
-    'equip', 'use', 'whip out', 'brandish', 'take out', 'get out'
-]
-
-UNEQUIP_WORDS = [
-    'unequip', 'put away', 'stop using', 'stow'
-]
-
-SPEAK_WORDS = [
-    'speak with', 'speak to', 'talk to', 'chat to', 'chat with', 'talk with',
-    'chat', 'speak', 'talk'
-]
-
 SHOW_COMMAND_LIST_WORDS = [
     'show commands', 'show controls', 'show words', 'show wordlist',
     'commands', 'controls', 'wordlist', 'words'
-]
-
-INSPECT_WORDS = [
-    'look at', 'inspect', 'examine'
-]
-
-LOOK_WORDS = [
-    'look', 'peep', 'peek', 'show', 'viddy'
-]
-
-LOOT_WORDS = [
-    'loot', 'search', 'rob', 'pickpocket'
-]
-
-INVENTORY_WORDS = [
-    'i', 'inventory'
 ]
 
 HELP_WORDS = [
@@ -70,6 +33,33 @@ SAVE_WORDS = [
 LOAD_WORDS = [
     'load'
 ]
+
+INVENTORY_WORDS = [
+    'i', 'inventory'
+]
+
+class Command(object):
+    """
+    Container class for data needed to execute a particular game command
+    """
+
+    def __init__(self, word_list, callback, desc, phrase_fmt):
+        self.word_list = word_list
+        self.callback = callback
+        self.desc = desc
+
+        self.desc = self.desc[0].upper() + self.desc[1:]
+        if not phrase_fmt or phrase_fmt == "":
+            self.phrase_fmt = '%s'
+        else:
+            self.phrase_fmt = phrase_fmt
+
+    def help_text(self):
+        ret = '\n' + self.desc + ':\n\n'
+        for w in self.word_list:
+            ret += ('    "' + self.phrase_fmt + '"\n') % w
+
+        return ret
 
 class Node(object):
     def __init__(self, char, token=None, text=None):
@@ -149,3 +139,47 @@ class SimpleTextFSM(object):
             i += 1
 
         return i, self.current.token
+
+class CommandParser(SimpleTextFSM):
+    def __init__(self, *args, **kwargs):
+        super(CommandParser, self).__init__()
+
+        default_commands = [
+            [HELP_WORDS, defaults._do_help, "show basic help information"],
+
+            [SHOW_COMMAND_LIST_WORDS, defaults._do_show_command_list,
+                "show all game commands"],
+
+            [SAVE_WORDS, defaults._do_save,
+                "save the current game state to a file"],
+
+            [LOAD_WORDS, defaults._do_load,
+                "load a previously saved game state file"],
+
+            [PRINT_SPEED_WORDS, map_builder._do_set_print_speed,
+                "set printing speed", "%s fast/slow"],
+
+            [PRINT_DELAY_WORDS, map_builder._do_set_print_delay, "set the "
+                "per-character print delay when slow printing is enabled",
+                "%s <seconds>"],
+
+            [PRINT_WIDTH_WORDS, map_builder._do_set_print_width,
+                "set the maximum line width for game output", "%s <width>"],
+
+            [KILL_WORDS, defaults._do_quit, "guit the game"],
+
+            [GO_WORDS, defaults._do_move,
+                "move the player (north/south/east/west)", "%s <direction>"],
+
+            [INVENTORY_WORDS, map_builder._do_inventory_listing,
+            "show player's inventory"]
+        ]
+
+        for arglist in default_commands:
+            self.add_command(*arglist)
+
+    def add_command(self, word_set, callback, help_text, fmt=""):
+        cmd = Command(word_set, callback, help_text, fmt)
+        for word in word_set:
+            self.add_token(word, cmd)
+

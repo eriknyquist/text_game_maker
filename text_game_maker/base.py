@@ -65,9 +65,9 @@ class GameEntity(object):
 
         else:
             msg = ("You try your best to %s %s, but you fail, and injure "
-                "yourself. You lose %d health points" % (word, item.prep,
-                item.damage))
+                "yourself. You lose %d health points" % (word, self.prep,
+                self.damage))
 
-            player.decrement_health(item.damage)
+            player.decrement_health(self.damage)
 
         return msg

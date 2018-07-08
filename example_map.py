@@ -1,5 +1,7 @@
 import sys
 
+import commands
+
 import text_game_maker as gamemaker
 from text_game_maker.items import Item, Food, Weapon
 from text_game_maker.tile import Tile
@@ -126,6 +128,7 @@ def on_start(player):
 
 def main():
     builder = MapBuilder(
+        commands.build_parser(),
         "the starting room",
         """in a small square room with stone walls and ceilings. The floor is
         dirt. The only light comes from the fire of the torches that line the
