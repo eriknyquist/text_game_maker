@@ -53,7 +53,6 @@ class Person(GameEntity):
         """
 
         p = map_builder.find_person(player, self.name)
-        p.delete()
 
         self.alive = False
         self.name = "%s's corpse" % self.name
@@ -126,9 +125,7 @@ class Person(GameEntity):
             self.coins -= cost
 
             # Transfer item
-            self.items.append(equipped)
-            equipped.delete()
-            equipped.home = self.items
+            equipped.move(self.items)
             text_game_maker.game_print("Sale completed.")
             return equipped
 

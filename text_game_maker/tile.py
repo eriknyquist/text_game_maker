@@ -89,15 +89,13 @@ class Tile(object):
         if item.location not in self.items:
             self.items[item.location] = []
 
-        item.home = self.items[item.location]
-        self.items[item.location].append(item)
+        item.move(self.items[item.location])
 
     def add_person(self, person):
         if person.location not in self.people:
             self.people[person.location] = []
 
-        person.home = self.people[person.location]
-        self.people[person.location].append(person)
+        person.move(self.people[person.location])
 
     def summary(self):
         """

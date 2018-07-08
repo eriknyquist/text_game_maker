@@ -352,12 +352,7 @@ class MapBuilder(object):
         :param text_game_maker.item.Item item: the item to add
         """
 
-        if item.location not in self.current.items:
-            self.current.items[item.location] = []
-
-        item.delete()
-        item.home = self.current.items[item.location]
-        self.current.items[item.location].append(item)
+        self.current.add_item(item)
 
     def add_person(self, person):
         """
@@ -366,12 +361,7 @@ class MapBuilder(object):
         :param text_game_maker.person.Person person: the person to add
         """
 
-        if person.location not in self.current.people:
-            self.current.people[person.location] = []
-
-        person.delete()
-        person.home = self.current.people[person.location]
-        self.current.people[person.location].append(person)
+        self.current.add_person(person)
 
     def set_locked(self):
         """

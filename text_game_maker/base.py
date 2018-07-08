@@ -44,6 +44,11 @@ class GameEntity(object):
         if self.home:
             del self.home[self.home.index(self)]
 
+    def move(self, location):
+        location.append(self)
+        self.delete()
+        self.home = location
+
     def on_speak(self, player):
         return "%s says nothing." % self.prep
 

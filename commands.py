@@ -45,10 +45,7 @@ def _take(player, item):
     if not item.on_take(player):
         return False
 
-    player.inventory['unequipped'].append(item)
-    item.delete()
-
-    item.home = player.inventory['unequipped']
+    item.move(player.inventory['unequipped'])
     return True
 
 def _do_eat(player, word, item_name):
@@ -60,7 +57,7 @@ def _do_eat(player, word, item_name):
     if not item:
         item = builder.find_item(player, item_name)
         if not item:
-            item  = builder.find_person(player, item_name)
+            item = builder.find_person(player, item_name)
             if not item:
                 text_game_maker._wrap_print("No %s available to %s"
                     % (item_name, word))
@@ -107,8 +104,6 @@ def _drop(player, n):
     item = builder.find_inventory_item(player, n)
     if not item:
         return
-
-    item.delete()
 
     item.location = "on the floor"
     player.current.add_item(item)
@@ -185,26 +180,18 @@ def _do_equip(player, word, item_name):
     # Move any already-equipped items back to unequipped
     if player.inventory['equipped']:
         equipped = player.inventory['equipped'][0]
-        player.inventory['unequipped'].append(equipped)
-        equipped.delete()
-        equipped.home = player.inventory['unequipped']
-        
-    item.delete()
+        equipped.move(player.inventory['unequipped'])
 
-    player.inventory['equipped'] = [item]
-    item.home = player.inventory['equipped']
-
+    item.move(player.inventory['equipped'])
     text_game_maker.game_print("Equipped %s." % item.name)
 
 def _do_unequip(player, word, fields):
     if not player.inventory['equipped']:
         text_game_maker.game_print('Nothing is currently equipped.')
         return
-    
+
     equipped = player.inventory['equipped'][0]
-    player.inventory['unequipped'].append(equipped)
-    equipped.delete()
-    equipped.home = player.inventory['unequipped']
+    equipped.move(player.inventory['unequipped'])
     text_game_maker.game_print('%s unequipped' % equipped.name)
 
 def _do_loot(player, word, name):
