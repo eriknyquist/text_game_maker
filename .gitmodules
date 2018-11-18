@@ -1,0 +1,3 @@
+[submodule "text_game_maker/ptttl"]
+	path = text_game_maker/ptttl
+	url = https://github.com/eriknyquist/ptttl

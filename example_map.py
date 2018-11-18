@@ -3,6 +3,7 @@ import sys
 import commands
 
 import text_game_maker as gamemaker
+from text_game_maker import audio
 from text_game_maker.items import Item, Food, Weapon
 from text_game_maker.tile import Tile
 from text_game_maker.person import Person
@@ -97,6 +98,7 @@ class LockedRoom(Tile):
             # unlock the destination tile
             item.delete()
             dest.set_unlocked()
+            audio.play_sound(audio.FANFARE_SOUND)
 
         return True
 
@@ -117,6 +119,7 @@ class DeathFallWindow(Tile):
         # normally
         gamemaker.game_print("You are dead. You plummeted into the rocks "
             "and the sea below the window.")
+        player.death()
         sys.exit()
 
 def on_start(player):

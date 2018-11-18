@@ -169,6 +169,7 @@ def read_line_raw(msg, cancel_word=None, default=None):
 
     prompt = "%s %s%s: " % (msg, cancel_desc, default_desc)
 
+    print('')
     user_input = session.prompt(prompt)
 
     if default and user_input == '':

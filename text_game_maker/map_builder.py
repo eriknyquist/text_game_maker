@@ -11,6 +11,7 @@ from text_game_maker import default_commands as defaults
 from text_game_maker.tile import Tile
 from text_game_maker.items import Item
 from text_game_maker.player import Player
+from text_game_maker import audio
 
 MIN_LINE_WIDTH = 50
 MAX_LINE_WIDTH = 120
@@ -253,7 +254,10 @@ class MapBuilder(object):
         else:
             i, cmd = self._run_fsm(action)
             if cmd:
+                audio.play_sound(audio.SUCCESS_SOUND)
                 cmd.callback(player, action[:i].strip(), action[i:].strip())
+            else:
+                audio.play_sound(audio.FAILURE_SOUND)
 
         text_game_maker.info['last_command'] = action
         player.turns += 1

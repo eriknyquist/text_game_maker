@@ -2,6 +2,8 @@ import time
 import pickle
 import text_game_maker
 
+from text_game_maker import audio
+
 MOVE_ENERGY_COST = 0.25
 
 class Player(object):
@@ -89,6 +91,10 @@ class Player(object):
     def save_state(self, filename):
         with open(filename, 'w') as fh:
             pickle.dump(self, fh)
+
+    def death(self):
+        audio.play_sound(audio.DEATH_SOUND)
+        audio.wait()
 
     def _move(self, dest, word, name):
         if dest is None:
