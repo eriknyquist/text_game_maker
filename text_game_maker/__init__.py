@@ -1,9 +1,14 @@
+from __future__ import unicode_literals, print_function
+
 import sys
 import time
 import inspect
 import textwrap
 import threading
 import Queue
+
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import InMemoryHistory
 
 import parser
 import map_builder
@@ -19,6 +24,9 @@ import map_builder
 #        if (pos == 'NNP' or pos == 'NNS' )]
 #    downcased = [x.lower() for x in nouns]
 #    return "\n".join(downcased)
+
+history = InMemoryHistory()
+session = PromptSession(history=history, enable_history_search=True)
 
 info = {
     'slow_printing': False,
@@ -89,16 +97,6 @@ Misc
 * Use 'controls' or 'commands' or 'words' or 'show words'... etc. to show a
   comprehensive listing of game commands"""
 
-input_queue = Queue.Queue()
-
-def _read_input_task():
-    while True:
-        input_queue.put(sys.stdin.read(1))
-
-enter_thread = threading.Thread(target=_read_input_task)
-enter_thread.daemon = True
-enter_thread.start()
-
 def _verify_callback(obj):
     if not inspect.isfunction(obj):
         raise TypeError('callbacks must be top-level functions')
@@ -111,7 +109,7 @@ def _wrap_text(text):
     return wrapper.fill(text.replace('\n', ' ').replace('\r', ''))
 
 def _wrap_print(text):
-    print '\n' + _wrap_text(text)
+    print('\n' + _wrap_text(text))
 
 def list_to_english(strlist, conj='and'):
     """
@@ -170,21 +168,8 @@ def read_line_raw(msg, cancel_word=None, default=None):
         cancel_desc = "(or '%s')" % cancel_word
 
     prompt = "%s %s%s: " % (msg, cancel_desc, default_desc)
-    sys.stdout.write('\n' + prompt)
-    sys.stdout.flush()
 
-    c = ''
-
-    while (c != '\r') and (c != '\n'):
-        try:
-            c = input_queue.get()
-        except KeyboardInterrupt:
-            _quit_hint()
-            continue
-
-        buf += c
-
-    user_input = buf.strip()
+    user_input = session.prompt(prompt)
 
     if default and user_input == '':
         return default
@@ -193,7 +178,7 @@ def read_line_raw(msg, cancel_word=None, default=None):
     # of commands remaining in the input queue
     if info['sequence_count']:
         info['sequence_count'] -= 1
-        print user_input
+        print(user_input)
 
     if cancel_word and cancel_word.startswith(user_input):
         return None
@@ -247,9 +232,9 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
     lines = ['    %d. %s' % (i + 1, choices[i]) for i in range(len(choices))]
 
     if msg:
-        print '\n' + msg + '\n'
+        print('\n' + msg + '\n')
 
-    print '\n' + '\n'.join(lines)
+    print('\n' + '\n'.join(lines))
 
     while True:
         ret = read_line(prompt, cancel_word)
@@ -280,25 +265,15 @@ def game_print(msg):
 
     msg = '\n' + _wrap_text(msg)
     if not info['slow_printing']:
-        print msg
+        print(msg)
         return
 
     for i in range(len(msg)):
-        if not info['sequence_count']:
-            try:
-                c = input_queue.get_nowait()
-            except Queue.Empty:
-                pass
-            else:
-                if c == '\n':
-                    print msg[i:]
-                    return
-
         sys.stdout.write(msg[i])
         sys.stdout.flush()
         time.sleep(info['chardelay'])
 
-    print ''
+    print('')
 
 def get_basic_controls():
     """
