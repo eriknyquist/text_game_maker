@@ -28,10 +28,11 @@ import map_builder
 history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
 
+sequence = []
+
 info = {
     'slow_printing': False,
     'chardelay': 0.02,
-    'sequence_count': None,
     'last_command': 'look',
     'sound': None
 }
@@ -112,6 +113,17 @@ def _wrap_text(text):
 def _wrap_print(text):
     print('\n' + _wrap_text(text))
 
+def queue_command_sequence(seq):
+    sequence.extend(seq)
+
+def pop_command():
+    try:
+        ret = sequence.pop(0)
+    except IndexError:
+        ret = None
+
+    return ret
+
 def save_sound(sound):
     info['sound'] = sound
 
@@ -175,18 +187,16 @@ def read_line_raw(msg, cancel_word=None, default=None):
         cancel_desc = "(or '%s')" % cancel_word
 
     prompt = "%s %s%s: " % (msg, cancel_desc, default_desc)
-
     print('')
-    user_input = session.prompt(prompt)
+
+    if sequence:
+        user_input = pop_command()
+        print(prompt + user_input)
+    else:
+        user_input = session.prompt(prompt)
 
     if default and user_input == '':
         return default
-
-    # If we are in the middle of command chain, decrement the count
-    # of commands remaining in the input queue
-    if info['sequence_count']:
-        info['sequence_count'] -= 1
-        print(user_input)
 
     if cancel_word and cancel_word.startswith(user_input):
         return None

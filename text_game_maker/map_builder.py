@@ -469,17 +469,13 @@ class MapBuilder(object):
 
     def _run_command_sequence(self, player, sequence):
         # Inject commands into the input queue
-        lines = '\n'.join(sequence) + '\n'
-        sys.stdin.write(lines)
+        text_game_maker.queue_command_sequence([s.strip() for s in sequence])
+        cmd = text_game_maker.pop_command()
 
-        # Set the global command sequence count, so we know how many commands
-        # from the chain are left in the input queue (even if a user callback
-        # 'steals' some of the commands by calling read_input)
-        text_game_maker.info['sequence_count'] = len(sequence)
-
-        while text_game_maker.info['sequence_count'] > 0:
-            action = text_game_maker.read_line_raw("> ").strip().lower()
-            self._parse_command(player, action)
+        while not cmd is None:
+            print("\n> %s" % cmd)
+            self._parse_command(player, cmd)
+            cmd = text_game_maker.pop_command()
 
         text_game_maker.info['sequence_count'] = None
 
