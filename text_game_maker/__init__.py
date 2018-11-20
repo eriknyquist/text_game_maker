@@ -32,7 +32,8 @@ info = {
     'slow_printing': False,
     'chardelay': 0.02,
     'sequence_count': None,
-    'last_command': 'look'
+    'last_command': 'look',
+    'sound': None
 }
 
 wrapper = textwrap.TextWrapper()
@@ -110,6 +111,12 @@ def _wrap_text(text):
 
 def _wrap_print(text):
     print('\n' + _wrap_text(text))
+
+def save_sound(sound):
+    info['sound'] = sound
+
+def last_saved_sound():
+    return info['sound']
 
 def list_to_english(strlist, conj='and'):
     """

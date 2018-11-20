@@ -1,5 +1,8 @@
+import sys
+
 import text_game_maker
 
+from text_game_maker import audio
 from text_game_maker import map_builder as builder
 from text_game_maker.parser import CommandParser
 
@@ -61,6 +64,7 @@ def _do_eat(player, word, item_name):
             if not item:
                 text_game_maker._wrap_print("No %s available to %s"
                     % (item_name, word))
+                text_game_maker.save_sound(audio.FAILURE_SOUND)
                 return
 
     msg = item.on_eat(player, word)
@@ -83,6 +87,7 @@ def _do_take(player, word, item_name):
 
         if not added:
             text_game_maker._wrap_print("No matching items to %s" % word)
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
         msg = text_game_maker.list_to_english(added)
@@ -90,6 +95,7 @@ def _do_take(player, word, item_name):
         item = builder.find_item(player, item_name)
         if not item:
             text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
         msg = item.name
@@ -126,6 +132,7 @@ def _do_drop(player, word, item_name):
 
         if not added:
             text_game_maker._wrap_print("No matching items to %s." % word)
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
         msg = text_game_maker.list_to_english(added)
@@ -134,6 +141,7 @@ def _do_drop(player, word, item_name):
         if not item:
             text_game_maker._wrap_print("No %s in your inventory to %s"
                 % (item_name, word))
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
         _drop(player, item.name)
@@ -151,6 +159,7 @@ def _do_speak(player, word, name):
         p = builder.find_item(player, name)
         if not p:
             text_game_maker._wrap_print("Don't know how to %s %s" % (word, name))
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
     text_game_maker.game_print('You speak to %s.' % p.prep)
@@ -171,6 +180,7 @@ def _do_equip(player, word, item_name):
     if not item:
         text_game_maker._wrap_print("No %s in your inventory to %s"
             % (item_name, word))
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
         return
 
     if item in player.inventory['equipped']:
@@ -204,6 +214,7 @@ def _do_loot(player, word, name):
         p = builder.find_item(player, name)
         if not p:
             text_game_maker.game_print("Not sure how to %s %s" % (word, name))
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
     if p.alive:
@@ -212,6 +223,7 @@ def _do_loot(player, word, name):
             % (word, p.name))
         text_game_maker.game_print("%s didn't like this, and killed you.\n"
             % p.name)
+        player.death()
         sys.exit()
     else:
         player._loot(word, p)
@@ -226,6 +238,7 @@ def _do_inspect(player, word, item):
         target = builder.find_person(player, item)
         if not target:
             text_game_maker._wrap_print("No %s available to %s" % (item, word))
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
     text_game_maker.game_print(target.on_look(player))

@@ -1,3 +1,5 @@
+import sys
+
 import text_game_maker
 
 class GameEntity(object):
@@ -70,8 +72,13 @@ class GameEntity(object):
 
         else:
             msg = ("You try your best to %s %s, but you fail, and injure "
-                "yourself. You lose %d health points" % (word, self.prep,
+                "yourself. You have lost %d health points." % (word, self.prep,
                 self.damage))
+
+            if player.health <= self.damage:
+                text_game_maker._wrap_print(msg + " You are dead.")
+                player.death()
+                sys.exit()
 
             player.decrement_health(self.damage)
 

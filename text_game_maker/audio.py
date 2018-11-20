@@ -8,6 +8,7 @@ from text_game_maker.ptttl.ptttl_audio_encoder import ptttl_to_sample_data
 AUDIO_DIR = os.path.abspath("audio")
 SUCCESS_SOUND = os.path.join(AUDIO_DIR, "prompt_success.txt")
 FAILURE_SOUND = os.path.join(AUDIO_DIR, "prompt_fail.txt")
+ERROR_SOUND = os.path.join(AUDIO_DIR, "prompt_error.txt")
 DEATH_SOUND = os.path.join(AUDIO_DIR, "death.txt")
 FANFARE_SOUND = os.path.join(AUDIO_DIR, "fanfare.txt")
 
@@ -39,6 +40,9 @@ def add_ptttl_file(filename, sound_id=None):
     ctrl.sounds[sound_id] = pygame.mixer.Sound(buffer=rawdata)
 
 def play_sound(sound_id):
+    if (not ctrl.last_played is None) and ctrl.last_played.get_busy():
+        return
+
     if sound_id not in ctrl.sounds:
         raise ValueError("No sound with ID '%s'" % sound_id)
 
@@ -46,5 +50,6 @@ def play_sound(sound_id):
 
 add_ptttl_file(SUCCESS_SOUND)
 add_ptttl_file(FAILURE_SOUND)
+add_ptttl_file(ERROR_SOUND)
 add_ptttl_file(DEATH_SOUND)
 add_ptttl_file(FANFARE_SOUND)

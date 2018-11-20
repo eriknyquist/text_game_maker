@@ -97,6 +97,8 @@ class Player(object):
         audio.wait()
 
     def _move(self, dest, word, name):
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
+
         if dest is None:
             text_game_maker.game_print("Can't go %s from here." % name)
             return self.current
@@ -124,9 +126,9 @@ class Player(object):
 
         self.current = dest
 
+        text_game_maker.save_sound(audio.SUCCESS_SOUND)
         text_game_maker.game_print(move_message + ".")
         text_game_maker.game_print(self.current_state())
-
         self.decrement_energy(MOVE_ENERGY_COST)
         return dest
 

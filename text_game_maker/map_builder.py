@@ -470,7 +470,7 @@ class MapBuilder(object):
     def _run_command_sequence(self, player, sequence):
         # Inject commands into the input queue
         lines = '\n'.join(sequence) + '\n'
-        self.inject_input(lines)
+        sys.stdin.write(lines)
 
         # Set the global command sequence count, so we know how many commands
         # from the chain are left in the input queue (even if a user callback
