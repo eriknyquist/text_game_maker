@@ -98,7 +98,7 @@ class LockedRoom(Tile):
             # unlock the destination tile
             item.delete()
             dest.set_unlocked()
-            audio.play_sound(audio.FANFARE_SOUND)
+            gamemaker.save_sound(audio.FANFARE_SOUND)
 
         return True
 

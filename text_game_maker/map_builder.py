@@ -254,10 +254,9 @@ class MapBuilder(object):
         else:
             i, cmd = self._run_fsm(action)
             if cmd:
-                audio.play_sound(audio.SUCCESS_SOUND)
                 cmd.callback(player, action[:i].strip(), action[i:].strip())
             else:
-                audio.play_sound(audio.FAILURE_SOUND)
+                text_game_maker.save_sound(audio.ERROR_SOUND)
 
         text_game_maker.info['last_command'] = action
         player.turns += 1
@@ -535,6 +534,7 @@ class MapBuilder(object):
                     text_game_maker.game_print(player.current_state())
                     break
 
+                text_game_maker.save_sound(audio.SUCCESS_SOUND)
                 raw = text_game_maker.read_line_raw("%s" % player.prompt)
                 action = ' '.join(raw.split())
                 self._do_scheduled_tasks(player)
@@ -543,6 +543,7 @@ class MapBuilder(object):
                 if delim:
                     sequence = action.lstrip(delim).split(delim)
                     self._run_command_sequence(player, sequence)
-                    continue
+                else:
+                    self._parse_command(player, action.strip().lower())
 
-                self._parse_command(player, action.strip().lower())
+                audio.play_sound(text_game_maker.last_saved_sound())

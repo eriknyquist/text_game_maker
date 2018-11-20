@@ -97,10 +97,11 @@ class Player(object):
         audio.wait()
 
     def _move(self, dest, word, name):
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        text_game_maker.save_sound(audio.SUCCESS_SOUND)
 
         if dest is None:
             text_game_maker.game_print("Can't go %s from here." % name)
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return self.current
 
         # Save locked state of destination tile before & after user callbacks,
@@ -109,9 +110,11 @@ class Player(object):
 
         if self.current.on_exit and (not
                 self.current.on_exit(self, self.current, dest)):
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
         if dest.on_enter and not dest.on_enter(self, self.current, dest):
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
         locked_after = dest.is_locked()
@@ -120,13 +123,13 @@ class Player(object):
         if locked_after:
             text_game_maker.game_print("Can't go through a locked door "
                 "without a key")
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
             return self.current
         elif locked_before:
             move_message += ", unlocking the door"
 
         self.current = dest
 
-        text_game_maker.save_sound(audio.SUCCESS_SOUND)
         text_game_maker.game_print(move_message + ".")
         text_game_maker.game_print(self.current_state())
         self.decrement_energy(MOVE_ENERGY_COST)

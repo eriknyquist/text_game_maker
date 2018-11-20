@@ -12,7 +12,13 @@ ERROR_SOUND = os.path.join(AUDIO_DIR, "prompt_error.txt")
 DEATH_SOUND = os.path.join(AUDIO_DIR, "death.txt")
 FANFARE_SOUND = os.path.join(AUDIO_DIR, "fanfare.txt")
 
-pygame.mixer.pre_init(frequency=44100, size=-16, channels=1)
+FREQ = 44100
+SAMPLESIZE = -16
+CHANNELS = 1
+BUFSIZE = 512
+
+pygame.mixer.pre_init(FREQ, SAMPLESIZE, CHANNELS, BUFSIZE)
+pygame.mixer.init()
 pygame.init()
 
 class Control(object):
