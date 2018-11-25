@@ -113,6 +113,9 @@ def _wrap_text(text):
 def _wrap_print(text):
     print('\n' + _wrap_text(text))
 
+def _unrecognised(val):
+    _wrap_print('Unrecognised command "%s"' % val)
+
 def queue_command_sequence(seq):
     sequence.extend(seq)
 
@@ -307,6 +310,33 @@ def _do_listing(word_list, arg, desc):
         ret = ret.rstrip() + '"\n'
 
     return ret
+
+def _find_word_end(string, i):
+    while i < len(string):
+        if string[i] == ' ':
+            return i
+
+        i += 1
+
+    return len(string)
+
+def _parser_suggestions(fsm, text, i):
+    _unrecognised(text)
+
+    if i > 0:
+        print ('\nDid you mean...\n\n%s'
+            % ('\n'.join(['  %s' % w for w in fsm.get_children()])))
+
+def run_fsm(fsm, action):
+    i, cmd = fsm.run(action)
+    if  i > 0 and i < len(action) and action[i - 1] != ' ':
+        _parser_suggestions(fsm, action[:_find_word_end(action, i)], i)
+        return i, None
+    elif not cmd:
+        _parser_suggestions(fsm, action, i)
+        return i, None
+
+    return i, cmd
 
 def get_print_controls():
     return (

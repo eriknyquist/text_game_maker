@@ -16,7 +16,7 @@ def _do_help(player, word, setting):
     if not setting or setting == "":
         print text_game_maker.basic_controls
     else:
-        i, cmd = _run_fsm(setting)
+        i, cmd = text_game_maker.run_fsm(player.fsm, setting)
         if cmd:
             print cmd.help_text().rstrip('\n')
 

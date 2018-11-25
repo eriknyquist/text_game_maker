@@ -24,18 +24,6 @@ def _translate(val, min1, max1, min2, max2):
     scaled = float(val - min1) / float(span1)
     return min2 + (scaled * span2)
 
-def _unrecognised(val):
-    text_game_maker._wrap_print('Unrecognised command "%s"' % val)
-
-def find_word_end(string, i):
-    while i < len(string):
-        if string[i] == ' ':
-            return i
-
-        i += 1
-
-    return len(string)
-
 def find_item(player, name):
     if name.startswith('the '):
         name = name[4:]
@@ -219,24 +207,6 @@ class MapBuilder(object):
         self.current = self.start
         self.prompt = "[?]: "
 
-    def _run_fsm(self, action):
-        i, cmd = self.fsm.run(action)
-        if  i > 0 and i < len(action) and action[i - 1] != ' ':
-            self._parser_suggestions(action[:find_word_end(action, i)], i)
-            return i, None
-        elif not cmd:
-            self._parser_suggestions(action, i)
-            return i, None
-
-        return i, cmd
-
-    def _parser_suggestions(self, text, i):
-        _unrecognised(text)
-
-        if i > 0:
-            print ('\nDid you mean...\n\n%s'
-                % ('\n'.join(['  %s' % w for w in self.fsm.get_children()])))
-
     def _is_shorthand_direction(self, word):
         for w in ['north', 'south', 'east', 'west']:
             if w.startswith(word):
@@ -252,7 +222,7 @@ class MapBuilder(object):
         if self._is_shorthand_direction(action):
             defaults._do_move(player, 'go', action)
         else:
-            i, cmd = self._run_fsm(action)
+            i, cmd = text_game_maker.run_fsm(self.fsm, action)
             if cmd:
                 cmd.callback(player, action[:i].strip(), action[i:].strip())
             else:
