@@ -63,18 +63,18 @@ def find_inventory_item(player, name):
     if name.startswith('the '):
         name = name[4:]
 
-    for item in player.inventory['equipped']:
-        if item.name.startswith(name) or name in item.name:
-                return item
+    if player.equipped:
+        if player.equipped.name.startswith(name) or name in player.equipped.name:
+            return player.equipped
 
-    for item in player.inventory['unequipped']:
+    for item in player.inventory:
         if item.name.startswith(name) or name in item.name:
-                return item
+            return item
 
     return None
 
 def find_inventory_wildcard(player, name):
-    for item in player.inventory['unequipped']:
+    for item in player.inventory:
         if fnmatch.fnmatch(item.name, name):
             return item
 
@@ -175,14 +175,13 @@ def _do_inventory_listing(player, word, setting):
     print _centre_line('possessions', len(banner))
     print ("\n" + fmt).format('COINS', "", player.coins)
 
-    if player.inventory['equipped']:
-        item = player.inventory['equipped'][0]
-        print ("\n" + fmt).format(item.name + " (equipped)", "", item.value)
+    if player.equipped:
+        print ("\n" + fmt).format(player.equipped.name + " (equipped)", "",
+                player.equipped.value)
 
-    if player.inventory['unequipped']:
-        print ''
-        for item in player.inventory['unequipped']:
-            print (fmt).format(item.name, "", item.value)
+    print("")
+    for item in player.inventory:
+        print (fmt).format(item.name, "", item.value)
 
     print"\n----------------------------------------"
 

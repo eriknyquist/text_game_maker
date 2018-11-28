@@ -48,7 +48,7 @@ def _take(player, item):
     if not item.on_take(player):
         return False
 
-    item.move(player.inventory['unequipped'])
+    item.move(player.inventory)
     return True
 
 def _do_eat(player, word, item_name):
@@ -183,26 +183,26 @@ def _do_equip(player, word, item_name):
         text_game_maker.save_sound(audio.FAILURE_SOUND)
         return
 
-    if item in player.inventory['equipped']:
+    if item is player.equipped:
         text_game_maker.game_print("%s is already equipped." % item.name)
         return
 
     # Move any already-equipped items back to unequipped
-    if player.inventory['equipped']:
-        equipped = player.inventory['equipped'][0]
-        equipped.move(player.inventory['unequipped'])
+    if player.equipped:
+        player.equipped.move(player.inventory)
 
-    item.move(player.inventory['equipped'])
+    player.equipped = item
+    player.equipped.delete()
     text_game_maker.game_print("Equipped %s." % item.name)
 
 def _do_unequip(player, word, fields):
-    if not player.inventory['equipped']:
+    if not player.equipped:
         text_game_maker.game_print('Nothing is currently equipped.')
         return
 
-    equipped = player.inventory['equipped'][0]
-    equipped.move(player.inventory['unequipped'])
-    text_game_maker.game_print('%s unequipped' % equipped.name)
+    player.equipped.move(player.inventory)
+    text_game_maker.game_print('%s unequipped' % player.equipped.name)
+    player.equipped = None
 
 def _do_loot(player, word, name):
     if not name or name == "":

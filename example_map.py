@@ -97,6 +97,7 @@ class LockedRoom(Tile):
             # Player has key equipped-- delete it from player's inventory
             # unlock the destination tile
             item.delete()
+            player.equipped = None
             dest.set_unlocked()
             gamemaker.save_sound(audio.FANFARE_SOUND)
 

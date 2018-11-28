@@ -45,6 +45,7 @@ class GameEntity(object):
     def delete(self):
         if self.home:
             del self.home[self.home.index(self)]
+            self.home = None
 
     def move(self, location):
         location.append(self)

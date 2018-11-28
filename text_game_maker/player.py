@@ -38,7 +38,8 @@ class Player(object):
         self.scheduled_tasks = {}
 
         self.coins = 0
-        self.inventory = {'equipped': [], 'unequipped': []}
+        self.equipped = None
+        self.inventory = []
         self.name = "john"
         self.title = "sir"
 
@@ -154,10 +155,10 @@ class Player(object):
         self.title = title
 
     def get_equipped(self):
-        if not self.inventory['equipped']:
+        if not self.equipped:
             return None
 
-        return self.inventory['equipped'][0]
+        return self.equipped
 
     def schedule_task(self, callback, turns=1):
         """
@@ -226,8 +227,8 @@ class Player(object):
             if person.items:
                 for item in person.items:
                     print_items.append('%s %s' % (item.prefix, item.name))
-                    self.inventory['unequipped'].append(item)
-                    item.home = self.inventory['unequipped']
+                    self.inventory.append(item)
+                    item.home = self.inventory
 
                 person.items = []
 

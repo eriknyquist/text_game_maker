@@ -100,7 +100,7 @@ class Person(GameEntity):
         :rtype: text_game_maker.item.Item
         """
 
-        equipped = player.inventory['equipped'][0]
+        equipped = player.equipped
         cost = equipped.value
         msg = "Ah, I see you have %s %s." % (equipped.prefix, equipped.name)
 
@@ -126,6 +126,7 @@ class Person(GameEntity):
 
             # Transfer item
             equipped.move(self.items)
+            player.equipped = None
             text_game_maker.game_print("Sale completed.")
             return equipped
 
