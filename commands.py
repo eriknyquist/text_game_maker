@@ -48,7 +48,7 @@ def _take(player, item):
     if not item.on_take(player):
         return False
 
-    item.move(player.inventory)
+    item.move(player.inventory.items)
     return True
 
 def _do_eat(player, word, item_name):
@@ -189,7 +189,7 @@ def _do_equip(player, word, item_name):
 
     # Move any already-equipped items back to unequipped
     if player.equipped:
-        player.equipped.move(player.inventory)
+        player.equipped.move(player.inventory.items)
 
     player.equipped = item
     player.equipped.delete()
@@ -200,7 +200,7 @@ def _do_unequip(player, word, fields):
         text_game_maker.game_print('Nothing is currently equipped.')
         return
 
-    player.equipped.move(player.inventory)
+    player.equipped.move(player.inventory.items)
     text_game_maker.game_print('%s unequipped' % player.equipped.name)
     player.equipped = None
 

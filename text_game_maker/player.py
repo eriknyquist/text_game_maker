@@ -3,6 +3,7 @@ import pickle
 import text_game_maker
 
 from text_game_maker import audio
+from text_game_maker.items import SmallBag
 
 MOVE_ENERGY_COST = 0.25
 
@@ -39,7 +40,7 @@ class Player(object):
 
         self.coins = 0
         self.equipped = None
-        self.inventory = []
+        self.inventory = SmallBag("a", "small bag", None, 25, 0)
         self.name = "john"
         self.title = "sir"
 
@@ -227,8 +228,8 @@ class Player(object):
             if person.items:
                 for item in person.items:
                     print_items.append('%s %s' % (item.prefix, item.name))
-                    self.inventory.append(item)
-                    item.home = self.inventory
+                    self.inventory.items.append(item)
+                    item.home = self.inventory.items
 
                 person.items = []
 

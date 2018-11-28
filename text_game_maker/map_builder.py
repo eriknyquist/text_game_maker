@@ -67,14 +67,14 @@ def find_inventory_item(player, name):
         if player.equipped.name.startswith(name) or name in player.equipped.name:
             return player.equipped
 
-    for item in player.inventory:
+    for item in player.inventory.items:
         if item.name.startswith(name) or name in item.name:
             return item
 
     return None
 
 def find_inventory_wildcard(player, name):
-    for item in player.inventory:
+    for item in player.inventory.items:
         if fnmatch.fnmatch(item.name, name):
             return item
 
@@ -180,7 +180,7 @@ def _do_inventory_listing(player, word, setting):
                 player.equipped.value)
 
     print("")
-    for item in player.inventory:
+    for item in player.inventory.items:
         print (fmt).format(item.name, "", item.value)
 
     print"\n----------------------------------------"

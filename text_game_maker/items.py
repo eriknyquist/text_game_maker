@@ -95,3 +95,14 @@ class Food(Item):
         super(Food, self).__init__(prefix, name, location, value)
         self.energy = energy
 
+class SmallBag(Item):
+    """
+    Class to represent a small bag used to carry player items
+    """
+
+    def __init__(self, prefix, name, location, value, energy):
+        super(SmallBag, self).__init__(prefix, name, location, value)
+        self.energy = energy
+
+    def is_container(self):
+        return True
