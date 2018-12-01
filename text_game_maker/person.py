@@ -35,7 +35,9 @@ class Person(GameEntity):
         self.location = location
         self.alive = alive
         self.coins = coins
-        self.items = items
+
+        for item in items:
+            self.add_item(item)
 
     def on_look(self, player):
         return "It's %s."  % self.name
@@ -72,6 +74,7 @@ class Person(GameEntity):
         :param text_game_maker.item.Item item: item to add
         """
 
+        item.home = self.items
         self.items.append(item)
 
     def say(self, msg):

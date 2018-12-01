@@ -43,14 +43,6 @@ LOOT_WORDS = [
     'loot', 'search', 'rob', 'pickpocket'
 ]
 
-def _take(player, item):
-    # If on_take callback returns false, abort adding this item
-    if not item.on_take(player):
-        return False
-
-    item.move(player.inventory.items)
-    return True
-
 def _do_eat(player, word, item_name):
     if not item_name or item_name == "":
         text_game_maker._wrap_print("What do you want to %s?" % word)
@@ -71,6 +63,17 @@ def _do_eat(player, word, item_name):
     if msg:
         text_game_maker.game_print(msg)
 
+def _take(player, item):
+    # If on_take callback returns false, abort adding this item
+    if not item.on_take(player):
+        return False
+
+    if not player.inventory:
+        text_game_maker._wrap_print("No bag to hold items")
+        return False
+
+    return player.inventory.add_item(item)
+
 def _do_take(player, word, item_name):
     if not item_name or item_name == "":
         text_game_maker._wrap_print("What do you want to %s?" % word)
@@ -82,7 +85,10 @@ def _do_take(player, word, item_name):
 
         while item:
             item = builder.find_item_wildcard(player, item_name)
-            if item and _take(player, item):
+            if item:
+                if not _take(player, item):
+                    return
+
                 added.append(item.name)
 
         if not added:

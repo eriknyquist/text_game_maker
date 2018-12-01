@@ -42,6 +42,7 @@ class GameEntity(object):
         # required for the delete() method
         self.home = None
 
+        # Items contained inside this item (if item is a container)
         self.items = []
 
     def is_container(self):

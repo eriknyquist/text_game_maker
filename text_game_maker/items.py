@@ -74,7 +74,7 @@ class Item(GameEntity):
         return not self.__eq__(other)
 
     def __str__(self):
-        return '%s %s' % (self.prefix, self.name)
+        return '%s %s' % (self.prep, self.name)
 
 class Weapon(Item):
     """
@@ -95,14 +95,38 @@ class Food(Item):
         super(Food, self).__init__(prefix, name, location, value)
         self.energy = energy
 
-class SmallBag(Item):
+class InventoryBag(Item):
     """
     Class to represent a small bag used to carry player items
     """
 
     def __init__(self, prefix, name, location, value, energy):
-        super(SmallBag, self).__init__(prefix, name, location, value)
+        super(InventoryBag, self).__init__(prefix, name, location, value)
+        self.capacity = 5
         self.energy = energy
 
     def is_container(self):
         return True
+
+    def add_item(self, item):
+        if len(self.items) >= self.capacity:
+            text_game_maker._wrap_print("Your bag is full")
+            return False
+
+        item.move(self.items)
+        return True
+
+class SmallBag(InventoryBag):
+    def __init__(self, prefix, name, location, value, energy):
+        super(SmallBag, self).__init__(prefix, name, location, value, energy)
+        self.capacity = 5
+
+class Bag(InventoryBag):
+    def __init__(self, prefix, name, location, value, energy):
+        super(SmallBag, self).__init__(prefix, name, location, value, energy)
+        self.capacity = 10
+
+class LargeBag(InventoryBag):
+    def __init__(self, prefix, name, location, value, energy):
+        super(SmallBag, self).__init__(prefix, name, location, value, energy)
+        self.capacity = 20

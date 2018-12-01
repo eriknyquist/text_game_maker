@@ -165,7 +165,15 @@ def main():
 
     builder.set_locked()
 
-    builder.move_west("a cellar", "a dark cellar")
+    builder.move_west()
+    builder.move_south("a brightly lit room", "a brightly lit room with a clean"
+        " white tiled floor and white plaster walls")
+
+    builder.add_item(Food("a", "packet of hot sauce", "on the floor", 2, 1))
+    builder.add_item(Food("an", "egg", "on the floor", 5, 6))
+    builder.add_item(Item("a", "box of matches", "on the floor", 5))
+    builder.add_item(Item("a", "straw", "on the floor", 0))
+    builder.add_item(Item("an", "Iron Maiden poster", "on the east wall", 7))
 
     # Set the input prompt
     builder.set_input_prompt("[action?]")

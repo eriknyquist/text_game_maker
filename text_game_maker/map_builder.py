@@ -163,27 +163,41 @@ def _player_health_listing(player):
         + _int_meter("power", player.power, player.max_power)
     )
 
+def _make_banner(text, width, bannerchar='-', spaces=1):
+    name = (' ' * spaces) + text + (' ' * spaces)
+    half = ('-' * ((width / 2) - (len(name) / 2)))
+    return (half + name + half)[:width]
+
 def _do_inventory_listing(player, word, setting):
-    banner = "--------------- INVENTORY --------------"
+    bannerwidth = 50
     name_line = "%s %s's" % (player.title, player.name)
     fmt = "{0:33}{1:1}({2})"
 
+    banner = _make_banner("status", bannerwidth)
     print '\n' + banner + '\n'
     print _player_health_listing(player) + '\n'
 
-    print _centre_line(name_line, len(banner))
-    print _centre_line('possessions', len(banner))
-    print ("\n" + fmt).format('COINS', "", player.coins)
+    if player.inventory is None:
+        print '\nNo bag to hold items\n'
+    else:
+        print '\n' + _make_banner(player.inventory.name, bannerwidth) + '\n'
+        print _centre_line(name_line, len(banner))
+        print _centre_line('possessions', len(banner))
+        print ("\n" + fmt).format('COINS', "", player.coins)
 
-    if player.equipped:
-        print ("\n" + fmt).format(player.equipped.name + " (equipped)", "",
-                player.equipped.value)
+        if player.equipped:
+            print ("\n" + fmt).format(player.equipped.name + " (equipped)", "",
+                    player.equipped.value)
 
-    print("")
-    for item in player.inventory.items:
-        print (fmt).format(item.name, "", item.value)
+        print("")
 
-    print"\n----------------------------------------"
+        if player.inventory.items:
+            for item in player.inventory.items:
+                print (fmt).format(item.name, "", item.value)
+
+            print("")
+
+    print('-' * bannerwidth)
 
 class MapBuilder(object):
     """

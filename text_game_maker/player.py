@@ -214,28 +214,49 @@ class Player(object):
         del self.scheduled_tasks[task_id]
         return True
 
+    def _item_to_word(self, item):
+        return '%s %s' % (item.prefix, item.name)
+
+    def _items_to_words(self, items):
+        return [self._item_to_word(i) for i in items]
+
+    def _loot_message(self, word, name, items, extra=""):
+        text_game_maker.game_print("You %s %s.\nYou find %s. %s"
+            % (word, name, text_game_maker.list_to_english(items), extra))
+
     def _loot(self, word, person):
         if not person.coins and not person.items:
             text_game_maker.game_print('\nYou %s %s, and find nothing.'
                 % (word, person.name))
-        else:
-            print_items = []
-            if person.coins:
-                print_items.append('%d coins' % person.coins)
-                self.coins += person.coins
-                person.coins = 0
+            return
 
-            if person.items:
-                for item in person.items:
-                    print_items.append('%s %s' % (item.prefix, item.name))
-                    self.inventory.items.append(item)
-                    item.home = self.inventory.items
+        print_items = []
+        if person.coins:
+            print_items.append('%d coins' % person.coins)
+            self.coins += person.coins
+            person.coins = 0
 
-                person.items = []
+        if person.items:
+            if not self.inventory:
+                self._loot_message(word, person.name,
+                    self._items_to_words(person.items), "However, you have no "
+                    "bag to carry items, so you can't take anything.")
+                return
 
-            text_game_maker.game_print("You %s %s.\nYou find %s."
-                % (word, person.name,
-                text_game_maker.list_to_english(print_items)))
+            if len(self.inventory.items) >= self.inventory.capacity:
+                self._loot_message(word, person.name,
+                    self._items_to_words(person.items), "However, your bag is "
+                    "full, so you can't take anything.")
+                return
+
+            remaining = (self.inventory.capacity - len(self.inventory.items))
+            for i in range(remaining):
+                print_items.append(self._item_to_word(person.items[i]))
+
+                if not self.inventory.add_item(person.items[i]):
+                    return
+
+        self._loot_message(word, person.name, print_items)
 
     def current_state(self):
         """
