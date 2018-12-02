@@ -40,7 +40,7 @@ class Player(object):
 
         self.coins = 0
         self.equipped = None
-        self.inventory = SmallBag("a", "small bag", None, 25, 0)
+        self.inventory = None
         self.name = "john"
         self.title = "sir"
 
@@ -250,10 +250,9 @@ class Player(object):
                 return
 
             remaining = (self.inventory.capacity - len(self.inventory.items))
-            for i in range(remaining):
-                print_items.append(self._item_to_word(person.items[i]))
-
-                if not self.inventory.add_item(person.items[i]):
+            for _ in range(remaining):
+                print_items.append(self._item_to_word(person.items[0]))
+                if not self.inventory.add_item(person.items[0]):
                     return
 
         self._loot_message(word, person.name, print_items)
@@ -280,7 +279,7 @@ class Player(object):
         if people:
             ret += people
 
-        return ret
+        return text_game_maker.capitalize(ret)
 
     def _move_north(self, word):
         self._move(self.current.north, word, "north")

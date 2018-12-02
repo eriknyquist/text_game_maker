@@ -15,7 +15,7 @@ FANFARE_SOUND = os.path.join(AUDIO_DIR, "fanfare.txt")
 FREQ = 44100
 SAMPLESIZE = -16
 CHANNELS = 1
-BUFSIZE = 512
+BUFSIZE = 4096
 
 pygame.mixer.pre_init(FREQ, SAMPLESIZE, CHANNELS, BUFSIZE)
 pygame.mixer.init()

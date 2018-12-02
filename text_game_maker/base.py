@@ -71,8 +71,11 @@ class GameEntity(object):
         if self.alive:
             msg = "%s is still alive. You cannot eat living people." % self.name
         elif self.edible:
-            msg = "You %s %s and gain %d energy points" % (word, self.prep,
+            msg = "You %s %s and gain %d energy point" % (word, self.prep,
                 self.energy)
+
+            if (self.energy == 0) or (self.energy > 1):
+                msg += "s"
 
             player.increment_energy(self.energy)
             self.delete()

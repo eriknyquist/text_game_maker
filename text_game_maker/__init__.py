@@ -133,6 +133,42 @@ def save_sound(sound):
 def last_saved_sound():
     return info['sound']
 
+def capitalize(text):
+    ret = list(text)
+
+    # Make sure first word is capitalized...
+
+    i = 0
+    while i < (len(text) - 1) and text[i].isspace():
+        i += 1
+
+    if text[i].isalpha() and text[i].islower():
+        ret[i] = ret[i].upper()
+
+    # Find all alpha characters following a period and make
+    # sure they are uppercase...
+
+    p = 0 # next period index
+
+    while p < (len(text) - 1):
+        p = text.find('.', p)
+
+        if p < 0:
+            break
+
+        p += 1
+
+        # index of first non-space character after period
+        w = p
+
+        while w < (len(text) - 1) and text[w].isspace():
+            w += 1
+
+        if text[w].isalpha() and text[w].islower():
+            ret[w] = ret[w].upper()
+
+    return ''.join(ret)
+
 def list_to_english(strlist, conj='and'):
     """
     Convert a list of strings to description of the list in english.
