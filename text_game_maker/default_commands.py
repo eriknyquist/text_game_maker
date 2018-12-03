@@ -37,6 +37,18 @@ def _do_move(player, word, direction):
         text_game_maker._wrap_print("Don't know how to %s %s."
             % (word, direction))
 
+def _do_craft(player, word, item):
+    if not item or item == "":
+        text_game_maker.game_print("What do you want to %s?" % word)
+        return
+
+    if not player.inventory:
+        text_game_maker.game_print("No bag to hold items. "
+                "Nothing to craft with.")
+        return
+
+    text_game_maker.crafting.craft(item, word, player.inventory)
+
 def _get_next_unused_save_id(save_dir):
     default_num = 1
     nums = [int(x.split('_')[2]) for x in os.listdir(save_dir)]

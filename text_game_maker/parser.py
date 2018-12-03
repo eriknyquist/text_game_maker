@@ -17,6 +17,10 @@ GO_WORDS = [
     'dance', 'creep', 'sneak', 'tiptoe'
 ]
 
+CRAFT_WORDS = [
+    'craft', 'make', 'create', 'build'
+]
+
 SHOW_COMMAND_LIST_WORDS = [
     'show commands', 'show controls', 'show words', 'show wordlist',
     'commands', 'controls', 'wordlist', 'words'
@@ -181,6 +185,9 @@ class CommandParser(SimpleTextFSM):
 
             [GO_WORDS, defaults._do_move,
                 "move the player (north/south/east/west)", "%s <direction>"],
+
+            [CRAFT_WORDS, defaults._do_craft,
+                "Craft an item", "%s <item name>"],
 
             [INVENTORY_WORDS, map_builder._do_inventory_listing,
             "show player's inventory"]
