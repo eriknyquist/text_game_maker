@@ -8,7 +8,7 @@ from text_game_maker.ptttl.ptttl_audio_encoder import ptttl_to_sample_data
 AUDIO_DIR = os.path.abspath("audio")
 SUCCESS_SOUND = os.path.join(AUDIO_DIR, "prompt_success.txt")
 FAILURE_SOUND = os.path.join(AUDIO_DIR, "prompt_fail.txt")
-CRAFT_SOUND = os.path.join(AUDIO_DIR, "craft_success.txt")
+NEW_ITEM_SOUND = os.path.join(AUDIO_DIR, "new_item.txt")
 ERROR_SOUND = os.path.join(AUDIO_DIR, "prompt_error.txt")
 DEATH_SOUND = os.path.join(AUDIO_DIR, "death.txt")
 FANFARE_SOUND = os.path.join(AUDIO_DIR, "fanfare.txt")
@@ -16,7 +16,7 @@ FANFARE_SOUND = os.path.join(AUDIO_DIR, "fanfare.txt")
 FREQ = 44100
 SAMPLESIZE = -16
 CHANNELS = 1
-BUFSIZE = 4096
+BUFSIZE = 1024
 
 pygame.mixer.pre_init(FREQ, SAMPLESIZE, CHANNELS, BUFSIZE)
 pygame.mixer.init()
@@ -57,7 +57,7 @@ def play_sound(sound_id):
 
 add_ptttl_file(SUCCESS_SOUND)
 add_ptttl_file(FAILURE_SOUND)
-add_ptttl_file(CRAFT_SOUND)
+add_ptttl_file(NEW_ITEM_SOUND)
 add_ptttl_file(ERROR_SOUND)
 add_ptttl_file(DEATH_SOUND)
 add_ptttl_file(FANFARE_SOUND)

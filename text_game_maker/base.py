@@ -45,8 +45,22 @@ class GameEntity(object):
         # Items contained inside this item (if item is a container)
         self.items = []
 
+        # Singluar verb e.g. "the key is on the floor", or plural e.g.
+        # "the coins are on the floor"
+        self.verb = "is"
+
     def is_container(self):
         return False
+
+    def add_item(self, item):
+        item.move(self.items)
+
+    def add_items(self, items):
+        for item in items:
+            item.move(self.items)
+
+    def add_to_player_inventory(self, player):
+        return player.inventory.add_item(self)
 
     def delete(self):
         if self.home:

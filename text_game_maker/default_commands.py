@@ -43,6 +43,7 @@ def _do_craft(player, word, item):
         return
 
     if not player.inventory:
+        text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
         text_game_maker.game_print("No bag to hold items. "
                 "Nothing to craft with.")
         return

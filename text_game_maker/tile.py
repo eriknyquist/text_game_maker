@@ -65,7 +65,7 @@ class Tile(object):
                 english = gamemaker.list_to_english(itemlist)
                 sentence = '%s are %s. ' % (english, loc)
             else:
-                sentence = '%s is %s. ' % (itemlist[0], loc)
+                sentence = '%s %s %s. ' % (itemlist[0], items[loc][0].verb, loc)
 
             ret += sentence
 
@@ -86,6 +86,11 @@ class Tile(object):
         return self._describe_locations(self.people)
 
     def add_item(self, item):
+        """
+        Add item to this tile
+
+        :param GameEntity item: item to add
+        """
         if item.location not in self.items:
             self.items[item.location] = []
 

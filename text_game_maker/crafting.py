@@ -13,12 +13,14 @@ def _get_inventory_item(name, inventory):
     return None
 
 def _need_items(name, word, items):
-    names = ['%s %s' % (x.prefix, x.name) for x in items]
-    text_game_maker.game_print("Can't %s %s. You need %s."
+    names = [str(x) for x in items]
+    text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
+    text_game_maker.game_print("Can't %s %s. Need %s."
             % (word, name, text_game_maker.list_to_english(names)))
 
 def craft(name, word, inventory):
     if not name in craftables:
+        text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
         text_game_maker.game_print("Don't know how to %s %s" % (word, name))
         return
 
@@ -37,5 +39,5 @@ def craft(name, word, inventory):
         i.delete()
 
     inventory.add_item(item)
-    text_game_maker.save_sound(text_game_maker.audio.CRAFT_SOUND)
+    text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
     text_game_maker.game_print("Created %s." % name)

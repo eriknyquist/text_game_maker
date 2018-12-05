@@ -24,12 +24,14 @@ def _translate(val, min1, max1, min2, max2):
     scaled = float(val - min1) / float(span1)
     return min2 + (scaled * span2)
 
-def find_item(player, name):
+def find_item(player, name, locations=None):
     if name.startswith('the '):
         name = name[4:]
 
-    for loc in player.current.items:
-        itemlist = player.current.items[loc]
+    if locations is None:
+        locations = player.current.items.values()
+
+    for itemlist in locations:
         for item in itemlist:
             if (item.name.lower().startswith(name.lower())
                     or name.lower() in item.name.lower()):
@@ -37,13 +39,16 @@ def find_item(player, name):
 
     return None
 
-def find_item_wildcard(player, name):
+def find_item_wildcard(player, name, locations=None):
     if name.startswith('the '):
         name = name[4:]
 
+    if locations is None:
+        locations = player.current.items.values()
+
     ret = []
-    for loc in player.current.items:
-        for item in player.current.items[loc]:
+    for loc in locations:
+        for item in loc:
             if fnmatch.fnmatch(item.name, name):
                 return item
 
@@ -60,6 +65,9 @@ def find_person(player, name):
     return None
 
 def find_inventory_item(player, name):
+    if not player.inventory:
+        return None
+
     if name.startswith('the '):
         name = name[4:]
 
@@ -344,10 +352,20 @@ class MapBuilder(object):
         """
         Add item to current tile
 
-        :param text_game_maker.item.Item item: the item to add
+        :param text_game_maker.base.Item item: the item to add
         """
 
         self.current.add_item(item)
+
+    def add_items(self, items):
+        """
+        Add multiple items to current tile
+
+        :param [text_game_maker.item.Item] items: list of items to add
+        """
+
+        for item in items:
+            self.current.add_item(item)
 
     def add_person(self, person):
         """

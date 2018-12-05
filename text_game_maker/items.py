@@ -28,7 +28,7 @@ class Item(GameEntity):
         self.location = location
 
     def on_look(self, player):
-        return "%s %s." % (self.prefix, self.name)
+        return "%s." % self.__str__()
 
     def set_prefix(self, prefix):
         """
@@ -74,7 +74,10 @@ class Item(GameEntity):
         return not self.__eq__(other)
 
     def __str__(self):
-        return '%s %s' % (self.prefix, self.name)
+        if self.prefix:
+            return '%s %s' % (self.prefix, self.name)
+
+        return self.name
 
 class Weapon(Item):
     """
@@ -95,13 +98,32 @@ class Food(Item):
         super(Food, self).__init__(prefix, name, location, value)
         self.energy = energy
 
+class Coins(Item):
+    def __init__(self, location, value):
+        super(Coins, self).__init__(None, "%s coins" % value, location, value)
+        if value > 1:
+            self.verb = "are"
+
+    def add_to_player_inventory(self, player):
+        player.coins += self.value
+        self.delete()
+        return True
+
+class SmallTin(Item):
+    def __init__(self, *args, **kwargs):
+        super(SmallTin, self).__init__(*args, **kwargs)
+        self.capacity = 5
+
+    def is_container(self):
+        return True
+
 class InventoryBag(Item):
     """
     Class to represent a small bag used to carry player items
     """
 
-    def __init__(self, prefix, name, location, value):
-        super(InventoryBag, self).__init__(prefix, name, location, value)
+    def __init__(self, *args, **kwargs):
+        super(InventoryBag, self).__init__(*args, **kwargs)
         self.capacity = 5
 
     def on_take(self, player):
@@ -122,6 +144,7 @@ class InventoryBag(Item):
         player.inventory = self
         self.delete()
 
+        text_game_maker.audio.play_sound(text_game_maker.audio.NEW_ITEM_SOUND)
         text_game_maker.game_print("You now have a %s." % self.name)
 
     def is_container(self):
@@ -136,16 +159,16 @@ class InventoryBag(Item):
         return True
 
 class SmallBag(InventoryBag):
-    def __init__(self, prefix, name, location, value):
-        super(SmallBag, self).__init__(prefix, name, location, value)
+    def __init__(self, *args, **kwargs):
+        super(SmallBag, self).__init__(*args, **kwargs)
         self.capacity = 5
 
 class Bag(InventoryBag):
-    def __init__(self, prefix, name, location, value):
-        super(SmallBag, self).__init__(prefix, name, location, value)
+    def __init__(self, *args, **kwargs):
+        super(SmallBag, self).__init__(*args, **kwargs)
         self.capacity = 10
 
 class LargeBag(InventoryBag):
-    def __init__(self, prefix, name, location, value):
-        super(SmallBag, self).__init__(prefix, name, location, value)
+    def __init__(self, *args, **kwargs):
+        super(SmallBag, self).__init__(*args, **kwargs)
         self.capacity = 20

@@ -214,11 +214,8 @@ class Player(object):
         del self.scheduled_tasks[task_id]
         return True
 
-    def _item_to_word(self, item):
-        return '%s %s' % (item.prefix, item.name)
-
     def _items_to_words(self, items):
-        return [self._item_to_word(i) for i in items]
+        return [str(i) for i in items]
 
     def _loot_message(self, word, name, items, extra=""):
         text_game_maker.game_print("You %s %s.\nYou find %s. %s"
@@ -251,7 +248,7 @@ class Player(object):
 
             remaining = (self.inventory.capacity - len(self.inventory.items))
             for _ in range(remaining):
-                print_items.append(self._item_to_word(person.items[0]))
+                print_items.append(str(person.items[0]))
                 if not self.inventory.add_item(person.items[0]):
                     return
 

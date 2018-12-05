@@ -67,16 +67,6 @@ class Person(GameEntity):
 
         text_game_maker.game_print(msg)
 
-    def add_item(self, item):
-        """
-        Add an item to this person's inventory
-
-        :param text_game_maker.item.Item item: item to add
-        """
-
-        item.home = self.items
-        self.items.append(item)
-
     def say(self, msg):
         """
         Speak to the player
@@ -105,7 +95,7 @@ class Person(GameEntity):
 
         equipped = player.equipped
         cost = equipped.value
-        msg = "Ah, I see you have %s %s." % (equipped.prefix, equipped.name)
+        msg = "Ah, I see you have %s %s." % (equipped)
 
         if self.coins >= cost:
             msg += " I would like to buy it for %d coins." % cost

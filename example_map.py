@@ -3,16 +3,11 @@ import sys
 import commands
 
 import text_game_maker
-from text_game_maker.items import Item, Food, Weapon, SmallBag
+from text_game_maker.items import Item, Food, Weapon, SmallBag, SmallTin, Coins
 from text_game_maker.tile import Tile
 from text_game_maker.person import Person
 from text_game_maker.map_builder import MapBuilder
 from text_game_maker import crafting
-
-string = Item("a", "piece of string", "on the floor", 0)
-paperclip = Item("a", "paperclip", "on the floor", 0)
-lockpick = Item("a", "lockpick", "", 0)
-smallbag = SmallBag("a", "small rucksack", "on the bunk", 15)
 
 class CellDoor(Tile):
     def on_enter(self, player, src, dest):
@@ -36,14 +31,19 @@ def main():
     builder = MapBuilder(
         commands.build_parser(),
         "your cell",
-        """in a small, windowless cell of bare concrete. A narrow wooden bunk is
+        """in a small, windowless cell of bare concrete. A narrow bunk is
         in the corner."""
     )
 
-    builder.add_item(string)
-    builder.add_item(paperclip)
-    builder.add_item(smallbag)
+    paperclip = Item("a", "paperclip", "", 0)
+    string = Item("a", "piece of string", "on the floor", 0)
+    smallbag = SmallBag("a", "rucksack", "on the bunk", 15)
+    tin = SmallTin("a", "small tin", "on the bunk", 0)
+    coins = Coins("on the floor", 7)
+    lockpick = Item("a", "lockpick", "", 0)
 
+    tin.add_items([coins, paperclip])
+    builder.add_items([string, smallbag, tin])
     crafting.add([string, paperclip], lockpick)
 
     builder.move_east(
