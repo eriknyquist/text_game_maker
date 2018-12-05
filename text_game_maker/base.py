@@ -83,7 +83,7 @@ class GameEntity(object):
 
     def on_eat(self, player, word):
         if self.alive:
-            msg = "%s is still alive. You cannot eat living people." % self.name
+            msg = "%s is still alive. You cannot eat living things." % self.name
         elif self.edible:
             msg = "You %s %s and gain %d energy point" % (word, self.prep,
                 self.energy)

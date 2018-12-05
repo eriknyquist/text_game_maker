@@ -5,6 +5,15 @@ craftables = {}
 def add(items, item):
     craftables[item.name] = (items, item)
 
+def help_text():
+    ret = []
+    for name in craftables:
+        items, item = craftables[name]
+        item_names = text_game_maker.list_to_english([str(x) for x in items])
+        ret.append("%s: requires %s" % (item.name, item_names))
+
+    return '\n'.join(ret)
+
 def _get_inventory_item(name, inventory):
     for item in inventory.items:
         if item.name == name:
