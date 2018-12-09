@@ -83,6 +83,14 @@ class Item(GameEntity):
 
         return self.name
 
+class Lighter(Item):
+    def __init__(self, location):
+        super(Lighter, self).__init__("a", "lighter", location, 2)
+
+    def on_burn(self, player):
+        text_game_maker.game_print("You can't burn the %s with itself."
+            % self.name)
+
 class Weapon(Item):
     """
     Class to represent a weapon
@@ -90,6 +98,7 @@ class Weapon(Item):
 
     def __init__(self, prefix, name, location, value, damage):
         super(Weapon, self).__init__(prefix, name, location, value)
+        self.combustible = False
         self.edible = False
         self.damage = damage
 
@@ -105,6 +114,7 @@ class Food(Item):
 class Coins(Item):
     def __init__(self, location, value):
         super(Coins, self).__init__(None, "%s coins" % value, location, value)
+        self.combustible = False
         if value > 1:
             self.verb = "are"
 
@@ -120,15 +130,20 @@ class Blueprint(Item):
         self._ingredients = ingredients
         self._item = item
 
+    def add_to_player_inventory(self, player):
+        pass
+
     def on_take(self, player):
         text_game_maker.crafting.add(self._ingredients, self._item)
         self.delete()
         text_game_maker._wrap_print("You can now make %s" % self._item)
         text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
+        return True
 
 class SmallTin(Item):
     def __init__(self, *args, **kwargs):
         super(SmallTin, self).__init__(*args, **kwargs)
+        self.combustible = False
         self.capacity = 3
         self.max_item_size = ITEM_SIZE_SMALL
 

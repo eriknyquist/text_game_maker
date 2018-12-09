@@ -40,6 +40,17 @@ def find_item(player, name, locations=None):
 
     return None
 
+def is_location(player, name):
+    for direction in player.current.iterate_directions():
+        if direction and direction.is_door() and (name in direction.name):
+            return True
+
+    for loc in player.current.items:
+        if name in loc:
+            return True
+
+    return False
+
 def find_item_wildcard(player, name, locations=None):
     if name.startswith('the '):
         name = name[4:]
@@ -78,6 +89,20 @@ def find_inventory_item(player, name):
 
     for item in player.inventory.items:
         if item.name.startswith(name) or name in item.name:
+            return item
+
+    return None
+
+def find_inventory_item_class(player, classobj):
+    if not player.inventory:
+        return None
+
+    if player.equipped:
+        if isinstance(player.equipped, classobj):
+            return player.equipped
+
+    for item in player.inventory.items:
+        if isinstance(item, classobj):
             return item
 
     return None

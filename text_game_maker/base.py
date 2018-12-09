@@ -1,4 +1,5 @@
 import sys
+import messages
 
 import text_game_maker
 
@@ -11,6 +12,9 @@ class GameEntity(object):
     def __init__(self):
         # Things are inanimate by default
         self.inanimate = True
+
+        # Most things are....
+        self.combustible = True
 
         # Things are not edible by default
         self.edible = False
@@ -74,6 +78,21 @@ class GameEntity(object):
         location.append(self)
         self.delete()
         self.home = location
+
+    def on_burn(self, player):
+        if self.home is player.inventory.items:
+            text_game_maker.game_print("The %s is in your inventory. You "
+                "shouldn't burn things in your inventory because your bag "
+                "would catch fire." % self.name)
+            return
+
+        if self.combustible:
+            msg = messages.burn_combustible_message(self.name)
+            self.delete()
+        else:
+            msg = messages.burn_noncombustible_message(self.name)
+
+        text_game_maker.game_print(msg)
 
     def on_speak(self, player):
         return "%s says nothing." % self.prep

@@ -4,6 +4,7 @@ import text_game_maker
 
 from text_game_maker import audio, messages
 from text_game_maker import map_builder as builder
+from text_game_maker.items import Lighter
 from text_game_maker.parser import CommandParser
 
 EAT_WORDS = [
@@ -12,8 +13,16 @@ EAT_WORDS = [
 
 UNLOCK_WORDS = ['unlock']
 
+EVERYTHING_WORDS = [
+    'everything', 'all'
+]
+
 TAKE_WORDS = [
     'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
+]
+
+BURN_WORDS = [
+    'burn', 'light', 'torch'
 ]
 
 PUT_WORDS = [
@@ -103,7 +112,7 @@ def _do_unlock(player, word, remaining):
     if door is None:
         text_game_maker._wrap_print(messages.no_item_message(door_name))
         return
-     
+
     item = builder.find_inventory_item(player, item_name)
     if not item:
         item = builder.find_item(player, item_name)
@@ -112,6 +121,32 @@ def _do_unlock(player, word, remaining):
             return
 
     door.on_unlock(player, item)
+
+def _do_burn(player, word, item_name):
+    lighter = builder.find_inventory_item_class(player, Lighter)
+    if lighter is None:
+        text_game_maker._wrap_print("You can't %s anything without a lighter."
+            % word)
+        return
+
+    if not item_name or item_name == "":
+        text_game_maker._wrap_print("What do you want to %s?" % word)
+        return
+
+    item = builder.find_item(player, item_name)
+    if not item:
+        item = builder.find_inventory_item(player, item_name)
+
+    if item:
+        item.on_burn(player)
+        return
+
+    if builder.is_location(player, item_name):
+        msg = messages.burn_noncombustible_message(item_name)
+        text_game_maker._wrap_print(msg)
+        return
+    else:
+        text_game_maker._wrap_print(messages.no_item_message(item_name))
 
 def _do_put(player, word, remaining):
     location_name = ""
@@ -225,17 +260,19 @@ def _do_take(player, word, remaining):
 
         locations = [dest_item.items]
 
-    if '*' in item_name:
+    if item_name in EVERYTHING_WORDS:
         added = []
         item = ' '
 
-        while item:
-            item = builder.find_item_wildcard(player, item_name, locations)
-            if item:
-                if not _take(player, item):
-                    return
+        for loc in locations:
+            for i in range(len(loc)):
+                if not loc:
+                    continue
 
-                added.append(item.name)
+                item = loc[0]
+                if item:
+                    _take(player, item)
+                    added.append(item.name)
 
         if not added:
             text_game_maker._wrap_print("Nothing to %s" % word)
@@ -244,6 +281,8 @@ def _do_take(player, word, remaining):
 
         msg = text_game_maker.list_to_english(added)
     else:
+        import pdb
+        pdb.set_trace()
         item = builder.find_item(player, item_name, locations)
         if not item:
             text_game_maker._wrap_print(messages.no_item_message(item_name))
@@ -276,15 +315,17 @@ def _do_drop(player, word, item_name):
         return
 
     msg = None
-    if '*' in item_name:
+    if item_name in EVERYTHING_WORDS:
         added = []
         item = ' '
 
-        while item:
-            item = builder.find_inventory_wildcard(player, item_name)
-            if item:
-                added.append(item.name)
-                _drop(player, item.name)
+        for _ in range(len(player.inventory.items)):
+            if not player.inventory.items:
+                break
+
+            item = player.inventory.items[0]
+            added.append(item.name)
+            _drop(player, item.name)
 
         if not added:
             text_game_maker._wrap_print("Nothing to %s." % word)
@@ -415,6 +456,8 @@ def build_parser():
 
         [UNLOCK_WORDS, _do_unlock, "unlock a door with a key or lockpick",
             "%s <door> with <item>"],
+
+        [BURN_WORDS, _do_burn, "burn an item", "%s <item>"],
 
         [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
 
