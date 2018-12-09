@@ -1,4 +1,5 @@
 import time
+import random
 import sys
 import pickle
 import os
@@ -8,7 +9,7 @@ import errno
 import parser
 import text_game_maker
 from text_game_maker import default_commands as defaults
-from text_game_maker.tile import Tile
+from text_game_maker.tile import Tile, LockedDoor, reverse_direction
 from text_game_maker.items import Item
 from text_game_maker.player import Player
 from text_game_maker import audio
@@ -236,6 +237,7 @@ class MapBuilder(object):
         self.start = Tile(name, description)
         self.current = self.start
         self.prompt = "[?]: "
+        random.seed(time.time())
 
     def _is_shorthand_direction(self, word):
         for w in ['north', 'south', 'east', 'west']:
@@ -348,6 +350,15 @@ class MapBuilder(object):
 
         self.current.description = text_game_maker._remove_leading_whitespace(desc)
 
+    def add_door(self, prefix, name, direction, doorclass=LockedDoor):
+        dirs = ['north', 'south', 'east', 'west']
+        if direction not in dirs:
+            raise ValueError('Invalid direction: must be one of %s' % dirs)
+
+        replace = getattr(self.current, direction)
+        door = doorclass(prefix, name, self.current, replace)
+        setattr(self.current, direction, door)
+
     def add_item(self, item):
         """
         Add item to current tile
@@ -376,14 +387,6 @@ class MapBuilder(object):
 
         self.current.add_person(person)
 
-    def set_locked(self):
-        """
-        Set the current tile to be locked. The player will not be able to
-        enter a locked tile (unless some enter/exit callback unlocks it)
-        """
-
-        self.current.set_locked()
-
     def set_input_prompt(self, prompt):
         """
         Set the message to print when prompting a player for game input
@@ -393,11 +396,28 @@ class MapBuilder(object):
 
         self.prompt = prompt
 
-    def __do_move(self, dest, name, description, tileclass):
-        if dest is None:
-            dest = tileclass(name, description)
+    def __do_move(self, direction, name, description, tileclass):
+        dest = getattr(self.current, direction)
+        door = False
+        new_tile = None
+        replace = False
 
-        return self.current, dest
+        new_tile = tileclass(name, description)
+
+        if dest is None:
+            setattr(self.current, direction, new_tile)
+        elif dest.is_door():
+            door = True
+            if dest.replacement_tile is None:
+                dest.replacement_tile = new_tile
+
+        old = self.current
+
+        if not door:
+            setattr(self.current, direction, new_tile)
+
+        self.current = new_tile
+        setattr(self.current, reverse_direction(direction), old)
 
     def move_west(self, name=None, description=None, tileclass=Tile):
         """
@@ -408,10 +428,7 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.west, name, description, tileclass)
-        self.current.west = new
-        self.current = self.current.west
-        self.current.east = old
+        self.__do_move('west', name, description, tileclass)
 
     def move_east(self, name=None, description=None, tileclass=Tile):
         """
@@ -422,10 +439,7 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.east, name, description, tileclass)
-        self.current.east = new
-        self.current = self.current.east
-        self.current.west = old
+        self.__do_move('east', name, description, tileclass)
 
     def move_north(self, name=None, description=None, tileclass=Tile):
         """
@@ -436,10 +450,7 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.north, name, description, tileclass)
-        self.current.north = new
-        self.current = self.current.north
-        self.current.south = old
+        self.__do_move('north', name, description, tileclass)
 
     def move_south(self, name=None, description=None, tileclass=Tile):
         """
@@ -450,10 +461,7 @@ class MapBuilder(object):
         :param str description: long description of tile
         """
 
-        old, new = self.__do_move(self.current.south, name, description, tileclass)
-        self.current.south = new
-        self.current = self.current.south
-        self.current.north = old
+        self.__do_move('south', name, description, tileclass)
 
     def _get_command_delimiter(self, action):
         for i in COMMAND_DELIMITERS:

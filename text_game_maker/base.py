@@ -45,6 +45,9 @@ class GameEntity(object):
         # Items contained inside this item (if item is a container)
         self.items = []
 
+        # Size of object (for putting inside containers)
+        self.size = 1
+
         # Singluar verb e.g. "the key is on the floor", or plural e.g.
         # "the coins are on the floor"
         self.verb = "is"

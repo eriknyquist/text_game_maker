@@ -12,7 +12,10 @@ def help_text():
         item_names = text_game_maker.list_to_english([str(x) for x in items])
         ret.append("%s: requires %s" % (item.name, item_names))
 
-    return '\n'.join(ret)
+    if ret:
+        return '\n'.join(ret)
+
+    return None
 
 def _get_inventory_item(name, inventory):
     for item in inventory.items:

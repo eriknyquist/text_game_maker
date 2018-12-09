@@ -106,10 +106,6 @@ class Player(object):
             text_game_maker.save_sound(audio.FAILURE_SOUND)
             return self.current
 
-        # Save locked state of destination tile before & after user callbacks,
-        # So we can determine if dest. tile was unlocked by one of them
-        locked_before = dest.is_locked()
-
         if self.current.on_exit and (not
                 self.current.on_exit(self, self.current, dest)):
             text_game_maker.save_sound(audio.FAILURE_SOUND)
@@ -119,19 +115,9 @@ class Player(object):
             text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
-        locked_after = dest.is_locked()
         move_message = "You %s %s" % (word, name)
 
-        if locked_after:
-            text_game_maker.game_print("Can't go through a locked door "
-                "without a key")
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
-            return self.current
-        elif locked_before:
-            move_message += ", unlocking the door"
-
         self.current = dest
-
         text_game_maker.game_print(move_message + ".")
         text_game_maker.game_print(self.current_state())
         self.decrement_energy(MOVE_ENERGY_COST)

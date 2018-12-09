@@ -1,5 +1,20 @@
 import text_game_maker as gamemaker
 
+def reverse_direction(direction):
+    if not direction:
+        return None
+
+    if direction == 'north':
+        return 'south'
+    elif direction == 'south':
+        return 'north'
+    elif direction == 'east':
+        return 'west'
+    elif direction == 'west':
+        return 'east'
+
+    return None
+
 class Tile(object):
     """
     Represents a single 'tile' or 'room' in the game
@@ -18,9 +33,6 @@ class Tile(object):
         if description:
             self.description = gamemaker._remove_leading_whitespace(description)
 
-        # If tile is locked, player will only see a locked door.
-        self.locked = False
-
         # Adjacent tiles to the north, south, east and west of this tile
         self.north = None
         self.south = None
@@ -33,6 +45,45 @@ class Tile(object):
         # People on this tile
         self.people = {}
 
+    def iterate_directions(self):
+        for tile in [self.north, self.south, self.east, self.west]:
+            yield tile
+
+    def is_door(self):
+        return False
+
+    def direction_to(self, tile):
+        """
+        Get the direction from this tile to the given tile
+
+        :param Tile tile: tile to check the direction to
+        :return: direction to the given tile
+        :rtype: str
+        """
+        if not tile:
+            return None
+
+        if tile == self.north:
+            return 'north'
+        elif tile == self.south:
+            return 'south'
+        elif tile == self.east:
+            return 'east'
+        elif tile == self.west:
+            return 'west'
+
+        return None
+
+    def direction_from(self, tile):
+        """
+        Get the direction from the given tile to this tile
+
+        :param Tile tile: tile to check the direction from
+        :return: direction from the given tile to this tile
+        :rtype: str
+        """
+        return reverse_direction(self.direction_to(tile))
+
     # Enter/exit methods
     def on_enter(self, player, src, dest):
         return True
@@ -42,12 +93,7 @@ class Tile(object):
 
     def _get_name(self, tile, name):
         if tile:
-            if tile.locked:
-                msg = "a locked door"
-            else:
-                msg = tile.name
-
-            return "to the %s is %s" % (name, msg)
+            return "to the %s is %s" % (name, tile.name)
         else:
             return None
 
@@ -121,25 +167,38 @@ class Tile(object):
 
         return '. '.join(ret)
 
-    def is_locked(self):
-        """
-        Returns true/false indicating whether this tile is locked.
-        :return: True if tile is locked, False if unlocked.
-        :rtype: bool
-        """
-
-        return self.locked
-
-    def set_locked(self):
-        """
-        Lock this tile-- player will only see a locked door
-        """
-
+class LockedDoor(Tile):
+    def __init__(self, prefix, name, src_tile, replacement_tile):
+        super(LockedDoor, self).__init__(name, "")
+        self.name = '%s %s' % (prefix, name)
+        self.short_name = name
+        self.prefix = prefix
         self.locked = True
+        self.source_tile = src_tile
+        self.replacement_tile = replacement_tile
 
-    def set_unlocked(self):
-        """
-        Unlock this tile-- player can enter normally
-        """
+    def is_door(self):
+        return True
 
-        self.locked = False
+    def on_unlock(self, player, item):
+        if item.name == "lockpick":
+            self.unlock()
+        else:
+            text_game_maker._wrap_print("%s cannot be unlocked with %s"
+                % (self.short_name, item.prep))
+
+    def unlock(self):
+        if not self.locked:
+            return
+
+        direction = self.source_tile.direction_to(self)
+        if not direction:
+            return
+
+        setattr(self.source_tile, direction, self.replacement_tile)
+        gamemaker.game_print("You unlock the %s." % self.short_name)
+
+    def on_enter(self, player, src, dest):
+        if self.locked:
+            gamemaker._wrap_print("%s is locked." % self.short_name)
+            return False

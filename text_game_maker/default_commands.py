@@ -40,7 +40,10 @@ def _do_move(player, word, direction):
 def _do_craft(player, word, item):
     if not item or item == "":
         text_game_maker.game_print("What do you want to %s?" % word)
-        text_game_maker._wrap_print(text_game_maker.crafting.help_text())
+        helptext = text_game_maker.crafting.help_text()
+        if helptext:
+            text_game_maker._wrap_print(helptext)
+
         return
 
     if not player.inventory:

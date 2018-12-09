@@ -13,8 +13,8 @@ KILL_WORDS = [
 ]
 
 GO_WORDS = [
-    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip', 'jump',
-    'dance', 'creep', 'sneak', 'tiptoe'
+    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip',
+    'creep', 'sneak', 'tiptoe'
 ]
 
 CRAFT_WORDS = [

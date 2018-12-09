@@ -3,7 +3,9 @@ import sys
 import commands
 
 import text_game_maker
-from text_game_maker.items import Item, Food, Weapon, SmallBag, SmallTin, Coins
+from text_game_maker.items import (Item, Food, Weapon, SmallBag, SmallTin,
+    Coins, Blueprint)
+
 from text_game_maker.tile import Tile
 from text_game_maker.person import Person
 from text_game_maker.map_builder import MapBuilder
@@ -41,17 +43,16 @@ def main():
     tin = SmallTin("a", "small tin", "on the bunk", 0)
     coins = Coins("on the floor", 7)
     lockpick = Item("a", "lockpick", "", 0)
+    lockpick_blueprint = Blueprint([string, paperclip], lockpick)
 
-    tin.add_items([coins, paperclip])
+    tin.add_items([coins, paperclip, lockpick_blueprint])
     builder.add_items([string, smallbag, tin])
-    crafting.add([string, paperclip], lockpick)
+    builder.add_door("a", "cell door", "east")
 
     builder.move_east(
-        "the cell door",
-        "a dark hallway", CellDoor
+        "a dark hallway",
+        "a dark hallway, with a dim light at the end"
     )
-
-    builder.set_locked()
 
     # Set the input prompt
     builder.set_input_prompt("[action?]")

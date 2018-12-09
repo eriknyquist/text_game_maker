@@ -1,6 +1,10 @@
 import text_game_maker
 from text_game_maker.base import GameEntity
 
+ITEM_SIZE_SMALL = 1
+ITEM_SIZE_MEDIUM = 2
+ITEM_SIZE_LARGE = 3
+
 class Item(GameEntity):
     """
     Base class for collectable item
@@ -109,10 +113,24 @@ class Coins(Item):
         self.delete()
         return True
 
+class Blueprint(Item):
+    def __init__(self, ingredients, item, location=""):
+        super(Blueprint, self).__init__("a", "blueprint for %s" % item,
+                location, 0)
+        self._ingredients = ingredients
+        self._item = item
+
+    def on_take(self, player):
+        text_game_maker.crafting.add(self._ingredients, self._item)
+        self.delete()
+        text_game_maker._wrap_print("You can now make %s" % self._item)
+        text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
+
 class SmallTin(Item):
     def __init__(self, *args, **kwargs):
         super(SmallTin, self).__init__(*args, **kwargs)
-        self.capacity = 5
+        self.capacity = 3
+        self.max_item_size = ITEM_SIZE_SMALL
 
     def is_container(self):
         return True
@@ -124,7 +142,9 @@ class InventoryBag(Item):
 
     def __init__(self, *args, **kwargs):
         super(InventoryBag, self).__init__(*args, **kwargs)
-        self.capacity = 5
+        self.capacity = 10
+        self.max_item_size = ITEM_SIZE_MEDIUM
+        self.size = ITEM_SIZE_MEDIUM
 
     def on_take(self, player):
         # Copy existing player items from old bag
@@ -144,7 +164,7 @@ class InventoryBag(Item):
         player.inventory = self
         self.delete()
 
-        text_game_maker.audio.play_sound(text_game_maker.audio.NEW_ITEM_SOUND)
+        text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
         text_game_maker.game_print("You now have a %s." % self.name)
 
     def is_container(self):

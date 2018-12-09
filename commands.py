@@ -2,13 +2,15 @@ import sys
 
 import text_game_maker
 
-from text_game_maker import audio
+from text_game_maker import audio, messages
 from text_game_maker import map_builder as builder
 from text_game_maker.parser import CommandParser
 
 EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
 ]
+
+UNLOCK_WORDS = ['unlock']
 
 TAKE_WORDS = [
     'take', 'pick up', 'steal', 'acquire', 'grab', 'get', 'snatch', 'dock'
@@ -51,26 +53,6 @@ LOOT_WORDS = [
     'loot', 'search', 'rob', 'pickpocket'
 ]
 
-def _do_eat(player, word, item_name):
-    if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
-        return
-
-    item = builder.find_inventory_item(player, item_name)
-    if not item:
-        item = builder.find_item(player, item_name)
-        if not item:
-            item = builder.find_person(player, item_name)
-            if not item:
-                text_game_maker._wrap_print("No %s available to %s"
-                    % (item_name, word))
-                text_game_maker.save_sound(audio.FAILURE_SOUND)
-                return
-
-    msg = item.on_eat(player, word)
-    if msg:
-        text_game_maker.game_print(msg)
-
 def _dontknow(msg):
     text_game_maker._wrap_print("Don't know how to %s" % msg)
     text_game_maker.save_sound(audio.FAILURE_SOUND)
@@ -83,10 +65,59 @@ def _split_word(string, word):
 
     return None, None
 
+def _do_eat(player, word, item_name):
+    if not item_name or item_name == "":
+        text_game_maker._wrap_print("What do you want to %s?" % word)
+        return
+
+    item = builder.find_inventory_item(player, item_name)
+    if not item:
+        item = builder.find_item(player, item_name)
+        if not item:
+            item = builder.find_person(player, item_name)
+            if not item:
+                text_game_maker._wrap_print(messages.no_item_message(item_name))
+                text_game_maker.save_sound(audio.FAILURE_SOUND)
+                return
+
+    msg = item.on_eat(player, word)
+    if msg:
+        text_game_maker.game_print(msg)
+
+def _do_unlock(player, word, remaining):
+    if not remaining or remaining == "":
+        text_game_maker._wrap_print("What do you want to %s?" % word)
+        return
+
+    door_name, item_name = _split_word(remaining, 'with')
+    if door_name is None:
+        text_game_maker._wrap_print("What do you want to %s %s with?" % (word, remaining))
+        return
+
+    door = None
+    for tile in player.current.iterate_directions():
+        if tile and tile.is_door() and (door_name in tile.short_name):
+            door = tile
+            break
+
+    if door is None:
+        text_game_maker._wrap_print(messages.no_item_message(door_name))
+        return
+     
+    item = builder.find_inventory_item(player, item_name)
+    if not item:
+        item = builder.find_item(player, item_name)
+        if not item:
+            text_game_maker._wrap_print(messages.no_item_message(item_name))
+            return
+
+    door.on_unlock(player, item)
+
 def _do_put(player, word, remaining):
     location_name = ""
     location = None
     item_name = None
+    dest_item = None
 
     for loc in player.current.items:
         if remaining.endswith(loc):
@@ -121,10 +152,19 @@ def _do_put(player, word, remaining):
     if not item:
         item = builder.find_item(player, item_name)
         if not item:
-            text_game_maker._wrap_print("No %s in your inventory to %s"
-                % (item_name, word))
+            text_game_maker._wrap_print(messages.no_item_message(item_name))
             text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
+
+    if item is dest_item:
+        text_game_maker.game_print("How can you %s the %s inside itself?"
+            % (word, item.name))
+        return
+
+    if item.size > dest_item.max_item_size:
+        text_game_maker.game_print(messages.container_too_small_message(
+                item.name, dest_item.name))
+        return
 
     text_game_maker.game_print("You %s the %s %s"
             % (word, item.name, location_name))
@@ -140,7 +180,7 @@ def _do_look_inside(player, word, remaining):
     if not item:
         item = builder.find_item(player, remaining)
         if not item:
-            _dontknow("No %s to %s" % (remaining, word))
+            text_game_maker._wrap_print(messages.no_item_message(remaining))
             return
 
     if item.is_container() and item.items:
@@ -158,6 +198,7 @@ def _take(player, item):
 
     if not player.inventory:
         text_game_maker._wrap_print("No bag to hold items")
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
         return False
 
     return item.add_to_player_inventory(player)
@@ -197,7 +238,7 @@ def _do_take(player, word, remaining):
                 added.append(item.name)
 
         if not added:
-            text_game_maker._wrap_print("No matching items to %s" % word)
+            text_game_maker._wrap_print("Nothing to %s" % word)
             text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
@@ -205,7 +246,7 @@ def _do_take(player, word, remaining):
     else:
         item = builder.find_item(player, item_name, locations)
         if not item:
-            text_game_maker._wrap_print("No %s available to %s" % (item_name, word))
+            text_game_maker._wrap_print(messages.no_item_message(item_name))
             text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
@@ -226,6 +267,10 @@ def _drop(player, n):
     player.current.add_item(item)
 
 def _do_drop(player, word, item_name):
+    if not player.inventory:
+        text_game_maker._wrap_print("No bag to %s items from." % word)
+        return
+
     if not item_name or item_name == "":
         text_game_maker._wrap_print("What do you want to drop?")
         return
@@ -242,7 +287,7 @@ def _do_drop(player, word, item_name):
                 _drop(player, item.name)
 
         if not added:
-            text_game_maker._wrap_print("No matching items to %s." % word)
+            text_game_maker._wrap_print("Nothing to %s." % word)
             text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
@@ -367,6 +412,9 @@ def build_parser():
     commands = [
         [EQUIP_WORDS, _do_equip, "equip an item from your inventory",
             "%s <item>"],
+
+        [UNLOCK_WORDS, _do_unlock, "unlock a door with a key or lockpick",
+            "%s <door> with <item>"],
 
         [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
 
