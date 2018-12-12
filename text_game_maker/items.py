@@ -131,7 +131,7 @@ class Blueprint(Item):
         self._item = item
 
     def add_to_player_inventory(self, player):
-        pass
+        return True
 
     def on_take(self, player):
         text_game_maker.crafting.add(self._ingredients, self._item)

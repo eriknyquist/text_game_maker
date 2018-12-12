@@ -241,6 +241,7 @@ def _take(player, item):
 def _do_take(player, word, remaining):
     item_name = None
     locations = None
+    items = []
 
     if not remaining or remaining == "":
         text_game_maker._wrap_print("What do you want to %s?" % word)
@@ -261,38 +262,37 @@ def _do_take(player, word, remaining):
         locations = [dest_item.items]
 
     if item_name in EVERYTHING_WORDS:
-        added = []
-        item = ' '
-
         for loc in locations:
-            for i in range(len(loc)):
-                if not loc:
-                    continue
-
-                item = loc[0]
-                if item:
-                    if not _take(player, item):
-                        return
-
-                    added.append(item.name)
-
-        if not added:
-            text_game_maker._wrap_print("Nothing to %s" % word)
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
-            return
-
-        msg = text_game_maker.list_to_english(added)
+            for item in loc:
+                items.append(item)
     else:
-        item = builder.find_item(player, item_name, locations)
-        if not item:
-            text_game_maker._wrap_print(messages.no_item_message(item_name))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
-            return
+        names = []
+        fields = text_game_maker.english_to_list(item_name)
+        if len(fields) > 1:
+            names = fields
+        else:
+            names = [item_name]
 
-        msg = item.name
-        if not _take(player, item):
-            return
+        for name in names:
+            item = builder.find_item(player, name, locations)
+            if not item:
+                text_game_maker._wrap_print(messages.no_item_message(item_name))
+                text_game_maker.save_sound(audio.FAILURE_SOUND)
+                return
 
+            items.append(item)
+
+    if not items:
+        text_game_maker._wrap_print("Nothing to %s" % word)
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        return
+
+    for item in items:
+        if item:
+            if not _take(player, item):
+                return
+
+    msg = text_game_maker.list_to_english([x.name for x in items])
     text_game_maker.game_print('%s added to inventory' % msg)
     return
 
