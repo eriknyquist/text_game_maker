@@ -148,6 +148,20 @@ def _do_burn(player, word, item_name):
     else:
         text_game_maker._wrap_print(messages.no_item_message(item_name))
 
+def _put(item, dest_item, location_name, location):
+    if item is dest_item:
+        text_game_maker.game_print("How can you %s the %s inside itself?"
+            % (word, item.name))
+        return False
+
+    if item.size > dest_item.max_item_size:
+        text_game_maker.game_print(messages.container_too_small_message(
+                item.name, dest_item.name))
+        return False
+
+    item.move(location)
+    return True
+
 def _do_put(player, word, remaining):
     location_name = ""
     location = None
@@ -183,28 +197,31 @@ def _do_put(player, word, remaining):
         location = dest_item.items
         location_name = 'in the %s' % dest_item.name
 
-    item = builder.find_inventory_item(player, item_name)
-    if not item:
-        item = builder.find_item(player, item_name)
+    items = []
+    names = []
+
+    fields = text_game_maker.english_to_list(item_name)
+    if len(fields) > 1:
+        names = fields
+    else:
+        names = [item_name]
+
+    real_names = []
+    for name in names:
+        item = builder.find_inventory_item(player, name)
         if not item:
-            text_game_maker._wrap_print(messages.no_item_message(item_name))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            item = builder.find_item(player, name)
+            if not item:
+                text_game_maker._wrap_print(messages.no_item_message(name))
+                text_game_maker.save_sound(audio.FAILURE_SOUND)
+                return
+
+        real_names.append(item.name)
+        if not _put(item, dest_item, location_name, location):
             return
 
-    if item is dest_item:
-        text_game_maker.game_print("How can you %s the %s inside itself?"
-            % (word, item.name))
-        return
-
-    if item.size > dest_item.max_item_size:
-        text_game_maker.game_print(messages.container_too_small_message(
-                item.name, dest_item.name))
-        return
-
     text_game_maker.game_print("You %s the %s %s"
-            % (word, item.name, location_name))
-
-    item.move(location)
+            % (word, text_game_maker.list_to_english(real_names), location_name))
 
 def _do_look_inside(player, word, remaining):
     if not remaining or remaining == "":
@@ -276,7 +293,7 @@ def _do_take(player, word, remaining):
         for name in names:
             item = builder.find_item(player, name, locations)
             if not item:
-                text_game_maker._wrap_print(messages.no_item_message(item_name))
+                text_game_maker._wrap_print(messages.no_item_message(name))
                 text_game_maker.save_sound(audio.FAILURE_SOUND)
                 return
 

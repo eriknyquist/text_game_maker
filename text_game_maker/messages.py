@@ -48,5 +48,5 @@ def container_too_small_message(item_name, container_name):
         "The {0}, alas, will never fit inside the {1}.",
         "Despite your most earnest efforts, the {0} remains mostly not inside "
         "the {1}.",
-        "Fitting the {0} inside the {1] is impossible."
+        "Fitting the {0} inside the {1} is impossible."
     ], item_name, container_name)
