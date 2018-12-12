@@ -313,14 +313,10 @@ def _do_take(player, word, remaining):
     text_game_maker.game_print('%s added to inventory' % msg)
     return
 
-def _drop(player, n):
-    # Place item on the floor in current room
-    item = builder.find_inventory_item(player, n)
-    if not item:
-        return
-
+def _drop(player, item):
     item.location = "on the floor"
     player.current.add_item(item)
+    return True
 
 def _do_drop(player, word, item_name):
     if not player.inventory:
@@ -331,37 +327,37 @@ def _do_drop(player, word, item_name):
         text_game_maker._wrap_print("What do you want to drop?")
         return
 
-    msg = None
+    item_names = []
     if item_name in EVERYTHING_WORDS:
-        added = []
-        item = ' '
-
-        for _ in range(len(player.inventory.items)):
-            if not player.inventory.items:
-                break
-
-            item = player.inventory.items[0]
-            added.append(item.name)
-            _drop(player, item.name)
-
-        if not added:
-            text_game_maker._wrap_print("Nothing to %s." % word)
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
-            return
-
-        msg = text_game_maker.list_to_english(added)
+        item_names = [x.name for x in player.inventory.items]
     else:
-        item = builder.find_inventory_item(player, item_name)
+        fields = text_game_maker.english_to_list(item_name)
+        if len(fields) > 1:
+            item_names = fields
+        else:
+            item_names = [item_name]
+
+    if not item_names:
+        text_game_maker._wrap_print("Nothing to %s." % word)
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        return
+
+    items = []
+    for name in item_names:
+        item = builder.find_inventory_item(player, name)
         if not item:
-            text_game_maker._wrap_print("No %s in your inventory to %s"
-                % (item_name, word))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            text_game_maker._wrap_print("No %s in your inventory to %s."
+                % (name, word))
             return
 
-        _drop(player, item.name)
-        msg = item.name
+        items.append(item)
 
-    text_game_maker.game_print("Dropped %s" % msg)
+    for item in items:
+        if not _drop(player, item):
+            return
+
+    text_game_maker.game_print("Dropped %s."
+        % text_game_maker.list_to_english([x.name for x in items]))
 
 def _do_speak(player, word, name):
     if not name or name == "":
