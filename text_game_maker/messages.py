@@ -6,7 +6,7 @@ def _randmsg(choices, *args):
 
 def burn_combustible_message(item_name):
     return _randmsg([
-        "You set the {0} alight and watch it burn until it is nothing but a"
+        "You set the {0} alight and watch it burn until it is nothing but a "
         "smouldering pile of ashes.",
         "You burn the {0}. The flames consume and destroy the {0}.",
         "You set the {0} on fire, and it burns until there is nothing left.",

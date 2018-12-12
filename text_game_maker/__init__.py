@@ -169,6 +169,29 @@ def capitalize(text):
 
     return ''.join(ret)
 
+def multisplit(s, *sep):
+    stack = [s]
+    for char in sep:
+        pieces = []
+        for substr in stack:
+            pieces.extend([x.strip() for x in substr.split(char)])
+
+        stack = pieces
+
+    return stack
+
+def english_to_list(text):
+    """
+    Convert a string of the form 'a, b, c and d' to a list of the form
+    ['a','b','c','d']
+
+    :param str text: input string
+    :return: list of items in string, split on either ',' or 'and'
+    :rtype: list
+    """
+
+    return multisplit(text, ",", "and")
+
 def list_to_english(strlist, conj='and'):
     """
     Convert a list of strings to description of the list in english.

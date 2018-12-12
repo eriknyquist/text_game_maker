@@ -271,7 +271,9 @@ def _do_take(player, word, remaining):
 
                 item = loc[0]
                 if item:
-                    _take(player, item)
+                    if not _take(player, item):
+                        return
+
                     added.append(item.name)
 
         if not added:
@@ -281,8 +283,6 @@ def _do_take(player, word, remaining):
 
         msg = text_game_maker.list_to_english(added)
     else:
-        import pdb
-        pdb.set_trace()
         item = builder.find_item(player, item_name, locations)
         if not item:
             text_game_maker._wrap_print(messages.no_item_message(item_name))
