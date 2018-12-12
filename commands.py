@@ -83,6 +83,12 @@ def _do_eat(player, word, item_name):
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
 
+    fields = text_game_maker.english_to_list(item_name)
+    if len(fields) > 1:
+        text_game_maker._wrap_print("Whoa there! how about eating one thing at "
+            "a time? And don't talk with your mouth full.")
+        return
+
     item = builder.find_any_item(player, item_name)
     if not item:
         item = builder.find_person(player, item_name)
@@ -133,7 +139,6 @@ def _do_burn(player, word, item_name):
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
 
-    names = []
     fields = text_game_maker.english_to_list(item_name)
     if len(fields) > 1:
         text_game_maker._wrap_print("Slow down, pyromaniac. We burn things one "
