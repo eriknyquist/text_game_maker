@@ -29,6 +29,10 @@ PUT_WORDS = [
     'put', 'place'
 ]
 
+INSIDE_WORDS = [
+    'in', 'inside', 'into'
+]
+
 DROP_WORDS = [
     'drop', 'throw away', 'discard', 'chuck', 'ditch', 'delete', 'undock'
 ]
@@ -79,15 +83,13 @@ def _do_eat(player, word, item_name):
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
 
-    item = builder.find_inventory_item(player, item_name)
+    item = builder.find_any_item(player, item_name)
     if not item:
-        item = builder.find_item(player, item_name)
+        item = builder.find_person(player, item_name)
         if not item:
-            item = builder.find_person(player, item_name)
-            if not item:
-                text_game_maker._wrap_print(messages.no_item_message(item_name))
-                text_game_maker.save_sound(audio.FAILURE_SOUND)
-                return
+            text_game_maker._wrap_print(messages.no_item_message(item_name))
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            return
 
     msg = item.on_eat(player, word)
     if msg:
@@ -113,12 +115,10 @@ def _do_unlock(player, word, remaining):
         text_game_maker._wrap_print(messages.no_item_message(door_name))
         return
 
-    item = builder.find_inventory_item(player, item_name)
+    item = builder.find_any_item(player, item_name)
     if not item:
-        item = builder.find_item(player, item_name)
-        if not item:
-            text_game_maker._wrap_print(messages.no_item_message(item_name))
-            return
+        text_game_maker._wrap_print(messages.no_item_message(item_name))
+        return
 
     door.on_unlock(player, item)
 
@@ -176,19 +176,19 @@ def _do_put(player, word, remaining):
             break
 
     if location is None:
-        item_name, dest_name = _split_word(remaining, 'in')
-        if item_name is None:
-            item_name, dest_name = _split_word(remaining, 'inside')
-            if item_name is None:
-                _dontknow("%s %s" % (word, remaining))
-                return
+        for sep in INSIDE_WORDS:
+            item_name, dest_name = _split_word(remaining, sep)
+            if item_name:
+                break
 
-        dest_item = builder.find_inventory_item(player, dest_name)
+        if item_name is None:
+            _dontknow("%s %s" % (word, remaining))
+            return
+
+        dest_item = builder.find_any_item(player, dest_name)
         if not dest_item:
-            dest_item = builder.find_item(player, dest_name)
-            if not dest_item:
-                _dontknow("%s %s" % (word, remaining))
-                return
+            _dontknow("%s %s" % (word, remaining))
+            return
 
         if not dest_item.is_container():
             text_game_maker._wrap_print("Can't %s %s" % (word, remaining))
@@ -208,13 +208,11 @@ def _do_put(player, word, remaining):
 
     real_names = []
     for name in names:
-        item = builder.find_inventory_item(player, name)
+        item = builder.find_any_item(player, name)
         if not item:
-            item = builder.find_item(player, name)
-            if not item:
-                text_game_maker._wrap_print(messages.no_item_message(name))
-                text_game_maker.save_sound(audio.FAILURE_SOUND)
-                return
+            text_game_maker._wrap_print(messages.no_item_message(name))
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            return
 
         real_names.append(item.name)
         if not _put(item, dest_item, location_name, location):
@@ -228,12 +226,10 @@ def _do_look_inside(player, word, remaining):
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
 
-    item = builder.find_inventory_item(player, remaining)
+    item = builder.find_any_item(player, remaining)
     if not item:
-        item = builder.find_item(player, remaining)
-        if not item:
-            text_game_maker._wrap_print(messages.no_item_message(remaining))
-            return
+        text_game_maker._wrap_print(messages.no_item_message(remaining))
+        return
 
     if item.is_container() and item.items:
         contains = text_game_maker.list_to_english(
@@ -269,12 +265,10 @@ def _do_take(player, word, remaining):
         item_name = remaining
         locations = player.current.items.values()
     else:
-        dest_item = builder.find_inventory_item(player, dest_name)
+        dest_item = builder.find_any_item(player, dest_name)
         if not dest_item:
-            dest_item = builder.find_item(player, dest_name)
-            if not dest_item:
-                _dontknow("%s %s" % (word, remaining))
-                return
+            _dontknow("%s %s" % (word, remaining))
+            return
 
         locations = [dest_item.items]
 

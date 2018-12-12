@@ -93,6 +93,13 @@ def find_inventory_item(player, name):
 
     return None
 
+def find_any_item(player, name):
+    ret = find_inventory_item(player, name)
+    if not ret:
+        return find_item(player, name)
+
+    return ret
+
 def find_inventory_item_class(player, classobj):
     if not player.inventory:
         return None
