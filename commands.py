@@ -133,10 +133,14 @@ def _do_burn(player, word, item_name):
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
 
-    item = builder.find_item(player, item_name)
-    if not item:
-        item = builder.find_inventory_item(player, item_name)
+    names = []
+    fields = text_game_maker.english_to_list(item_name)
+    if len(fields) > 1:
+        text_game_maker._wrap_print("Slow down, pyromaniac. We burn things one "
+            "at a time around here.")
+        return
 
+    item = builder.find_any_item(player, item_name)
     if item:
         item.on_burn(player)
         return
