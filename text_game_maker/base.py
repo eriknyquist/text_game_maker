@@ -94,14 +94,18 @@ class GameEntity(object):
 
         text_game_maker.game_print(msg)
 
+    def on_read(self, player):
+        msg = 'read the %s' % self.name
+        text_game_maker._wrap_print(messages.nonsensical_action_message(msg))
+
     def on_speak(self, player):
-        return "%s says nothing." % self.prep
+        text_game_maker.game_print("%s says nothing." % self.prep)
 
     def on_take(self, player):
         return True
 
     def on_look(self, player):
-        return "It's a %s" % self.name
+        text_game_maker.game_print("It's a %s" % self.name)
 
     def on_eat(self, player, word):
         if self.alive:

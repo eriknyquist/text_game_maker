@@ -180,15 +180,6 @@ def _do_set_print_width(player, word, setting):
     text_game_maker._wrap_print("OK, line width set to %d." % val)
     text_game_maker.wrapper.width = val
 
-def _centre_line(string, line_width):
-    string = string.strip()
-    diff = line_width - len(string)
-    if diff <= 2:
-        return string
-
-    spaces = ' ' * (diff / 2)
-    return spaces + string + spaces
-
 def _int_meter(name, val, maxval):
     hp_width = 17
     scaled = int(_translate(val, 1, maxval, 1, hp_width))
@@ -205,45 +196,41 @@ def _player_health_listing(player, width):
         _int_meter("power", player.power, player.max_power)
     ]
 
-    return '\n'.join([_centre_line(x, width) for x in ret])
-
-def _make_banner(text, width, bannerchar='-', spaces=1):
-    name = (' ' * spaces) + text + (' ' * spaces)
-    half = ('-' * ((width / 2) - (len(name) / 2)))
-    return (half + name + half)[:width]
+    return '\n'.join([text_game_maker.centre_text(x, width) for x in ret])
 
 def _do_inventory_listing(player, word, setting):
     bannerwidth = 50
     fmt = "{0:33}{1:1}({2})"
 
-    banner = _make_banner("status", bannerwidth)
+    banner = text_game_maker.line_banner("status", bannerwidth)
     print '\n' + banner + '\n'
     print _player_health_listing(player, bannerwidth) + '\n'
-    print _centre_line(("\n" + fmt).format('COINS', "", player.coins),
-            bannerwidth)
+    print text_game_maker.centre_text(("\n" + fmt).format('COINS', "",
+        player.coins), bannerwidth)
 
     if player.inventory is None:
         print("")
         print('-' * bannerwidth)
         print("")
-        print _centre_line('No bag to hold items', bannerwidth)
+        print text_game_maker.centre_text('No bag to hold items', bannerwidth)
         print("")
     else:
         banner_text = "%s (%d/%d)" % (player.inventory.name,
             len(player.inventory.items), player.inventory.capacity)
 
-        print '\n' + _make_banner(banner_text, bannerwidth) + '\n'
+        print '\n' + text_game_maker.line_banner(banner_text,
+            bannerwidth) + '\n'
 
         if player.equipped:
             print ("\n" + fmt).format(player.equipped.name + " (equipped)", "",
-                    player.equipped.value)
+                player.equipped.value)
 
         print("")
 
         if player.inventory.items:
             for item in player.inventory.items:
-                print _centre_line((fmt).format(item.name, "", item.value),
-                        bannerwidth)
+                print text_game_maker.centre_text((fmt).format(item.name, "",
+                    item.value), bannerwidth)
 
             print("")
 

@@ -25,6 +25,10 @@ BURN_WORDS = [
     'burn', 'light', 'torch'
 ]
 
+READ_WORDS = [
+    'read'
+]
+
 PUT_WORDS = [
     'put', 'place'
 ]
@@ -100,6 +104,30 @@ def _do_eat(player, word, item_name):
     msg = item.on_eat(player, word)
     if msg:
         text_game_maker.game_print(msg)
+
+def _do_read(player, word, item_name):
+    if not item_name or item_name == "":
+        text_game_maker._wrap_print("What do you want to %s?" % word)
+        return
+
+    fields = text_game_maker.english_to_list(item_name)
+    if len(fields) > 1:
+        text_game_maker._wrap_print("Really, now. You can only read *one* thing"
+            " at a time.")
+        return
+
+    item = builder.find_any_item(player, item_name)
+    if item:
+        item.on_read(player)
+        return
+
+    if builder.is_location(player, item_name):
+        text_game_maker._wrap_print(messages.nonsensical_action_message(
+            '%s the %s' % (word, item_name)))
+    else:
+        text_game_maker._wrap_print(messages.no_item_message(item_name))
+
+    text_game_maker.save_sound(audio.FAILURE_SOUND)
 
 def _do_unlock(player, word, remaining):
     if not remaining or remaining == "":
@@ -446,7 +474,7 @@ def _do_inspect(player, word, item):
         _do_look(player, word, item)
         return
 
-    target = builder.find_item(player, item)
+    target = builder.find_any_item(player, item)
     if not target:
         target = builder.find_person(player, item)
         if not target:
@@ -454,7 +482,7 @@ def _do_inspect(player, word, item):
             text_game_maker.save_sound(audio.FAILURE_SOUND)
             return
 
-    text_game_maker.game_print(target.on_look(player))
+    target.on_look(player)
 
 def _do_look(player, word, item):
     if item != '':
@@ -474,6 +502,8 @@ def build_parser():
             "%s <door> with <item>"],
 
         [BURN_WORDS, _do_burn, "burn an item", "%s <item>"],
+
+        [READ_WORDS, _do_read, "read an item", "%s <item>"],
 
         [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
 

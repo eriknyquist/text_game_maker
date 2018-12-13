@@ -219,6 +219,26 @@ def list_to_english(strlist, conj='and'):
 
     return msg + strlist[-1]
 
+def centre_text(string, line_width=None):
+    if not line_width:
+        line_width = wrapper.width
+
+    string = string.strip()
+    diff = line_width - len(string)
+    if diff <= 2:
+        return string
+
+    spaces = ' ' * (diff / 2)
+    return spaces + string + spaces
+
+def line_banner(text, width=None, bannerchar='-', spaces=1):
+    if not width:
+        width = wrapper.width
+
+    name = (' ' * spaces) + text + (' ' * spaces)
+    half = ('-' * ((width / 2) - (len(name) / 2)))
+    return (half + name + half)[:width]
+
 def _quit_hint():
     _wrap_print("Use %s to stop playing"
         % (list_to_english(['"%s"' % i for i in parser.KILL_WORDS], conj='or')))

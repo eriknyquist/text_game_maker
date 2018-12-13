@@ -31,9 +31,6 @@ class Item(GameEntity):
         self.prefix = prefix
         self.location = location
 
-    def on_look(self, player):
-        return "%s." % self.__str__()
-
     def set_prefix(self, prefix):
         """
         Set item prefix word (usually 'an' or 'a')
@@ -122,6 +119,33 @@ class Coins(Item):
         player.coins += self.value
         self.delete()
         return True
+
+class Paper(Item):
+    def __init__(self, prefix, name, location, text, header=None, footer=None):
+        super(Paper, self).__init__(prefix, name, location, 0)
+        self.text = text
+        self.header = header
+        self.footer = footer
+
+    def on_look(self, player):
+        self.on_read(player)
+
+    def on_read(self, player):
+        centered_lines = []
+        lines = text_game_maker._wrap_text(self.text).split('\n')
+
+        for line in lines:
+            centered_lines.append(text_game_maker.centre_text(line))
+
+        msg = '\n'.join(centered_lines)
+
+        if self.header:
+            msg = "%s\n\n%s" % (text_game_maker.line_banner(self.header), msg)
+
+        if self.footer:
+            msg = "%s\n\n%s" % (msg, text_game_maker.line_banner(self.footer))
+
+        print('\n' + msg)
 
 class Blueprint(Item):
     def __init__(self, ingredients, item, location=""):

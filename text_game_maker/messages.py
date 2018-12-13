@@ -4,6 +4,16 @@ def _randmsg(choices, *args):
     choice = random.choice(choices)
     return choice.format(*args)
 
+def nonsensical_action_message(nonsensical_action):
+    return _randmsg([
+        "How can you {0}?",
+        "Unsure how to {0}, you cry.",
+        "You want to {0}. Oh, how you yearn for it! But you cannot figure out "
+        "how to {0}.",
+        "{0}? How do you plan on doing that?",
+        "You try very hard to {0}, to no avail."
+    ], nonsensical_action)
+
 def burn_combustible_message(item_name):
     return _randmsg([
         "You set the {0} alight and watch it burn until it is nothing but a "

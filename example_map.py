@@ -4,7 +4,7 @@ import commands
 
 import text_game_maker
 from text_game_maker.items import (Item, Food, Weapon, SmallBag, SmallTin,
-    Coins, Blueprint, Lighter)
+    Coins, Blueprint, Lighter, Paper)
 
 from text_game_maker.tile import Tile
 from text_game_maker.person import Person
@@ -47,10 +47,14 @@ def main():
     lockpick = Item("a", "lockpick", "", 0)
     lighter = Lighter("on the bunk")
 
+    poster = Paper("a", "poster", "on the wall",
+        "hey this is a poster", "header", "footer"
+    )
+
     lockpick_blueprint = Blueprint([string, paperclip], lockpick)
 
     tin.add_items([coins, paperclip, lockpick_blueprint])
-    builder.add_items([string, smallbag, tin, lighter])
+    builder.add_items([string, smallbag, tin, lighter, poster])
     builder.add_door("a", "cell door", "east")
 
     builder.move_east(
