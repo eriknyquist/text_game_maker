@@ -99,6 +99,17 @@ Misc
 * Use 'controls' or 'commands' or 'words' or 'show words'... etc. to show a
   comprehensive listing of game commands"""
 
+format_tokens = {
+    "<playername>": lambda: map_builder.get_instance().player.name
+}
+
+def replace_format_tokens(text):
+    for tok in format_tokens:
+        if tok in text:
+            text = text.replace(tok, format_tokens[tok]())
+
+    return text
+
 def _verify_callback(obj):
     if not inspect.isfunction(obj):
         raise TypeError('callbacks must be top-level functions')
@@ -111,7 +122,7 @@ def _wrap_text(text):
     return wrapper.fill(text.replace('\n', ' ').replace('\r', ''))
 
 def _wrap_print(text):
-    print('\n' + _wrap_text(text))
+    print('\n' + _wrap_text(replace_format_tokens(text)))
 
 def _unrecognised(val):
     _wrap_print('Unrecognised command "%s"' % val)
@@ -363,7 +374,7 @@ def game_print(msg):
     :type msg: str
     """
 
-    msg = '\n' + _wrap_text(msg)
+    msg = '\n' + _wrap_text(replace_format_tokens(msg))
     if not info['slow_printing']:
         print(msg)
         return

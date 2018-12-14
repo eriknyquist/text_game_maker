@@ -24,10 +24,7 @@ class CellDoor(Tile):
 
 def on_start(player):
     name = text_game_maker.read_line("What is your name?")
-    title = text_game_maker.read_line("What is your title (sir, lady, etc...)?")
-
     player.set_name(name.title())
-    player.set_title(title.title())
 
 def main():
     builder = MapBuilder(
@@ -47,8 +44,12 @@ def main():
     lockpick = Item("a", "lockpick", "", 0)
     lighter = Lighter("on the bunk")
 
-    poster = Paper("a", "poster", "on the wall",
-        "hey this is a poster", "header", "footer"
+    poster = Paper("a", "poster", "on the wall", [
+            "<playername>",
+            "Wanted for crimes against the State. $50000 to be "
+            "awarded for capture, dead or alive."
+        ],
+        "WANTED!", "WANTED!"
     )
 
     lockpick_blueprint = Blueprint([string, paperclip], lockpick)

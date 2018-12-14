@@ -121,29 +121,71 @@ class Coins(Item):
         return True
 
 class Paper(Item):
-    def __init__(self, prefix, name, location, text, header=None, footer=None):
+    def __init__(self, prefix, name, location, paragraphs, header=None,
+            footer=None):
         super(Paper, self).__init__(prefix, name, location, 0)
-        self.text = text
+        self.paragraphs = paragraphs
         self.header = header
         self.footer = footer
+
+    def paragraphs_text(self):
+        ret = []
+
+        for p in self.paragraphs:
+            centered_lines = []
+            lines = text_game_maker._wrap_text(p).split('\n')
+
+            for line in lines:
+                formatted = text_game_maker.replace_format_tokens(line)
+                centered_lines.append(text_game_maker.centre_text(formatted))
+
+            ret.append('\n'.join(centered_lines))
+
+        return '\n\n'.join(ret)
+
+    def header_text(self):
+        htxt = text_game_maker.replace_format_tokens(self.header)
+        return text_game_maker.line_banner(htxt)
+
+    def footer_text(self):
+        ftxt = text_game_maker.replace_format_tokens(self.footer)
+        return text_game_maker.line_banner(ftxt)
 
     def on_look(self, player):
         self.on_read(player)
 
     def on_read(self, player):
-        centered_lines = []
-        lines = text_game_maker._wrap_text(self.text).split('\n')
-
-        for line in lines:
-            centered_lines.append(text_game_maker.centre_text(line))
-
-        msg = '\n'.join(centered_lines)
-
+        msg = self.paragraphs_text()
         if self.header:
-            msg = "%s\n\n%s" % (text_game_maker.line_banner(self.header), msg)
+            msg = "%s\n\n%s" % (self.header_text(), msg)
 
         if self.footer:
-            msg = "%s\n\n%s" % (msg, text_game_maker.line_banner(self.footer))
+            msg = "%s\n\n%s" % (msg, self.footer_text())
+
+        print('\n' + msg)
+
+class PosterWithPhoto(Paper):
+    def __init__(self, prefix, name, location, paragraphs, photo, header=None,
+            footer=None):
+        super(PosterWithPhoto, self).__init__(prefix, name, location,
+            paragraphs, header, footer)
+        self.photo = photo
+
+    def photo_text(self):
+        centered = []
+        lines = self.photo.split('\n')
+        for line in lines:
+            centered.append(text_game_maker.centre_text(line))
+
+        return '\n'.join(centered)
+
+    def on_read(self, player):
+        msg = '\n' + self.photo_text() + '\n\n' + self.paragraphs_text()
+        if self.header:
+            msg = "%s\n%s" % (self.header_text(), msg)
+
+        if self.footer:
+            msg = "%s\n\n%s" % (msg, self.footer_text())
 
         print('\n' + msg)
 

@@ -18,6 +18,10 @@ MIN_LINE_WIDTH = 50
 MAX_LINE_WIDTH = 120
 COMMAND_DELIMITERS = [',', ';', '/', '\\']
 
+info = {
+    'instance': None
+}
+
 def _translate(val, min1, max1, min2, max2):
     span1 = max1 - min1
     span2 = max2 - min2
@@ -236,6 +240,9 @@ def _do_inventory_listing(player, word, setting):
 
     print('-' * bannerwidth)
 
+def get_instance():
+    return info['instance']
+
 class MapBuilder(object):
     """
     Base class for building a tile-based map
@@ -251,12 +258,18 @@ class MapBuilder(object):
         :param str description: short name for starting Tile
         """
 
+        if info['instance']:
+            raise RuntimeError("Only one %s instance allowed"
+                % self.__class__.__name__)
+
+        info['instance'] = self
         self.on_start = None
         self.fsm = parser
         self.start = Tile(name, description)
         self.current = self.start
         self.prompt = "[?]: "
         random.seed(time.time())
+        self.player = None
 
     def _is_shorthand_direction(self, word):
         for w in ['north', 'south', 'east', 'west']:
@@ -539,8 +552,8 @@ class MapBuilder(object):
         Start running the game
         """
 
-        player = Player(self.start, self.prompt)
-        player.fsm = self.fsm
+        self.player = Player(self.start, self.prompt)
+        self.player.fsm = self.fsm
         menu_choices = ["New game", "Load game", "Controls"]
 
         while True:
@@ -552,13 +565,13 @@ class MapBuilder(object):
 
             elif choice == 0:
                 if self.on_start:
-                    self.on_start(player)
+                    self.on_start(self.player)
 
-                text_game_maker.game_print(player.current_state())
+                text_game_maker.game_print(self.player.current_state())
                 break
 
             elif choice == 1:
-                if defaults._do_load(player, '', ''):
+                if defaults._do_load(self.player, '', ''):
                     break
 
             elif choice == 2:
@@ -566,21 +579,21 @@ class MapBuilder(object):
 
         while True:
             while True:
-                if player.load_from_file:
-                    player = self._load_state(player, player.load_from_file)
-                    text_game_maker.game_print(player.current_state())
+                if self.player.load_from_file:
+                    self.player = self._load_state(self.player, self.player.load_from_file)
+                    text_game_maker.game_print(self.player.current_state())
                     break
 
                 text_game_maker.save_sound(audio.SUCCESS_SOUND)
-                raw = text_game_maker.read_line_raw("%s" % player.prompt)
+                raw = text_game_maker.read_line_raw("%s" % self.player.prompt)
                 action = ' '.join(raw.split())
-                self._do_scheduled_tasks(player)
+                self._do_scheduled_tasks(self.player)
 
                 delim = self._get_command_delimiter(action)
                 if delim:
                     sequence = action.lstrip(delim).split(delim)
-                    self._run_command_sequence(player, sequence)
+                    self._run_command_sequence(self.player, sequence)
                 else:
-                    self._parse_command(player, action.strip().lower())
+                    self._parse_command(self.player, action.strip().lower())
 
                 audio.play_sound(text_game_maker.last_saved_sound())

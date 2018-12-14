@@ -42,7 +42,6 @@ class Player(object):
         self.equipped = None
         self.inventory = None
         self.name = "john"
-        self.title = "sir"
 
     def _dec_clamp(self, curr, val, min_val):
         if curr == min_val:
@@ -131,15 +130,6 @@ class Player(object):
         """
 
         self.name = name
-
-    def set_title(self, title):
-        """
-        Set player title
-
-        :param str title: new player title
-        """
-
-        self.title = title
 
     def get_equipped(self):
         if not self.equipped:
