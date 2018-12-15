@@ -313,9 +313,7 @@ def _do_take(player, word, remaining):
         locations = [dest_item.items]
 
     if item_name in EVERYTHING_WORDS:
-        for loc in locations:
-            for item in loc:
-                items.append(item)
+        items = builder.get_all_items(player, locations)
     else:
         names = []
         fields = text_game_maker.english_to_list(item_name)

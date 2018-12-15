@@ -11,17 +11,6 @@ from text_game_maker.person import Person
 from text_game_maker.map_builder import MapBuilder
 from text_game_maker import crafting
 
-class CellDoor(Tile):
-    def on_enter(self, player, src, dest):
-        """
-        :param text_game_maker.Player player: Player instance
-        :param text_game_maker.Tile src: source tile (the tile that player is\
-        trying to exit)
-        :param text_game_maker.Tile dest: destination tile (the tile that player\
-            is trying to enter)
-        """
-        pass
-
 def on_start(player):
     name = text_game_maker.read_line("What is your name?")
     player.set_name(name.title())

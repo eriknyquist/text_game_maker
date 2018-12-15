@@ -38,8 +38,8 @@ def find_item(player, name, locations=None):
 
     for itemlist in locations:
         for item in itemlist:
-            if (item.name.lower().startswith(name.lower())
-                    or name.lower() in item.name.lower()):
+            if ((item.name.lower().startswith(name.lower())
+                    or name.lower() in item.name.lower()) and not item.scenery):
                 return item
 
     return None
@@ -56,11 +56,17 @@ def is_location(player, name):
 
     return False
 
-def get_all_items(player, except_item=None):
+def get_all_items(player, locations=None, except_item=None):
+    if not locations:
+        locations = player.current.items.values()
+
     ret = []
-    for loc in player.current.items:
-        for item in player.current.items[loc]:
+    for loc in locations:
+        for item in loc:
             if (not except_item is None) and (except_item is item):
+                continue
+
+            if item.scenery:
                 continue
 
             ret.append(item)
@@ -77,7 +83,7 @@ def find_item_wildcard(player, name, locations=None):
     ret = []
     for loc in locations:
         for item in loc:
-            if fnmatch.fnmatch(item.name, name):
+            if (not item.scenery) and fnmatch.fnmatch(item.name, name):
                 return item
 
     return None
