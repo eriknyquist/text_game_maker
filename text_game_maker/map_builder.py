@@ -266,14 +266,11 @@ class MapBuilder(object):
     Base class for building a tile-based map
     """
 
-    def __init__(self, parser, name=None, description=None):
+    def __init__(self, parser):
         """
-        Initialises a MapBuilder instance. When you create a MapBuilder
-        object, it automatically creates the first tile, and sets it as the
-        current tile to build on.
+        Initialises a MapBuilder instance.
 
-        :param str name: short name for starting Tile
-        :param str description: short name for starting Tile
+        :param text_game_maker.parser.CommandParser: command parser
         """
 
         if info['instance']:
@@ -281,13 +278,24 @@ class MapBuilder(object):
                 % self.__class__.__name__)
 
         info['instance'] = self
-        self.on_start = None
+        self.on_game_run = None
         self.fsm = parser
-        self.start = Tile(name, description)
-        self.current = self.start
-        self.prompt = "[?]: "
+        self.start = None
+        self.current = None
+        self.prompt = " > "
         random.seed(time.time())
         self.player = None
+
+    def start_map(self, name, description):
+        """
+        Start building the map; create the first tile
+
+        :param str name: short name for starting Tile
+        :param str description: short name for starting Tile
+        """
+
+        self.start = Tile(name, description)
+        self.current = self.start
 
     def _is_shorthand_direction(self, word):
         for w in ['north', 'south', 'east', 'west']:
@@ -365,7 +373,7 @@ class MapBuilder(object):
 
         self.current.set_on_exit(callback)
 
-    def set_on_start(self, callback):
+    def set_on_game_run(self, callback):
         """
         Set callback function to be invoked when player starts a new game (i.e.
         not from a save file). Callback function should accept one parameter:
@@ -380,7 +388,7 @@ class MapBuilder(object):
         :param callback: callback function
         """
 
-        self.on_start = callback
+        self.on_game_run = callback
 
     def set_name(self, name):
         """
@@ -582,8 +590,8 @@ class MapBuilder(object):
                 sys.exit()
 
             elif choice == 0:
-                if self.on_start:
-                    self.on_start(self.player)
+                if self.on_game_run:
+                    self.on_game_run(self.player)
 
                 text_game_maker.game_print(self.player.current_state())
                 break

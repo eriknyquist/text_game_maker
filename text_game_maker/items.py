@@ -10,7 +10,7 @@ class Item(GameEntity):
     Base class for collectable item
     """
 
-    def __init__(self, prefix, name, location, value):
+    def __init__(self, prefix, name, location, value, combustible=True):
         """
         Initialises an Item instance
 
@@ -22,6 +22,7 @@ class Item(GameEntity):
 
         super(Item, self).__init__()
 
+        self.combustible = combustible
         self.inanimate = True
         self.edible = True
         self.value = value
@@ -93,9 +94,8 @@ class Weapon(Item):
     Class to represent a weapon
     """
 
-    def __init__(self, prefix, name, location, value, damage):
-        super(Weapon, self).__init__(prefix, name, location, value)
-        self.combustible = False
+    def __init__(self, prefix, name, location, value, damage, combustible=False):
+        super(Weapon, self).__init__(prefix, name, location, value, combustible)
         self.edible = False
         self.damage = damage
 
@@ -218,10 +218,9 @@ class SmallTin(Item):
 
 class Furniture(Item):
     def __init__(self, prefix, name, location, combustible=True):
-        super(Furniture, self).__init__(prefix, name, location, 0)
+        super(Furniture, self).__init__(prefix, name, location, 0, combustible)
         self.scenery = True
         self.size = ITEM_SIZE_LARGE
-        self.combustible = combustible
 
 class InventoryBag(Item):
     """

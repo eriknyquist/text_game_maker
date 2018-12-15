@@ -274,12 +274,12 @@ def read_line_raw(msg, cancel_word=None, default=None):
     cancel_desc = ""
 
     if default:
-        default_desc = " [default: %s] " % default
+        default_desc = " [default: %s]" % default
 
     if cancel_word:
-        cancel_desc = "(or '%s')" % cancel_word
+        cancel_desc = " (or '%s') " % cancel_word
 
-    prompt = "%s %s%s: " % (msg, cancel_desc, default_desc)
+    prompt = "%s%s%s" % (msg, cancel_desc, default_desc)
     print('')
 
     if sequence:
@@ -317,7 +317,7 @@ def ask_yes_no(msg, cancel_word="cancel"):
     :rtype: int
     """
 
-    prompt = "%s (yes/no/%s)" % (msg, cancel_word)
+    prompt = "%s (yes/no/%s):" % (msg, cancel_word)
 
     while True:
         ret = read_line(prompt)
