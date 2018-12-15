@@ -4,7 +4,7 @@ import commands
 
 import text_game_maker
 from text_game_maker.items import (Item, Food, Weapon, SmallBag, SmallTin,
-    Coins, Blueprint, Lighter, Paper)
+    Coins, Blueprint, Lighter, Paper, Furniture)
 
 from text_game_maker.tile import Tile
 from text_game_maker.person import Person
@@ -30,13 +30,13 @@ def main():
     builder = MapBuilder(
         commands.build_parser(),
         "your cell",
-        """in a small, windowless cell of bare concrete. A narrow bunk is
-        in the corner."""
+        """in a small, windowless cell of bare concrete."""
     )
 
     paperclip = Item("a", "paperclip", "", 0)
     paperclip.combustible = False
 
+    bunk = Furniture("a", "narrow bunk", "in the corner", combustible=False)
     string = Item("a", "piece of string", "on the floor", 0)
     smallbag = SmallBag("a", "rucksack", "on the bunk", 15)
     tin = SmallTin("a", "small tin", "on the bunk", 0)
@@ -55,7 +55,7 @@ def main():
     lockpick_blueprint = Blueprint([string, paperclip], lockpick)
 
     tin.add_items([coins, paperclip, lockpick_blueprint])
-    builder.add_items([string, smallbag, tin, lighter, poster])
+    builder.add_items([bunk, string, smallbag, tin, lighter, poster])
     builder.add_door("a", "cell door", "east")
 
     builder.move_east(

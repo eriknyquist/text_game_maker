@@ -44,6 +44,7 @@ def find_item(player, name, locations=None):
 
     return None
 
+
 def is_location(player, name):
     for direction in player.current.iterate_directions():
         if direction and direction.is_door() and (name in direction.name):
@@ -54,6 +55,17 @@ def is_location(player, name):
             return True
 
     return False
+
+def get_all_items(player, except_item=None):
+    ret = []
+    for loc in player.current.items:
+        for item in player.current.items[loc]:
+            if (not except_item is None) and (except_item is item):
+                continue
+
+            ret.append(item)
+
+    return ret
 
 def find_item_wildcard(player, name, locations=None):
     if name.startswith('the '):

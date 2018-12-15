@@ -97,13 +97,13 @@ class Tile(object):
         else:
             return None
 
-    def _describe_locations(self, items):
+    def _item_descriptions(self, items, testfunc=None):
         if not items:
             return None
 
         ret = ""
         for loc in items:
-            itemlist = [str(i) for i in items[loc]]
+            itemlist = [str(i) for i in items[loc] if testfunc and testfunc(i)]
 
             if not itemlist:
                 continue
@@ -117,19 +117,26 @@ class Tile(object):
 
         return ret
 
-    def describe_items(self):
+    def describe_scene(self):
         """
-        Return sentences describing all item locations on this tile
+        Return sentences describing all scenery items on this tile
         """
 
-        return self._describe_locations(self.items)
+        return self._item_descriptions(self.items, lambda x: x.scenery)
+
+    def describe_items(self):
+        """
+        Return sentences describing all non-scenery items on this tile
+        """
+
+        return self._item_descriptions(self.items, lambda x: not x.scenery)
 
     def describe_people(self):
         """
         Return sentences describing all people on this tile
         """
 
-        return self._describe_locations(self.people)
+        return self._item_descriptions(self.people)
 
     def add_item(self, item):
         """

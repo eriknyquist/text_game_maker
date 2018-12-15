@@ -187,8 +187,8 @@ def _do_burn(player, word, item_name):
 
 def _put(item, dest_item, location_name, location):
     if item is dest_item:
-        text_game_maker.game_print("How can you %s the %s inside itself?"
-            % (word, item.name))
+        text_game_maker.game_print("How can you put the %s inside itself?"
+            % (item.name))
         return False
 
     if item.size > dest_item.max_item_size:
@@ -239,22 +239,25 @@ def _do_put(player, word, remaining):
 
     fields = text_game_maker.english_to_list(item_name)
     if len(fields) > 1:
-        names = fields
-    else:
-        names = [item_name]
+        for name in fields:
+            item = builder.find_any_item(player, name)
+            if not item:
+                text_game_maker._wrap_print(messages.no_item_message(name))
+                text_game_maker.save_sound(audio.FAILURE_SOUND)
+                items.append(item)
 
-    real_names = []
-    for name in names:
-        item = builder.find_any_item(player, name)
-        if not item:
-            text_game_maker._wrap_print(messages.no_item_message(name))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
-            return
+    elif item_name in EVERYTHING_WORDS:
+        items = builder.get_all_items(player, except_item=dest_item)
 
-        real_names.append(item.name)
+    if not items:
+        text_game_maker._wrap_print(messages.no_item_message(item_name))
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
+
+    for item in items:
         if not _put(item, dest_item, location_name, location):
             return
 
+    real_names = [x.name for x in items]
     text_game_maker.game_print("You %s the %s %s"
             % (word, text_game_maker.list_to_english(real_names), location_name))
 

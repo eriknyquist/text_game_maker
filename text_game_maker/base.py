@@ -16,6 +16,11 @@ class GameEntity(object):
         # Most things are....
         self.combustible = True
 
+        # Immovable props in the scene that should be mentioned before smaller
+        # interactive items when describing a room, e.g. furniture,
+        # architectural features of the room
+        self.scenery = False
+
         # Things are not edible by default
         self.edible = False
 

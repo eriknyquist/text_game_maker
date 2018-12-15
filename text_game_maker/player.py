@@ -244,6 +244,10 @@ class Player(object):
         if summary:
             ret += "%s. " % summary
 
+        scene = self.current.describe_scene()
+        if scene:
+            ret += scene
+
         items = self.current.describe_items()
         if items:
             ret += items

@@ -216,6 +216,13 @@ class SmallTin(Item):
     def is_container(self):
         return True
 
+class Furniture(Item):
+    def __init__(self, prefix, name, location, combustible=True):
+        super(Furniture, self).__init__(prefix, name, location, 0)
+        self.scenery = True
+        self.size = ITEM_SIZE_LARGE
+        self.combustible = combustible
+
 class InventoryBag(Item):
     """
     Class to represent a small bag used to carry player items
