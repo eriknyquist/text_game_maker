@@ -272,10 +272,10 @@ class SmallBag(InventoryBag):
 
 class Bag(InventoryBag):
     def __init__(self, *args, **kwargs):
-        super(SmallBag, self).__init__(*args, **kwargs)
+        super(Bag, self).__init__(*args, **kwargs)
         self.capacity = 10
 
 class LargeBag(InventoryBag):
     def __init__(self, *args, **kwargs):
-        super(SmallBag, self).__init__(*args, **kwargs)
+        super(LargeBag, self).__init__(*args, **kwargs)
         self.capacity = 20

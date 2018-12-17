@@ -110,6 +110,28 @@ def replace_format_tokens(text):
 
     return text
 
+def get_all_contained_items(item, stoptest=None):
+    ret = []
+
+    if not item.is_container():
+        return ret
+
+    stack = [item]
+
+    while stack:
+        subitem = stack.pop(0)
+
+        for i in subitem.items:
+            ret.append(i)
+
+            if i.is_container():
+                if stoptest and stoptest(i):
+                    continue
+
+                stack.append(i)
+
+    return ret
+
 def _verify_callback(obj):
     if not inspect.isfunction(obj):
         raise TypeError('callbacks must be top-level functions')

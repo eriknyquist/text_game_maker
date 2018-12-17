@@ -92,6 +92,17 @@ class GameEntity(object):
             return
 
         if self.combustible:
+            if self.is_container():
+                items = text_game_maker.get_all_contained_items(self,
+                    lambda x: not x.combustible)
+
+                for item in items:
+                    if item.combustible:
+                        item.delete()
+                    else:
+                        item.location = self.location
+                        player.current.add_item(item)
+
             msg = messages.burn_combustible_message(self.name)
             self.delete()
         else:

@@ -3,7 +3,7 @@ import sys
 import commands
 
 import text_game_maker
-from text_game_maker.items import (Item, Food, Weapon, SmallBag, SmallTin,
+from text_game_maker.items import (Item, Food, Weapon, Bag, SmallBag, SmallTin,
     Coins, Blueprint, Lighter, Paper, Furniture)
 
 from text_game_maker.map_builder import MapBuilder
@@ -47,7 +47,8 @@ def main():
     bunk = Furniture("a", "narrow bunk", "in the corner", combustible=False)
 
     # bag and tin are also special, they can contain other items
-    smallbag = SmallBag("a", "rucksack", "on the bunk", 15)
+    rucksack = Bag("a", "rucksack", "on the bunk", 15)
+    paperbag = SmallBag("a", "paper bag", "on the bunk", 15)
     tin = SmallTin("a", "small tin", "on the bunk", 0)
 
     # Make a blueprint for a lockpick; lockpick takes one string and one paperclip
@@ -57,7 +58,7 @@ def main():
     tin.add_items([coins, paperclip, lockpick_blueprint])
 
     # Add all the items to the room
-    builder.add_items([bunk, string, smallbag, tin, lighter, poster])
+    builder.add_items([bunk, string, rucksack, tin, lighter, poster, paperbag])
 
     # Add a door to the east. The door will be locked and will require a
     # lockpick to unlock.

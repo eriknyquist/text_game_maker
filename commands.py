@@ -46,7 +46,7 @@ EQUIP_WORDS = [
 ]
 
 UNEQUIP_WORDS = [
-    'unequip', 'put away', 'stop using', 'stow'
+    'unequip', 'stop using', 'stow'
 ]
 
 SPEAK_WORDS = [
@@ -244,14 +244,21 @@ def _do_put(player, word, remaining):
             if not item:
                 text_game_maker._wrap_print(messages.no_item_message(name))
                 text_game_maker.save_sound(audio.FAILURE_SOUND)
-                items.append(item)
+                return
+
+            items.append(item)
 
     elif item_name in EVERYTHING_WORDS:
         items = builder.get_all_items(player, except_item=dest_item)
+        if not items:
+            text_game_maker._wrap_print("Nothing to %s." % word)
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            return
 
     if not items:
         text_game_maker._wrap_print(messages.no_item_message(item_name))
         text_game_maker.save_sound(audio.FAILURE_SOUND)
+        return
 
     for item in items:
         if not _put(item, dest_item, location_name, location):
