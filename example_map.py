@@ -19,7 +19,8 @@ def on_game_run(player):
 
 def main():
     # Create a MapBuilder object with the command parser
-    builder = MapBuilder(commands.build_parser())
+    parser = commands.build_parser()
+    builder = MapBuilder(parser)
 
     # Start building the map; create the first tile/room
     builder.start_map(

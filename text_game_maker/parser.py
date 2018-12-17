@@ -1,3 +1,4 @@
+import json
 import text_game_maker
 from text_game_maker import map_builder
 from text_game_maker import default_commands as defaults
@@ -107,7 +108,7 @@ class SimpleTextFSM(object):
         return ret
 
     def dump_json(self):
-        return json.dumps(self._dump(self.start), indent=2)
+        return json.dumps(self._dump_json(self.start), indent=2)
 
     def iterate(self, node=None):
         if node is None:
