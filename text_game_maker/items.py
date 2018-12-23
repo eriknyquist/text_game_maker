@@ -264,6 +264,19 @@ class InventoryBag(Item):
 
         item.move(self.items)
         return True
+		
+class PaperBag(Item):
+    """
+    Class to represent a small bag used to carry player items
+    """
+    def __init__(self, *args, **kwargs):
+        super(PaperBag, self).__init__(*args, **kwargs)
+        self.capacity = 10
+        self.max_item_size = ITEM_SIZE_MEDIUM
+        self.size = ITEM_SIZE_MEDIUM
+
+    def is_container(self):
+        return True
 
 class SmallBag(InventoryBag):
     def __init__(self, *args, **kwargs):

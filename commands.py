@@ -303,10 +303,13 @@ def _do_take(player, word, remaining):
     locations = None
     items = []
 
+    import pdb
+    pdb.set_trace()
+	
     if not remaining or remaining == "":
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
-
+	
     item_name, dest_name = _split_word(remaining, 'from')
     if dest_name is None:
         item_name = remaining
@@ -343,12 +346,15 @@ def _do_take(player, word, remaining):
         text_game_maker.save_sound(audio.FAILURE_SOUND)
         return
 
+    names = []
     for item in items:
         if item:
             if not _take(player, item):
                 return
+			
+            names.append(item.name)
 
-    msg = text_game_maker.list_to_english([x.name for x in items])
+    msg = text_game_maker.list_to_english(names)
     text_game_maker.game_print('%s added to inventory' % msg)
     return
 

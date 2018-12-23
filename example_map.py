@@ -4,7 +4,7 @@ import commands
 
 import text_game_maker
 from text_game_maker.items import (Item, Food, Weapon, Bag, SmallBag, SmallTin,
-    Coins, Blueprint, Lighter, Paper, Furniture)
+    Coins, Blueprint, Lighter, Paper, PaperBag, Furniture)
 
 from text_game_maker.map_builder import MapBuilder
 from text_game_maker import crafting
@@ -49,7 +49,7 @@ def main():
 
     # bag and tin are also special, they can contain other items
     rucksack = Bag("a", "rucksack", "on the bunk", 15)
-    paperbag = SmallBag("a", "paper bag", "on the bunk", 15)
+    paperbag = PaperBag("a", "paper bag", "on the bunk", 15)
     tin = SmallTin("a", "small tin", "on the bunk", 0)
 
     # Make a blueprint for a lockpick; lockpick takes one string and one paperclip
