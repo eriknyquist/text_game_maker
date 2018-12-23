@@ -4,6 +4,23 @@ def _randmsg(choices, *args):
     choice = random.choice(choices)
     return choice.format(*args)
 
+def suicide_message():
+    return _randmsg([
+        "You kill yourself.",
+        "You hold your breath for a very long time and suffocate.",
+        "You strangle yourself to death with your socks.",
+        "You lie down peacefully on the ground for several days until "
+        "starvation and thirst bring you to a slow and painful death",
+        "Dropping to your knees, you smash your face and head into the "
+        "hard ground repeatedly until your brain no longer works. You are dead.",
+        "You squat down low, poised like a cat. Turning your eyes towards the sky, "
+        "you straighten your legs and spring suddenly upwards, rising several feet "
+        "into the air. With great effort, you twist and roll your entire body in the "
+        "air so that you are now upside-down with the top of your head facing the "
+        "ground. You land squarely on your head with a loud crack, as your body "
+        "crumples like an accordion and your spine snaps in several places. You are very dead."
+    ])
+ 
 def nonsensical_action_message(nonsensical_action):
     return _randmsg([
         "How can you {0}?",
@@ -11,7 +28,9 @@ def nonsensical_action_message(nonsensical_action):
         "You want to {0}. Oh, how you yearn for it! But you cannot figure out "
         "how to {0}.",
         "{0}? How do you plan on doing that?",
-        "You try very hard to {0}, to no avail."
+        "You try very hard to {0}, to no avail.",
+        "All of us back here think it's pretty funny that you tried to {0}.",
+        "Remember that time you tried to {0}? How we laughed at you..."
     ], nonsensical_action)
 
 def burn_combustible_message(item_name):

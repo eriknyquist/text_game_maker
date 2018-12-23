@@ -11,6 +11,10 @@ EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
 ]
 
+SUICIDE_WORDS = [
+    "kill self", "kill myself", "suicide", "kill player", "die", "goodbye cruel world"
+]
+
 UNLOCK_WORDS = ['unlock']
 
 EVERYTHING_WORDS = [
@@ -302,9 +306,6 @@ def _do_take(player, word, remaining):
     item_name = None
     locations = None
     items = []
-
-    import pdb
-    pdb.set_trace()
 	
     if not remaining or remaining == "":
         text_game_maker._wrap_print("What do you want to %s?" % word)
@@ -483,6 +484,11 @@ def _do_loot(player, word, name):
     else:
         player._loot(word, p)
 
+def _do_suicide(player, word, remaining):
+    text_game_maker.game_print(messages.suicide_message())
+    player.death()
+    sys.exit()
+
 def _do_inspect(player, word, item):
     if item == '':
         _do_look(player, word, item)
@@ -518,6 +524,8 @@ def build_parser():
         [BURN_WORDS, _do_burn, "burn an item", "%s <item>"],
 
         [READ_WORDS, _do_read, "read an item", "%s <item>"],
+        
+        [SUICIDE_WORDS, _do_suicide, "commit suicide", "%s"],
 
         [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
 

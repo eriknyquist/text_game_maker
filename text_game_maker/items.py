@@ -222,6 +222,10 @@ class Furniture(Item):
         self.scenery = True
         self.size = ITEM_SIZE_LARGE
 
+class Car(Item):
+	def is_container(self):
+		return True
+
 class InventoryBag(Item):
     """
     Class to represent a small bag used to carry player items
