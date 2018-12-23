@@ -4,6 +4,16 @@ def _randmsg(choices, *args):
     choice = random.choice(choices)
     return choice.format(*args)
 
+def badword_message():
+    return _randmsg([
+        "I refuse to respond to such language.",
+        "Does your mother know that you speak like that?",
+        "Wash your mouth out and try again.",
+        "Where did you learn to talk like that?",
+        "Never have I heard such language!",
+        "I'll thank you to watch your language."
+    ])
+
 def suicide_message():
     return _randmsg([
         "You kill yourself.",

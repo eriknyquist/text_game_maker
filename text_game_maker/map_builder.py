@@ -12,11 +12,15 @@ from text_game_maker import default_commands as defaults
 from text_game_maker.tile import Tile, LockedDoor, reverse_direction
 from text_game_maker.items import Item
 from text_game_maker.player import Player
-from text_game_maker import audio
+from text_game_maker import audio, messages
 
 MIN_LINE_WIDTH = 50
 MAX_LINE_WIDTH = 120
 COMMAND_DELIMITERS = [',', ';', '/', '\\']
+
+BADWORDS = [
+    "fuck", "shit", "cunt", "bitch", "motherfucker"
+]
 
 info = {
     'instance': None
@@ -308,6 +312,10 @@ class MapBuilder(object):
         if action == '':
             action = text_game_maker.info['last_command']
             print '\n' + action
+
+        if action in BADWORDS:
+            text_game_maker.game_print(messages.badword_message())
+            return
 
         if self._is_shorthand_direction(action):
             defaults._do_move(player, 'go', action)
