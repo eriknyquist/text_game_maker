@@ -20,6 +20,10 @@ class Tile(object):
     Represents a single 'tile' or 'room' in the game
     """
 
+    default_locations = [
+        "on the ground"
+    ]
+
     def __init__(self, name=None, description=None):
         """
         Initialise a Tile instance
@@ -40,7 +44,7 @@ class Tile(object):
         self.west = None
 
         # Items on this tile
-        self.items = {}
+        self.items = {loc: [] for loc in self.default_locations}
 
         # People on this tile
         self.people = {}

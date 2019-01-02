@@ -59,7 +59,7 @@ class Person(GameEntity):
         self.alive = False
         self.name = "%s's corpse" % self.name
         self.prep = self.name
-        self.location = "on the floor"
+        self.location = "on the ground"
         player.current.add_person(self)
 
         if msg is None or msg == "":

@@ -4,43 +4,10 @@ import commands
 
 import text_game_maker
 from text_game_maker.items import (Item, Food, Weapon, Bag, SmallBag, SmallTin,
-    Coins, Blueprint, Lighter, Paper, PosterWithPhoto, PaperBag, Furniture, Car)
+    Coins, Blueprint, Lighter, Paper, PaperBag, Furniture, Car)
 
 from text_game_maker.map_builder import MapBuilder
 from text_game_maker import crafting
-
-mugshot = [
-    "",
-    "",
-    "",
-    "",
-    "                               .*%###(((                                  ",
-    "                            ,/(#((&&/#(#,                                 ",
-    "                         ,,/*%%&%&%(#(##%(%#                              ",
-    "                       #*.#&(%&&%#@%###%%%%%#.                            ",
-    "                      /*%&%%####/#%(/%((//((                              ",
-    "                      %#&%%&%(*(.#%((.,**(#%(%/##                         ",    
-    "                     .(#%&&&&%(*.,(( . ..*(#%&%%(*                        ",     
-    "                      *%%/&%(/*....    ..,.%%%*(                          ",     
-    "                       %&&%(*/,,...*/(#*...,%(,*                          ",     
-    "                       .%%&(#(##%,..,.   ..,*...%                         ",     
-    "                        ,(*(#*,,//,,.    ..,*..,                          ",     
-    "                            /***(,.,..,....,,%                            ",     
-    "                            (/*(%#/*,,,....,,%(,                          ",     
-    "                             (/(#%%#*%/,...,*%&%%.                        ",     
-    "                              (//(*/(*,,*,*/** %&&%%%%%#*                 ",     
-    "                            #&@###(**,,,,//*,* &&&&&&&&&%%%%%%%#          ",     
-    "                        .%&&&&%%#%#//(/#/,.,,  %&&&&&&&&&&&%%%%%%#%*      ",     
-    "                    ,%%%&&&&&&(#(%###(/**,,*. .&&&&%&&&&&&&&&&%%%&%%      ",     
-    "                /%%%%&&&&&&&&&,*//. ./,**,*   #&&&&&&&&&&&&&&%&%&&%&%     ",     
-    "              %%%&&%&&&&@&&&&&&,*(( .....,*#, &&&&&&&&&&&&&%&&&&&&&&&%    ",    
-    "             %%&&&&&&&&@&&&&&&&,        ...( .&&&&&&&&&&&%&&&&&&&&&&&&%   ",     
-    "             %%&&&&&&&&&&&&&&&&    .    ..,(  &&&&&&&&&&&&&&&&&&&&&&&&&%  ",     
-    "            %&&&&&&&&&@@&&&%&            . .&&&&&#&&&&&&&&&&&&&&&&&&%     ", 
-    "            &&&&&&&&&&&@&%#&&%             &&&&#&&&&&&&&&&&@&&&&&&&"
-]
-
-mugshot = '\n'.join(mugshot)
 
 # Called when the game starts
 def on_game_run(player):
@@ -61,11 +28,11 @@ def main():
         """standing in a field beside a desolate country road."""
     )
 
-    idcard = PosterWithPhoto("an", "ID badge", "on the floor", [
+    idcard = Paper("an", "ID badge", "on the floor", [
             "name: <playername>",
             "occupation: field agent",
             "CID: 5545658868"
-        ], mugshot, header="ID CARD", footer="ID CARD"
+        ], header="ID CARD", footer="ID CARD"
     )
     
     # Create all the items in the room

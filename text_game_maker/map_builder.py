@@ -43,7 +43,7 @@ def find_item(player, name, locations=None):
     for itemlist in locations:
         for item in itemlist:
             if ((item.name.lower().startswith(name.lower())
-                    or name.lower() in item.name.lower()) and not item.scenery):
+                    or name.lower() in item.name.lower())):
                 return item
 
     return None
@@ -226,7 +226,7 @@ def _player_health_listing(player, width):
 
 def _do_inventory_listing(player, word, setting):
     bannerwidth = 50
-    fmt = "{0:33}{1:1}({2})"
+    fmt = "    {0:33}{1:1}({2})"
 
     banner = text_game_maker.line_banner("status", bannerwidth)
     print '\n' + banner + '\n'
@@ -255,8 +255,7 @@ def _do_inventory_listing(player, word, setting):
 
         if player.inventory.items:
             for item in player.inventory.items:
-                print text_game_maker.centre_text((fmt).format(item.name, "",
-                    item.value), bannerwidth)
+                print fmt.format(item.name, "", item.value)
 
             print("")
 

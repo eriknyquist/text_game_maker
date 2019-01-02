@@ -195,7 +195,7 @@ def _put(item, dest_item, location_name, location):
             % (item.name))
         return False
 
-    if item.size > dest_item.max_item_size:
+    if item.size >= dest_item.size:
         text_game_maker.game_print(messages.container_too_small_message(
                 item.name, dest_item.name))
         return False
@@ -242,7 +242,7 @@ def _do_put(player, word, remaining):
     names = []
 
     fields = text_game_maker.english_to_list(item_name)
-    if len(fields) > 1:
+    if fields:
         for name in fields:
             item = builder.find_any_item(player, name)
             if not item:
@@ -265,7 +265,7 @@ def _do_put(player, word, remaining):
         return
 
     for item in items:
-        if not _put(item, dest_item, location_name, location):
+        if not dest_item.add_item(item):
             return
 
     real_names = [x.name for x in items]
@@ -360,7 +360,7 @@ def _do_take(player, word, remaining):
     return
 
 def _drop(player, item):
-    item.location = "on the floor"
+    item.location = "on the ground"
     player.current.add_item(item)
     return True
 

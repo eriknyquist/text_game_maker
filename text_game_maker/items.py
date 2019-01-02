@@ -1,9 +1,11 @@
 import text_game_maker
+from text_game_maker import messages
 from text_game_maker.base import GameEntity
 
 ITEM_SIZE_SMALL = 1
 ITEM_SIZE_MEDIUM = 2
 ITEM_SIZE_LARGE = 3
+ITEM_SIZE_VERY_LARGE = 4
 
 class Item(GameEntity):
     """
@@ -31,6 +33,7 @@ class Item(GameEntity):
 
         self.prefix = prefix
         self.location = location
+        self.size = ITEM_SIZE_SMALL
 
     def set_prefix(self, prefix):
         """
@@ -206,27 +209,55 @@ class Blueprint(Item):
         text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
         return True
 
-class SmallTin(Item):
-    def __init__(self, *args, **kwargs):
-        super(SmallTin, self).__init__(*args, **kwargs)
-        self.combustible = False
-        self.capacity = 3
-        self.max_item_size = ITEM_SIZE_SMALL
-
-    def is_container(self):
-        return True
-
 class Furniture(Item):
     def __init__(self, prefix, name, location, combustible=True):
         super(Furniture, self).__init__(prefix, name, location, 0, combustible)
         self.scenery = True
         self.size = ITEM_SIZE_LARGE
 
-class Car(Item):
-	def is_container(self):
-		return True
+class Car(Furniture):
+    def is_container(self):
+        return True
 
-class InventoryBag(Item):
+class Container(Item):
+    """
+    Class to represent a container with limited capacity and item size
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(Container, self).__init__(*args, **kwargs)
+
+    def is_container(self):
+        return True
+
+    def add_item(self, item):
+        if item is self:
+            text_game_maker.game_print("How can you put the %s inside itself?"
+                % (item.name))
+            return False
+
+        if len(self.items) >= self.capacity:
+            text_game_maker._wrap_print("The %s is full" % self.name)
+            return False
+
+        if self.size < item.size:
+            text_game_maker.game_print(messages.container_too_small_message(
+                item.name, self.name))
+            return False
+
+        item.move(self.items)
+        return True
+
+class SmallTin(Container):
+    def __init__(self, *args, **kwargs):
+        super(SmallTin, self).__init__(*args, **kwargs)
+        self.combustible = False
+        self.capacity = 3
+
+    def is_container(self):
+        return True
+
+class InventoryBag(Container):
     """
     Class to represent a small bag used to carry player items
     """
@@ -234,7 +265,6 @@ class InventoryBag(Item):
     def __init__(self, *args, **kwargs):
         super(InventoryBag, self).__init__(*args, **kwargs)
         self.capacity = 10
-        self.max_item_size = ITEM_SIZE_MEDIUM
         self.size = ITEM_SIZE_MEDIUM
 
     def on_take(self, player):
@@ -247,8 +277,8 @@ class InventoryBag(Item):
                 self.add_item(player.inventory.items[0])
 
         if player.inventory:
-            # Drop old bag on the floor
-            player.inventory.location = "on the floor"
+            # Drop old bag on the ground
+            player.inventory.location = "on the ground"
             player.current.add_item(player.inventory)
 
         # Give new bag to player
@@ -258,29 +288,14 @@ class InventoryBag(Item):
         text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
         text_game_maker.game_print("You now have a %s." % self.name)
 
-    def is_container(self):
-        return True
-
-    def add_item(self, item):
-        if len(self.items) >= self.capacity:
-            text_game_maker._wrap_print("Your bag is full")
-            return False
-
-        item.move(self.items)
-        return True
-		
-class PaperBag(Item):
+class PaperBag(Container):
     """
     Class to represent a small bag used to carry player items
     """
     def __init__(self, *args, **kwargs):
         super(PaperBag, self).__init__(*args, **kwargs)
         self.capacity = 10
-        self.max_item_size = ITEM_SIZE_MEDIUM
         self.size = ITEM_SIZE_MEDIUM
-
-    def is_container(self):
-        return True
 
 class SmallBag(InventoryBag):
     def __init__(self, *args, **kwargs):
