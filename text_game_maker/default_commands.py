@@ -20,11 +20,7 @@ def _do_help(player, word, setting):
         if cmd:
             print cmd.help_text().rstrip('\n')
 
-def _do_move(player, word, direction):
-    if not direction or direction == "":
-        text_game_maker._wrap_print("Where do you want to go?")
-        return
-
+def _move_direction(player, word, direction):
     if 'north'.startswith(direction):
         player._move_north(word)
     elif 'south'.startswith(direction):
@@ -34,8 +30,27 @@ def _do_move(player, word, direction):
     elif 'west'.startswith(direction):
         player._move_west(word)
     else:
-        text_game_maker._wrap_print("Don't know how to %s %s."
-            % (word, direction))
+        return False
+
+    return True
+
+def _do_move(player, word, direction):
+    if not direction or direction == "":
+        text_game_maker._wrap_print("Where do you want to go?")
+        return
+
+    if direction.startswith('to '):
+        direction = direction[3:]
+
+    if _move_direction(player, word, direction):
+        return
+
+    for tile in player.current.iterate_directions():
+        if tile and (direction in tile.name):
+            if _move_direction(player, word, player.current.direction_to(tile)):
+                return
+
+    text_game_maker._wrap_print("Don't know how to %s %s." % (word, direction))
 
 def _do_craft(player, word, item):
     if not item or item == "":
