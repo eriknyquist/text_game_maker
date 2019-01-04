@@ -113,10 +113,12 @@ class Food(Item):
 
 class Coins(Item):
     def __init__(self, location, value):
-        super(Coins, self).__init__(None, "%s coins" % value, location, value)
+        super(Coins, self).__init__(None, "", location, value)
         self.combustible = False
+        self.name = "%s coin" % value
         if value > 1:
             self.verb = "are"
+            self.name += "s"
 
     def add_to_player_inventory(self, player):
         player.coins += self.value

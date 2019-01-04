@@ -39,7 +39,9 @@ def _do_move(player, word, direction):
         text_game_maker._wrap_print("Where do you want to go?")
         return
 
-    if direction.startswith('to '):
+    if direction.startswith('to the '):
+        direction = direction[7:]
+    elif direction.startswith('to '):
         direction = direction[3:]
 
     if _move_direction(player, word, direction):

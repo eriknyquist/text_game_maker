@@ -26,6 +26,13 @@ info = {
     'instance': None
 }
 
+def _has_badword(text):
+    for word in BADWORDS:
+        if word in text:
+            return True
+
+    return False
+
 def _translate(val, min1, max1, min2, max2):
     span1 = max1 - min1
     span2 = max2 - min2
@@ -311,10 +318,6 @@ class MapBuilder(object):
         if action == '':
             action = text_game_maker.info['last_command']
             print '\n' + action
-
-        if action in BADWORDS:
-            text_game_maker.game_print(messages.badword_message())
-            return
 
         if self._is_shorthand_direction(action):
             defaults._do_move(player, 'go', action)
@@ -620,6 +623,12 @@ class MapBuilder(object):
                 text_game_maker.save_sound(audio.SUCCESS_SOUND)
                 raw = text_game_maker.read_line_raw("%s" % self.player.prompt)
                 action = ' '.join(raw.split())
+
+
+                if _has_badword(action):
+                    text_game_maker.game_print(messages.badword_message())
+                    continue
+
                 self._do_scheduled_tasks(self.player)
 
                 delim = self._get_command_delimiter(action)
