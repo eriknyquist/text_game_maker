@@ -231,7 +231,7 @@ def _do_put(player, word, remaining):
             _dontknow("%s %s" % (word, remaining))
             return
 
-        if not dest_item.is_container():
+        if not dest_item.is_container:
             text_game_maker._wrap_print("Can't %s %s" % (word, remaining))
             return
 
@@ -242,7 +242,14 @@ def _do_put(player, word, remaining):
     names = []
 
     fields = text_game_maker.english_to_list(item_name)
-    if fields:
+    if (len(fields) == 1) and (item_name in EVERYTHING_WORDS):
+        items = builder.get_all_items(player, except_item=dest_item)
+        if not items:
+            text_game_maker._wrap_print("Nothing to %s." % word)
+            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            return
+
+    elif fields:
         for name in fields:
             item = builder.find_any_item(player, name)
             if not item:
@@ -251,13 +258,6 @@ def _do_put(player, word, remaining):
                 return
 
             items.append(item)
-
-    elif item_name in EVERYTHING_WORDS:
-        items = builder.get_all_items(player, except_item=dest_item)
-        if not items:
-            text_game_maker._wrap_print("Nothing to %s." % word)
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
-            return
 
     if not items:
         text_game_maker._wrap_print(messages.no_item_message(item_name))
@@ -282,7 +282,7 @@ def _do_look_inside(player, word, remaining):
         text_game_maker._wrap_print(messages.no_item_message(remaining))
         return
 
-    if item.is_container() and item.items:
+    if item.is_container and item.items:
         contains = text_game_maker.list_to_english(
             [str(x) for x in item.items])
     else:

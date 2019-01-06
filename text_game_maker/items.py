@@ -217,10 +217,6 @@ class Furniture(Item):
         self.scenery = True
         self.size = ITEM_SIZE_LARGE
 
-class Car(Furniture):
-    def is_container(self):
-        return True
-
 class Container(Item):
     """
     Class to represent a container with limited capacity and item size
@@ -228,9 +224,7 @@ class Container(Item):
 
     def __init__(self, *args, **kwargs):
         super(Container, self).__init__(*args, **kwargs)
-
-    def is_container(self):
-        return True
+        self.is_container = True
 
     def add_item(self, item):
         if item is self:
@@ -255,9 +249,6 @@ class SmallTin(Container):
         super(SmallTin, self).__init__(*args, **kwargs)
         self.combustible = False
         self.capacity = 3
-
-    def is_container(self):
-        return True
 
 class InventoryBag(Container):
     """

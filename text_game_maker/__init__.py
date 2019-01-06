@@ -113,7 +113,7 @@ def replace_format_tokens(text):
 def get_all_contained_items(item, stoptest=None):
     ret = []
 
-    if not item.is_container():
+    if not item.is_container:
         return ret
 
     stack = [item]
@@ -124,7 +124,7 @@ def get_all_contained_items(item, stoptest=None):
         for i in subitem.items:
             ret.append(i)
 
-            if i.is_container():
+            if i.is_container:
                 if stoptest and stoptest(i):
                     continue
 

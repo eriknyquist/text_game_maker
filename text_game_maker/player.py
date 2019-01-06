@@ -94,8 +94,14 @@ class Player(object):
             pickle.dump(self, fh)
 
     def death(self):
-        audio.play_sound(audio.DEATH_SOUND)
-        audio.wait()
+        try:
+            audio.play_sound(audio.DEATH_SOUND)
+            audio.wait()
+
+            while True:
+                time.sleep(0.01)
+        except KeyboardInterrupt:
+            return
 
     def _move(self, dest, word, name):
         text_game_maker.save_sound(audio.SUCCESS_SOUND)

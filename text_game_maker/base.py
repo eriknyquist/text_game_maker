@@ -51,6 +51,12 @@ class GameEntity(object):
         # required for the delete() method
         self.home = None
 
+        # Can this item contain other item
+        self.is_container = False
+
+        # Number of items this item can hold (if container)
+        self.capacity = 0
+
         # Items contained inside this item (if item is a container)
         self.items = []
 
@@ -60,9 +66,6 @@ class GameEntity(object):
         # Singluar verb e.g. "the key is on the floor", or plural e.g.
         # "the coins are on the floor"
         self.verb = "is"
-
-    def is_container(self):
-        return False
 
     def add_item(self, item):
         item.move(self.items)
@@ -92,7 +95,7 @@ class GameEntity(object):
             return
 
         if self.combustible:
-            if self.is_container():
+            if self.is_container:
                 items = text_game_maker.get_all_contained_items(self,
                     lambda x: not x.combustible)
 
