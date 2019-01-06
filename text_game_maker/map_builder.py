@@ -154,6 +154,13 @@ def find_inventory_wildcard(player, name):
 
     return None
 
+def find_tile(player, name):
+    for tile in player.current.iterate_directions():
+        if tile and (name in tile.name):
+            return tile
+
+    return None
+
 def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
         text_game_maker._wrap_print("Fast or slow? e.g. 'print fast'")

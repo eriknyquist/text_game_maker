@@ -126,6 +126,10 @@ class GameEntity(object):
     def on_look(self, player):
         text_game_maker.game_print("It's a %s" % self.name)
 
+    def on_look_under(self, player):
+        text_game_maker.game_print("There is not much to see under the %s"
+            % self.name)
+
     def on_eat(self, player, word):
         if self.alive:
             msg = "%s is still alive. You cannot eat living things." % self.name

@@ -1,6 +1,7 @@
 import sys
 import os
 import text_game_maker
+import map_builder as builder
 
 def _do_quit(player, word, name):
     ret = text_game_maker.ask_yes_no("really stop playing?")
@@ -47,10 +48,10 @@ def _do_move(player, word, direction):
     if _move_direction(player, word, direction):
         return
 
-    for tile in player.current.iterate_directions():
-        if tile and (direction in tile.name):
-            if _move_direction(player, word, player.current.direction_to(tile)):
-                return
+    tile = builder.find_tile(player, direction)
+    if tile:
+        if _move_direction(player, word, player.current.direction_to(tile)):
+            return
 
     text_game_maker._wrap_print("Don't know how to %s %s." % (word, direction))
 

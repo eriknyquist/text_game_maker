@@ -66,6 +66,15 @@ LOOK_WORDS = [
     'look', 'peep', 'peek', 'show', 'viddy'
 ]
 
+look_under_adjs = [
+    'under', 'underneath', 'beneath'
+]
+
+LOOK_UNDER_WORDS = []
+for x in LOOK_WORDS:
+    for y in look_under_adjs:
+        LOOK_UNDER_WORDS.append('%s %s' % (x, y))
+
 LOOK_INSIDE_WORDS = [
     'look in', 'look inside', 'peep in' , 'peep inside',
 ]
@@ -73,10 +82,6 @@ LOOK_INSIDE_WORDS = [
 LOOT_WORDS = [
     'loot', 'search', 'rob', 'pickpocket'
 ]
-
-def _dontknow(msg):
-    text_game_maker._wrap_print("Don't know how to %s" % msg)
-    text_game_maker.save_sound(audio.FAILURE_SOUND)
 
 def _split_word(string, word):
     inlist = string.split()
@@ -223,12 +228,12 @@ def _do_put(player, word, remaining):
                 break
 
         if item_name is None:
-            _dontknow("%s %s" % (word, remaining))
+            messages.dontknow_message('%s %s' % (word, remaining))
             return
 
         dest_item = builder.find_any_item(player, dest_name)
         if not dest_item:
-            _dontknow("%s %s" % (word, remaining))
+            messages.dontknow_message('%s %s' % (word, remaining))
             return
 
         if not dest_item.is_container:
@@ -306,11 +311,11 @@ def _do_take(player, word, remaining):
     item_name = None
     locations = None
     items = []
-	
+
     if not remaining or remaining == "":
         text_game_maker._wrap_print("What do you want to %s?" % word)
         return
-	
+
     item_name, dest_name = _split_word(remaining, 'from')
     if dest_name is None:
         item_name = remaining
@@ -318,7 +323,7 @@ def _do_take(player, word, remaining):
     else:
         dest_item = builder.find_any_item(player, dest_name)
         if not dest_item:
-            _dontknow("%s %s" % (word, remaining))
+            messages.dontknow_message('%s %s' % (word, remaining))
             return
 
         locations = [dest_item.items]
@@ -352,7 +357,7 @@ def _do_take(player, word, remaining):
         if item:
             if not _take(player, item):
                 return
-			
+
             names.append(item.name)
 
     msg = text_game_maker.list_to_english(names)
@@ -497,12 +502,20 @@ def _do_inspect(player, word, item):
     target = builder.find_any_item(player, item)
     if not target:
         target = builder.find_person(player, item)
-        if not target:
-            text_game_maker._wrap_print("No %s available to %s" % (item, word))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
-            return
 
-    target.on_look(player)
+    if target:
+        target.on_look(player)
+        return
+
+    tile = builder.find_tile(player, item)
+    if tile:
+        text_game_maker.game_print("%s." % tile.name)
+    else:
+        text_game_maker._wrap_print(
+            messages.dontknow_message("%s %s" % (word, item)))
+
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
+
 
 def _do_look(player, word, item):
     if item != '':
@@ -510,6 +523,21 @@ def _do_look(player, word, item):
         return
 
     text_game_maker.game_print(player.current_state())
+
+def _do_look_under(player, word, item):
+    if item == '':
+        text_game_maker._wrap_print("What do you want to %s?" % word)
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        return
+
+    target = builder.find_any_item(player, item)
+    if target:
+        target.on_look_under(player)
+        return
+
+    text_game_maker._wrap_print(messages.dontknow_message("%s %s"
+        % (word, item)))
+    text_game_maker.save_sound(audio.FAILURE_SOUND)
 
 def build_parser():
     ret = CommandParser()
@@ -524,7 +552,7 @@ def build_parser():
         [BURN_WORDS, _do_burn, "burn an item", "%s <item>"],
 
         [READ_WORDS, _do_read, "read an item", "%s <item>"],
-        
+
         [SUICIDE_WORDS, _do_suicide, "commit suicide", "%s"],
 
         [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
@@ -545,6 +573,8 @@ def build_parser():
 
         [INSPECT_WORDS, _do_inspect, "examine an item in more "
             "detail", "%s <item>"],
+
+        [LOOK_UNDER_WORDS, _do_look_under, "look under an item", "%s <item>"],
 
         [LOOK_INSIDE_WORDS, _do_look_inside,
             "examine the contents of an object"],

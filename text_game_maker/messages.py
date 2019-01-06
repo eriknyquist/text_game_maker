@@ -4,6 +4,12 @@ def _randmsg(choices, *args):
     choice = random.choice(choices)
     return choice.format(*args)
 
+def dontknow_message(ambiguous_action):
+    return _randmsg([
+        "Don't know how to {0}",
+        "Not sure how to {0}"
+    ], ambiguous_action)
+
 def badword_message():
     return _randmsg([
         "I refuse to respond to such language.",
