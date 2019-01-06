@@ -5,8 +5,9 @@ import text_game_maker
 from text_game_maker.map_builder import MapBuilder
 from text_game_maker import crafting
 
-def scheduler_test(player):
+def scheduler_test(player, turns):
     text_game_maker.game_print("Scheduler: %d turns" % player.turns)
+    player.schedule_task(scheduler_test, turns + 1)
 
 # Called when the game starts
 def on_game_run(player):

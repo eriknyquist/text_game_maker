@@ -150,19 +150,19 @@ class Player(object):
 
         The function should accept one parameter, and return a bool:
 
-            def callback(player):
+            def callback(player, turns):
                 pass
 
             Callback parameters:
 
             * *player* (text_game_maker.player.Player): player instance
+            * *turns* (int): number of turns this callback was scheduled for
 
             * *Return value* (bool): if True, this task will be scheduled
               again with the same number of turns
 
         :param str callback: function that returns the message to print
-        :param float seconds: time delay in seconds before the message can be\
-            printed
+        :param int turns: number of turns to pass before callback will be invoked
         :return: task ID
         :rtype: int
         """
@@ -177,7 +177,7 @@ class Player(object):
         for task_id in list(self.scheduled_tasks):
             callback, turns, start = self.scheduled_tasks[task_id]
             if self.turns >= (start + turns):
-                if callback(self):
+                if callback(self, turns):
                     new = (callback, turns, self.turns)
                     self.scheduled_tasks[task_id] = new
                 else:
