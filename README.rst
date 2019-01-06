@@ -34,4 +34,4 @@ Features overview
 Documentation
 =============
 
-`doc/build/html/index.html <http://htmlpreview.github.io/?https://github.com/eriknyquist/text_game_maker/blob/master/doc/build/html/index.html>`_
+`text-game-maker.readthedocs.io <https://text-game-maker.readthedocs.io>`_
