@@ -596,6 +596,7 @@ class MapBuilder(object):
         Start running the game
         """
 
+        audio.init()
         self.player = Player(self.start, self.prompt)
         self.player.fsm = self.fsm
         menu_choices = ["New game", "Load game", "Controls"]

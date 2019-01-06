@@ -18,25 +18,21 @@ SAMPLESIZE = -16
 CHANNELS = 1
 BUFSIZE = 1024
 
-pygame.mixer.pre_init(FREQ, SAMPLESIZE, CHANNELS, BUFSIZE)
-pygame.mixer.init()
-pygame.init()
-
-class Control(object):
+class _Control(object):
     def __init__(self):
         self.sounds = {}
         self.last_played = None
 
-ctrl = Control()
+ctrl = _Control()
 
-def wait():
-    if ctrl.last_played is None:
-        return
+def load_file(filename, sound_id=None):
+    """
+    Read a PTTTL file, convert to PCM samples and save for playback
 
-    while ctrl.last_played.get_busy():
-        time.sleep(0.01)
-
-def add_ptttl_file(filename, sound_id=None):
+    :param str filename: filename for PTTTL file to read
+    :param sound_id: key used to retrieve sound for playback (if None, filename\
+        is used)
+    """
     if sound_id is None:
         sound_id = filename
 
@@ -46,7 +42,44 @@ def add_ptttl_file(filename, sound_id=None):
     rawdata = ptttl_to_sample_data(ptttl_data)
     ctrl.sounds[sound_id] = pygame.mixer.Sound(buffer=rawdata)
 
+def init(frequency=FREQ, samplewidth=SAMPLESIZE, numchannels=CHANNELS,
+        buffersize=BUFSIZE):
+    """
+    Initialize game audio and load PTTTL files for default sounds
+
+    :param int frequency: frequency in HZ
+    :param int samplewidth: sample size in bits
+    :param int numchannels: number of audio channels
+    :param int buffersize: size in bytes of the buffer to be used for playing\
+        audio samples
+    """
+    pygame.mixer.pre_init(frequency, samplewidth, numchannels, buffersize)
+    pygame.mixer.init()
+    pygame.init()
+
+    load_file(SUCCESS_SOUND)
+    load_file(FAILURE_SOUND)
+    load_file(NEW_ITEM_SOUND)
+    load_file(ERROR_SOUND)
+    load_file(DEATH_SOUND)
+    load_file(FANFARE_SOUND)
+
+def wait():
+    """
+    Wait until currently playing sound is finished playing (if any)
+    """
+    if ctrl.last_played is None:
+        return
+
+    while ctrl.last_played.get_busy():
+        time.sleep(0.01)
+
 def play_sound(sound_id):
+    """
+    Play a loaded sound
+
+    :param sound_id: key for sound to play
+    """
     if (not ctrl.last_played is None) and ctrl.last_played.get_busy():
         return
 
@@ -54,10 +87,3 @@ def play_sound(sound_id):
         raise ValueError("No sound with ID '%s'" % sound_id)
 
     ctrl.last_played = pygame.mixer.Sound.play(ctrl.sounds[sound_id])
-
-add_ptttl_file(SUCCESS_SOUND)
-add_ptttl_file(FAILURE_SOUND)
-add_ptttl_file(NEW_ITEM_SOUND)
-add_ptttl_file(ERROR_SOUND)
-add_ptttl_file(DEATH_SOUND)
-add_ptttl_file(FANFARE_SOUND)
