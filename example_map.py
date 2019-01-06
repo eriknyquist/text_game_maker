@@ -29,28 +29,27 @@ def main():
     )
 
     # Create all the items in the room
-    paperclip = Item("a", "paperclip", "", 0, combustible=False)
-    string = Item("a", "piece of string", "on the floor", 0)
-    coins = Coins("on the floor", 7)
-    lockpick = Item("a", "lockpick", "", 0)
-    lighter = Lighter("on the bunk")
+    paperclip = Item("a", "paperclip", combustible=False)
+    string = Item("a", "piece of string", location="on the floor")
+    coins = Coins(location="on the floor", value=7)
+    lockpick = Item("a", "lockpick")
+    lighter = Lighter(location="on the bunk")
 
-    poster = Paper("a", "poster", "on the wall", [
+    poster = Paper("a", "poster", location="on the wall", paragraphs=[
             "<playername>",
             "Wanted for crimes against the State. $50000 to be "
             "awarded for capture, dead or alive."
-        ],
-
-        header="WANTED!", footer="WANTED!"
+        ], header="WANTED!", footer="WANTED!"
     )
 
     # furniture is special, you can't take it like other items
-    bunk = Furniture("a", "narrow bunk", "in the corner", combustible=False)
+    bunk = Furniture("a", "narrow bunk", location="in the corner",
+        combustible=False)
 
     # bag and tin are also special, they can contain other items
-    rucksack = Bag("a", "rucksack", "on the bunk", 15)
-    paperbag = PaperBag("a", "paper bag", "on the bunk", 15)
-    tin = SmallTin("a", "small tin", "on the bunk", 0)
+    rucksack = Bag("a", "rucksack", location="on the bunk")
+    paperbag = PaperBag("a", "paper bag", location="on the bunk")
+    tin = SmallTin("a", "small tin", location="on the bunk")
 
     # Make a blueprint for a lockpick; lockpick takes one string and one paperclip
     lockpick_blueprint = Blueprint([string, paperclip], lockpick)

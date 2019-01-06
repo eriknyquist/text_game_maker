@@ -12,7 +12,7 @@ class Item(GameEntity):
     Base class for collectable item
     """
 
-    def __init__(self, prefix, name, location, value, combustible=True):
+    def __init__(self, prefix, name, **kwargs):
         """
         Initialises an Item instance
 
@@ -24,16 +24,19 @@ class Item(GameEntity):
 
         super(Item, self).__init__()
 
-        self.combustible = combustible
+        self.combustible = True
         self.inanimate = True
         self.edible = True
-        self.value = value
+        self.value = 0
+        self.location = ""
         self.name = name
         self.prep = 'the ' + name
 
         self.prefix = prefix
-        self.location = location
         self.size = ITEM_SIZE_SMALL
+
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
 
     def set_prefix(self, prefix):
         """
@@ -85,8 +88,8 @@ class Item(GameEntity):
         return self.name
 
 class Lighter(Item):
-    def __init__(self, location):
-        super(Lighter, self).__init__("a", "lighter", location, 2)
+    def __init__(self, **kwargs):
+        super(Lighter, self).__init__("a", "lighter", **kwargs)
 
     def on_burn(self, player):
         text_game_maker.game_print("You can't burn the %s with itself."
@@ -97,8 +100,8 @@ class Weapon(Item):
     Class to represent a weapon
     """
 
-    def __init__(self, prefix, name, location, value, damage, combustible=False):
-        super(Weapon, self).__init__(prefix, name, location, value, combustible)
+    def __init__(self, prefix, name, **kwargs):
+        super(Weapon, self).__init__(prefix, name, **kwargs)
         self.edible = False
         self.damage = damage
 
@@ -107,16 +110,18 @@ class Food(Item):
     Class to represent a food item
     """
 
-    def __init__(self, prefix, name, location, value, energy):
+    def __init__(self, prefix, name, **kwargs):
         super(Food, self).__init__(prefix, name, location, value)
+        self.edbile = True
         self.energy = energy
 
 class Coins(Item):
-    def __init__(self, location, value):
-        super(Coins, self).__init__(None, "", location, value)
+    def __init__(self, **kwargs):
+        self.value = 1
         self.combustible = False
-        self.name = "%s coin" % value
-        if value > 1:
+        super(Coins, self).__init__(None, "", **kwargs)
+        self.name = "%s coin" % self.value
+        if self.value > 1:
             self.verb = "are"
             self.name += "s"
 
@@ -126,12 +131,11 @@ class Coins(Item):
         return True
 
 class Paper(Item):
-    def __init__(self, prefix, name, location, paragraphs, header=None,
-            footer=None):
-        super(Paper, self).__init__(prefix, name, location, 0)
-        self.paragraphs = paragraphs
-        self.header = header
-        self.footer = footer
+    def __init__(self, prefix, name, **kwargs):
+        self.paragraphs = []
+        self.header = None
+        self.footer = None
+        super(Paper, self).__init__(prefix, name, **kwargs)
 
     def paragraphs_text(self):
         ret = []
@@ -169,53 +173,28 @@ class Paper(Item):
 
         print('\n' + msg)
 
-class PosterWithPhoto(Paper):
-    def __init__(self, prefix, name, location, paragraphs, photo, header=None,
-            footer=None):
-        super(PosterWithPhoto, self).__init__(prefix, name, location,
-            paragraphs, header, footer)
-        self.photo = photo
-
-    def photo_text(self):
-        centered = []
-        lines = self.photo.split('\n')
-        for line in lines:
-            centered.append(text_game_maker.centre_text(line))
-
-        return '\n'.join(centered)
-
-    def on_read(self, player):
-        msg = '\n' + self.photo_text() + '\n\n' + self.paragraphs_text()
-        if self.header:
-            msg = "%s\n%s" % (self.header_text(), msg)
-
-        if self.footer:
-            msg = "%s\n\n%s" % (msg, self.footer_text())
-
-        print('\n' + msg)
-
 class Blueprint(Item):
-    def __init__(self, ingredients, item, location=""):
+    def __init__(self, ingredients, item, **kwargs):
         super(Blueprint, self).__init__("a", "blueprint for %s" % item,
-                location, 0)
-        self._ingredients = ingredients
-        self._item = item
+            **kwargs)
+        self.ingredients = ingredients
+        self.item = item
 
     def add_to_player_inventory(self, player):
         return True
 
     def on_take(self, player):
-        text_game_maker.crafting.add(self._ingredients, self._item)
-        self.delete()
-        text_game_maker._wrap_print("You can now make %s" % self._item)
+        text_game_maker.crafting.add(self.ingredients, self.item)
+        text_game_maker._wrap_print("You can now make %s" % self.item)
         text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
+        self.delete()
         return True
 
 class Furniture(Item):
-    def __init__(self, prefix, name, location, combustible=True):
-        super(Furniture, self).__init__(prefix, name, location, 0, combustible)
+    def __init__(self, prefix, name, **kwargs):
         self.scenery = True
         self.size = ITEM_SIZE_LARGE
+        super(Furniture, self).__init__(prefix, name, **kwargs)
 
 class Container(Item):
     """
