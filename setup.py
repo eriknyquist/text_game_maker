@@ -9,6 +9,6 @@ exe_options = {
     }
 }
 
-exes = [cx_Freeze.Executable("map2.py")]
+exes = [cx_Freeze.Executable("example_map.py")]
 
 cx_Freeze.setup(name="test game", options=exe_options, executables=exes)

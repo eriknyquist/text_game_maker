@@ -35,11 +35,11 @@ def main():
     lockpick = Item("a", "lockpick")
     lighter = Lighter(location="on the bunk")
 
-    poster = Paper("a", "poster", location="on the wall", paragraphs=[
-            "<playername>",
-            "Wanted for crimes against the State. $50000 to be "
-            "awarded for capture, dead or alive."
-        ], header="WANTED!", footer="WANTED!"
+    idcard = Paper("an", "ID badge", locations="on the floor", paragraphs=[
+            "name: <playername>",
+            "occupation: field agent",
+            "CID: 5545658868"
+        ], header="ID CARD", footer="ID CARD"
     )
 
     # furniture is special, you can't take it like other items
@@ -54,11 +54,12 @@ def main():
     # Make a blueprint for a lockpick; lockpick takes one string and one paperclip
     lockpick_blueprint = Blueprint([string, paperclip], lockpick)
 
+    rucksack.add_items([coins, paperclip])
     # Put some items inside the small tin
-    tin.add_items([coins, paperclip, lockpick_blueprint])
+    tin.add_items([idcard, lockpick_blueprint])
 
     # Add all the items to the room
-    builder.add_items([bunk, string, rucksack, tin, lighter, poster, paperbag])
+    builder.add_items([bunk, string, rucksack, tin, lighter, paperbag])
 
     # Add a door to the east. The door will be locked and will require a
     # lockpick to unlock.
