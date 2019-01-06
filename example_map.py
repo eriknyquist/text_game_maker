@@ -5,6 +5,9 @@ import text_game_maker
 from text_game_maker.map_builder import MapBuilder
 from text_game_maker import crafting
 
+def scheduler_test(player):
+    text_game_maker.game_print("Scheduler: %d turns" % player.turns)
+
 # Called when the game starts
 def on_game_run(player):
     # read name from player
@@ -12,6 +15,8 @@ def on_game_run(player):
 
     # captialize with name.title() and set as player name
     player.set_name(name.title())
+
+    player.schedule_task(scheduler_test, 5)
 
 def main():
     # Create a MapBuilder object with the command parser

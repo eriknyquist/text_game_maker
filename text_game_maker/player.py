@@ -172,6 +172,17 @@ class Player(object):
         self.task_id = (self.task_id + 1) % self.max_task_id
         return ret
 
+    def scheduler_tick(self):
+        self.turns += 1
+        for task_id in list(self.scheduled_tasks):
+            callback, turns, start = self.scheduled_tasks[task_id]
+            if self.turns >= (start + turns):
+                if callback(self):
+                    new = (callback, turns, self.turns)
+                    self.scheduled_tasks[task_id] = new
+                else:
+                    del self.scheduled_tasks[task_id]
+
     def clear_tasks(self):
         """
         Clear all pending scheduled tasks (tasks which have been added but

@@ -334,9 +334,10 @@ class MapBuilder(object):
                 cmd.callback(player, action[:i].strip(), action[i:].strip())
             else:
                 text_game_maker.save_sound(audio.ERROR_SOUND)
+                return
 
         text_game_maker.info['last_command'] = action
-        player.turns += 1
+        player.scheduler_tick()
 
     def set_on_enter(self, callback):
         """
@@ -572,7 +573,7 @@ class MapBuilder(object):
         text_game_maker.info['sequence_count'] = None
 
     def _do_scheduled_tasks(self, player):
-        for task_id in list(player.scheduled_tasks):
+        for task_id in player.scheduled_tasks:
             callback, turns, start = player.scheduled_tasks[task_id]
             if player.turns >= (start + turns):
                 if callback(player):
@@ -635,8 +636,6 @@ class MapBuilder(object):
                 if _has_badword(action):
                     text_game_maker.game_print(messages.badword_message())
                     continue
-
-                self._do_scheduled_tasks(self.player)
 
                 delim = self._get_command_delimiter(action)
                 if delim:
