@@ -3,9 +3,22 @@ import text_game_maker
 craftables = {}
 
 def add(items, item):
+    """
+    Add new craftable item
+
+    :param [text_game_maker.items.Item] items: list of ingredients
+    :param text_game_maker.items.Item item: new item created by combining\
+        ingredients
+    """
     craftables[item.name] = (items, item)
 
 def help_text():
+    """
+    Retreive human-readable description of all added craftable items
+
+    :return: description of all added craftable items
+    :rtype: str
+    """
     ret = []
     for name in craftables:
         items, item = craftables[name]
@@ -31,6 +44,14 @@ def _need_items(name, word, items):
             % (word, name, text_game_maker.list_to_english(names)))
 
 def craft(name, word, inventory):
+    """
+    Craft an item by name
+
+    :param str name: name of the item to craft
+    :param str word: command/action word used by player
+    :param text_game_maker.items.Container inventory: inventory object to use\
+        for crafting
+    """
     if not name in craftables:
         text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
         text_game_maker.game_print("Don't know how to %s %s" % (word, name))

@@ -13,18 +13,6 @@ from prompt_toolkit.history import InMemoryHistory
 import parser
 import map_builder
 
-# Might use this later...
-#
-#import nltk
-#
-#def get_nouns(text):
-#    tokens = nltk.word_tokenize(text)
-#    tagged = nltk.pos_tag(tokens)
-#    nouns = ['%s (%s)' % (word, pos) for word,pos in tagged
-#        if (pos == 'NNP' or pos == 'NNS' )]
-#    downcased = [x.lower() for x in nouns]
-#    return "\n".join(downcased)
-
 history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
 
@@ -104,6 +92,13 @@ format_tokens = {
 }
 
 def replace_format_tokens(text):
+    """
+    Replace format tokens in string (if any)
+
+    :param str text: text that may contain format tokens
+    :return: formatted text
+    :rtype: str
+    """
     for tok in format_tokens:
         if tok in text:
             text = text.replace(tok, format_tokens[tok]())
@@ -111,6 +106,16 @@ def replace_format_tokens(text):
     return text
 
 def get_all_contained_items(item, stoptest=None):
+    """
+    Recursively retrieve all items contained in another item
+
+    :param text_game_maker.items.Item item: item to retrieve items from
+    :param stoptest: callback to call on each sub-item to test whether\
+        recursion should continue. If stoptest() == True, recursion will\
+        continue
+    :return: list of retrieved items
+    :rtype: [text_game_maker.items.Item]
+    """
     ret = []
 
     if not item.is_container:
@@ -150,9 +155,20 @@ def _unrecognised(val):
     _wrap_print('Unrecognised command "%s"' % val)
 
 def queue_command_sequence(seq):
+    """
+    Add to game command sequence list
+
+    :param [str] seq: list of command strings to add
+    """
     sequence.extend(seq)
 
 def pop_command():
+    """
+    Pop oldest command from game command sequence list
+
+    :return: oldest command in game command sequence list
+    :rtype: str
+    """
     try:
         ret = sequence.pop(0)
     except IndexError:
@@ -161,12 +177,30 @@ def pop_command():
     return ret
 
 def save_sound(sound):
+    """
+    Save a sound to be played when parsing of the current command is completed.
+    Overwrites any previously saved sound.
+
+    :param sound: sound ID key needed by text_game_maker.audio.play_sound
+    """
     info['sound'] = sound
 
 def last_saved_sound():
+    """
+    Retrieve last sound ID saved with text_game_maker.save_sound
+
+    :return: last saved sound ID
+    """
     return info['sound']
 
 def capitalize(text):
+    """
+    Capitalize first non-whitespace character folling each period in string
+
+    :param str text: text to capitalize
+    :return: capitalized text
+    :rtype: str
+    """
     ret = list(text)
 
     # Make sure first word is capitalized...
@@ -202,7 +236,15 @@ def capitalize(text):
 
     return ''.join(ret)
 
-def multisplit(s, *sep):
+def multisplit(s, *seps):
+    """
+    Split a string into substrings by multiple tokens
+
+    :param str s: string to split
+    :param [str] seps: list of strings to split on
+    :return: list of substrings
+    :rtype: [str]
+    """
     stack = [s]
     for char in sep:
         pieces = []
@@ -253,6 +295,15 @@ def list_to_english(strlist, conj='and'):
     return msg + strlist[-1]
 
 def centre_text(string, line_width=None):
+    """
+    Centre a line of text within a specific number of columns
+
+    :param str string: text to be centred
+    :param int line_width: line width for centreing text. If None, the\
+        current line width being used for game output will be used
+    :return: centred text
+    :rtype: str
+    """
     if not line_width:
         line_width = wrapper.width
 
@@ -265,6 +316,21 @@ def centre_text(string, line_width=None):
     return spaces + string + spaces
 
 def line_banner(text, width=None, bannerchar='-', spaces=1):
+    """
+    Centre a line of text within a specific number of columns, and surround text
+    with a repeated character on either side.
+
+    Example:
+
+    ---------- centred text ----------
+
+    :param str text: text to be centred
+    :param int width: line width for centreing text
+    :param str bannerchar: character to use for banner around centred text
+    :param int spaces: number of spaces seperating centred text from banner
+    :return: centred text with banner
+    :rtype: str
+    """
     if not width:
         width = wrapper.width
 
