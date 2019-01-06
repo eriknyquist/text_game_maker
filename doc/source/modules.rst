@@ -1,10 +1,7 @@
-.
-=
+text_game_maker
+===============
 
 .. toctree::
    :maxdepth: 4
 
-   example_map
-   test
    text_game_maker
-   wtest

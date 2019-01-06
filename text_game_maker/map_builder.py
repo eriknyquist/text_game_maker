@@ -41,6 +41,16 @@ def _translate(val, min1, max1, min2, max2):
     return min2 + (scaled * span2)
 
 def find_item(player, name, locations=None):
+    """
+    Find an item by name in the provided locations
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: name of item to find
+    :param [[text_game_maker.items.Item]] locations: location lists to search.\
+        If None, the item list of the current room/tile is used
+    :return: found item (None if no matching item is found)
+    :rtype: text_game_maker.items.Item
+    """
     if name.startswith('the '):
         name = name[4:]
 
@@ -57,6 +67,15 @@ def find_item(player, name, locations=None):
 
 
 def is_location(player, name):
+    """
+    Checks if text matches the name of an adjacent tile that is connected to
+    the current tile
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: text to check
+    :return: True if text matches adjacent tile name
+    :rtype: bool
+    """
     for direction in player.current.iterate_directions():
         if direction and direction.is_door() and (name in direction.name):
             return True
@@ -68,6 +87,17 @@ def is_location(player, name):
     return False
 
 def get_all_items(player, locations=None, except_item=None):
+    """
+    Retrieves all items from specified locations
+
+    :param text_game_maker.player.Player player: player object
+    :param [[text_game_maker.items.Item]] locations: location lists to search.\
+        If None, the item list of the current room/tile is used
+    :param object except_item: do not retrive item from location if it is the\
+        same memory object as except_item. If None, no items are ignored.
+    :return: list of retreived items
+    :rtype: [text_game_maker.items.Item]
+    """
     if not locations:
         locations = player.current.items.values()
 
@@ -85,6 +115,17 @@ def get_all_items(player, locations=None, except_item=None):
     return ret
 
 def find_item_wildcard(player, name, locations=None):
+    """
+    Find the first item whose name matches a wildcard pattern ('*') in specific
+    locations.
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: wildcard pattern
+    :param [[text_game_maker.items.Item]] locations: location lists to search.\
+        If None, the item list of the current room/tile is used
+    :return: found item. If no matching item is found, None is returned.
+    :rtype: text_game_maker.items.Item
+    """
     if name.startswith('the '):
         name = name[4:]
 
@@ -100,6 +141,14 @@ def find_item_wildcard(player, name, locations=None):
     return None
 
 def find_person(player, name):
+    """
+    Find a person by name in the current tile
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: name of person to search for
+    :return: found person. If no matching person is found, None is returned.
+    :rtype: text_game_maker.person.Person
+    """
     for loc in player.current.people:
         itemlist = player.current.people[loc]
         for item in itemlist:
@@ -110,6 +159,14 @@ def find_person(player, name):
     return None
 
 def find_inventory_item(player, name):
+    """
+    Find an item by name in player's inventory
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: name of item to search for
+    :return: found item. If no matching item is found, None is returned.
+    :rtype: text_game_maker.items.Item
+    """
     if not player.inventory:
         return None
 
@@ -127,6 +184,14 @@ def find_inventory_item(player, name):
     return None
 
 def find_any_item(player, name):
+    """
+    Find an item by name in either the player's inventory or in the current tile
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: name of item to search for
+    :return: found item. If no matching item is found, None is returned.
+    :rtype: text_game_maker.items.Item
+    """
     ret = find_inventory_item(player, name)
     if not ret:
         return find_item(player, name)
@@ -134,6 +199,15 @@ def find_any_item(player, name):
     return ret
 
 def find_inventory_item_class(player, classobj):
+    """
+    Find first item in player's inventory which is an instance of a specific
+    class
+
+    :param text_game_maker.player.Player player: player object
+    :param classobj: class to check for instances of
+    :return: found item. If no matching item is found, None is returned.
+    :rtype: text_game_maker.items.Item
+    """
     if not player.inventory:
         return None
 
@@ -148,6 +222,15 @@ def find_inventory_item_class(player, classobj):
     return None
 
 def find_inventory_wildcard(player, name):
+    """
+    Find the first item in player's inventory whose name matches a wildcard
+    pattern ('*').
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: wildcard pattern
+    :return: found item. If no matching item is found, None is returned.
+    :rtype: text_game_maker.items.Item
+    """
     for item in player.inventory.items:
         if fnmatch.fnmatch(item.name, name):
             return item
@@ -155,6 +238,15 @@ def find_inventory_wildcard(player, name):
     return None
 
 def find_tile(player, name):
+    """
+    Find an adjacent tile that is connected to the current tile by name
+
+    :param text_game_maker.player.Player player: player object
+    :param str name: name of adjacent tile to search for
+    :return: adjacent matching tile. If no matching tiles are found, None is\
+        returned
+    :rtype: text_game_maker.tile.Tile
+    """
     for tile in player.current.iterate_directions():
         if tile and (name in tile.name):
             return tile
@@ -427,6 +519,15 @@ class MapBuilder(object):
         self.current.description = text_game_maker._remove_leading_whitespace(desc)
 
     def add_door(self, prefix, name, direction, doorclass=LockedDoor):
+        """
+        Add a locked door that blocks the player from exiting the current room
+
+        :param str prefix: prefix for door name, e.g. "a"
+        :param str name: door name, e.g. "locked door"
+        :param str direction: direction to locked door from current tile, e.g.\
+            "north"
+        :param doorclass: class object to instantiate for door
+        """
         dirs = ['north', 'south', 'east', 'west']
         if direction not in dirs:
             raise ValueError('Invalid direction: must be one of %s' % dirs)
