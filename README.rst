@@ -3,49 +3,7 @@
 Text Adventure Game Maker
 -------------------------
 
-|projectname| is a framework for building simple text-based games. Here is a
-simple game made with |projectname|:
-
-.. code:: python
-
-    import text_game_maker
-    from text_game_maker.item import Item
-    from text_game_maker.person import Person
-    from text_game_maker.map_builder import MapBuilder
-
-    # callback function for locked room: each time player attempts to enter
-    # the locked room, this callback function will be called
-    def room_enter_callback(player, source, dest):
-        if player.has_equipped('brass key'):
-            # if 'brass key' is equipped, delete from player's inventory ...
-            player.delete_equipped()
-
-            # ... and unlock the destination tile
-            dest.set_unlocked()
-
-        return True
-
-    builder = MapBuilder()
-
-    # First room, player will start here
-    builder.set_name('a dark cellar')
-    builder.set_description('in a dark, moist cellar with no windows')
-    builder.add_item(Item("a", "brass key", "on the floor", 8))
-
-    # New room to the west
-    builder.move_west()
-    builder.set_name('a well-lit room')
-    builder.set_description('a bright, dry room with many windows')
-
-    # This room is locked-- need the brass key to get in
-    builder.set_locked()
-
-    # Add enter callback so tile can be unlocked. Callback will
-    # be invoked when player attempts to enter this tile.
-    builder.set_on_enter(room_enter_callback)
-
-    # Start reading player input and run the game
-    builder.run_game()
+|projectname| is a framework for building simple text-based games.
 
 Features overview
 =================
