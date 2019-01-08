@@ -1,6 +1,7 @@
 import text_game_maker
-from text_game_maker import messages
-from text_game_maker.base import GameEntity
+from text_game_maker.messages import messages
+from text_game_maker.game_objects.base import GameEntity
+from text_game_maker.audio import audio
 
 ITEM_SIZE_SMALL = 1
 ITEM_SIZE_MEDIUM = 2
@@ -186,7 +187,7 @@ class Blueprint(Item):
     def on_take(self, player):
         text_game_maker.crafting.add(self.ingredients, self.item)
         text_game_maker._wrap_print("You can now make %s" % self.item)
-        text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
+        text_game_maker.save_sound(audio.NEW_ITEM_SOUND)
         self.delete()
         return True
 
@@ -257,7 +258,7 @@ class InventoryBag(Container):
         player.inventory = self
         self.delete()
 
-        text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
+        text_game_maker.save_sound(audio.NEW_ITEM_SOUND)
         text_game_maker.game_print("You now have a %s." % self.name)
 
 class PaperBag(Container):

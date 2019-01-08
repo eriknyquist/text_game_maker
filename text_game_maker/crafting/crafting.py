@@ -1,14 +1,16 @@
 import text_game_maker
 
+from text_game_maker.audio import audio
+
 craftables = {}
 
 def add(items, item):
     """
     Add new craftable item
 
-    :param [text_game_maker.items.Item] items: list of ingredients
-    :param text_game_maker.items.Item item: new item created by combining\
-        ingredients
+    :param [text_game_maker.game_objects.items.Item] items: list of ingredients
+    :param text_game_maker.game_objects.items.Item item: new item created by\
+        combining ingredients
     """
     craftables[item.name] = (items, item)
 
@@ -39,7 +41,7 @@ def _get_inventory_item(name, inventory):
 
 def _need_items(name, word, items):
     names = [str(x) for x in items]
-    text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
+    text_game_maker.save_sound(audio.FAILURE_SOUND)
     text_game_maker.game_print("Can't %s %s. Need %s."
             % (word, name, text_game_maker.list_to_english(names)))
 
@@ -49,11 +51,11 @@ def craft(name, word, inventory):
 
     :param str name: name of the item to craft
     :param str word: command/action word used by player
-    :param text_game_maker.items.Container inventory: inventory object to use\
-        for crafting
+    :param text_game_maker.game_objects.items.Container inventory: inventory\
+        object to use for crafting
     """
     if not name in craftables:
-        text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
+        text_game_maker.save_sound(audio.FAILURE_SOUND)
         text_game_maker.game_print("Don't know how to %s %s" % (word, name))
         return
 
@@ -72,5 +74,5 @@ def craft(name, word, inventory):
         i.delete()
 
     inventory.add_item(item)
-    text_game_maker.save_sound(text_game_maker.audio.NEW_ITEM_SOUND)
+    text_game_maker.save_sound(audio.NEW_ITEM_SOUND)
     text_game_maker.game_print("Created %s." % name)

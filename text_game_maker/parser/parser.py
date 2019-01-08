@@ -1,7 +1,6 @@
 import json
 import text_game_maker
-from text_game_maker import map_builder
-from text_game_maker import default_commands as defaults
+from text_game_maker.builder import map_builder
 
 PRINT_SPEED_WORDS = ['print speed']
 
@@ -161,15 +160,15 @@ class CommandParser(SimpleTextFSM):
         super(CommandParser, self).__init__()
 
         default_commands = [
-            [HELP_WORDS, defaults._do_help, "show basic help information"],
+            [HELP_WORDS, map_builder._do_help, "show basic help information"],
 
-            [SHOW_COMMAND_LIST_WORDS, defaults._do_show_command_list,
+            [SHOW_COMMAND_LIST_WORDS, map_builder._do_show_command_list,
                 "show all game commands"],
 
-            [SAVE_WORDS, defaults._do_save,
+            [SAVE_WORDS, map_builder._do_save,
                 "save the current game state to a file"],
 
-            [LOAD_WORDS, defaults._do_load,
+            [LOAD_WORDS, map_builder._do_load,
                 "load a previously saved game state file"],
 
             [PRINT_SPEED_WORDS, map_builder._do_set_print_speed,
@@ -182,12 +181,12 @@ class CommandParser(SimpleTextFSM):
             [PRINT_WIDTH_WORDS, map_builder._do_set_print_width,
                 "set the maximum line width for game output", "%s <width>"],
 
-            [KILL_WORDS, defaults._do_quit, "guit the game"],
+            [KILL_WORDS, map_builder._do_quit, "guit the game"],
 
-            [GO_WORDS, defaults._do_move,
+            [GO_WORDS, map_builder._do_move,
                 "move the player (north/south/east/west)", "%s <direction>"],
 
-            [CRAFT_WORDS, defaults._do_craft,
+            [CRAFT_WORDS, map_builder._do_craft,
                 "Craft an item", "%s <item name>"],
 
             [INVENTORY_WORDS, map_builder._do_inventory_listing,

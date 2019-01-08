@@ -2,10 +2,11 @@ import sys
 
 import text_game_maker
 
-from text_game_maker import audio, messages
-from text_game_maker import map_builder as builder
-from text_game_maker.items import Lighter
-from text_game_maker.parser import CommandParser
+from text_game_maker.audio import audio
+from text_game_maker.messages import messages
+from text_game_maker.builder import map_builder as builder
+from text_game_maker.game_objects.items import Lighter
+from text_game_maker.parser.parser import CommandParser
 
 EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'

@@ -1,7 +1,7 @@
 import sys
-import messages
 
 import text_game_maker
+from text_game_maker.messages import messages
 
 class GameEntity(object):
     """

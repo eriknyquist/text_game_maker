@@ -1,8 +1,8 @@
 import text_game_maker
-from text_game_maker.items import (Item, Food, Weapon, Bag, SmallBag, SmallTin,
-    Coins, Blueprint, Lighter, Paper, PaperBag, Furniture)
+from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
+    SmallBag, SmallTin, Coins, Blueprint, Lighter, Paper, PaperBag, Furniture)
 
-from text_game_maker import crafting
+from text_game_maker.crafting import crafting
 
 def prison_starting_cell(builder):
     # Start building the map; create the first tile/room

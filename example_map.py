@@ -2,8 +2,8 @@ import commands
 import example_map_rooms as rooms
 
 import text_game_maker
-from text_game_maker.map_builder import MapBuilder
-from text_game_maker import crafting
+from text_game_maker.builder.map_builder import MapBuilder
+from text_game_maker.crafting import crafting
 
 def scheduler_test(player, turns):
     text_game_maker.game_print("Scheduler: %d turns" % player.turns)

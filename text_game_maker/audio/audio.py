@@ -46,7 +46,7 @@ def init(frequency=FREQ, samplewidth=SAMPLESIZE, numchannels=CHANNELS,
         buffersize=BUFSIZE):
     """
     Initialize game audio and load PTTTL files for default sounds (called
-    automatically by text_game_maker.map_builder.MapBuilder.run_game)
+    automatically by text_game_maker.builder.map_builder.MapBuilder.run_game)
 
     :param int frequency: frequency in HZ
     :param int samplewidth: sample size in bits

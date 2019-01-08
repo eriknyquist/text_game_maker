@@ -9,8 +9,10 @@ BUILD := build
 all:
 	$(PYTHON) setup.py build_exe
 
-docs:
-	sphinx-apidoc -o $(RST_SRCDIR) $(PYTHON_SRCDIR) -f
+autodoc:
+	sphinx-apidoc -E -M -o $(RST_SRCDIR) $(PYTHON_SRCDIR) -f
+
+docs: autodoc
 	make clean html -C $(DOCS_DIR)
 
 test:

@@ -8,11 +8,12 @@ import errno
 
 import parser
 import text_game_maker
-from text_game_maker import default_commands as defaults
-from text_game_maker.tile import Tile, LockedDoor, reverse_direction
-from text_game_maker.items import Item
-from text_game_maker.player import Player
-from text_game_maker import audio, messages
+from text_game_maker.tile.tile import Tile, LockedDoor, reverse_direction
+from text_game_maker.game_objects.items import Item
+from text_game_maker.player.player import Player
+from text_game_maker.audio import audio
+from text_game_maker.crafting import crafting
+from text_game_maker.messages import messages
 
 MIN_LINE_WIDTH = 50
 MAX_LINE_WIDTH = 120
@@ -25,6 +26,177 @@ BADWORDS = [
 info = {
     'instance': None
 }
+
+########## built-in command handlers ##########
+
+def _do_quit(player, word, name):
+    ret = text_game_maker.ask_yes_no("really stop playing?")
+    if ret < 0:
+        return
+    elif ret:
+        sys.exit()
+
+def _do_show_command_list(player, word, setting):
+    print text_game_maker.get_full_controls(player.fsm)
+
+def _do_help(player, word, setting):
+    if not setting or setting == "":
+        print text_game_maker.basic_controls
+    else:
+        i, cmd = text_game_maker.run_fsm(player.fsm, setting)
+        if cmd:
+            print cmd.help_text().rstrip('\n')
+
+def _move_direction(player, word, direction):
+    if 'north'.startswith(direction):
+        player._move_north(word)
+    elif 'south'.startswith(direction):
+        player._move_south(word)
+    elif 'east'.startswith(direction):
+        player._move_east(word)
+    elif 'west'.startswith(direction):
+        player._move_west(word)
+    else:
+        return False
+
+    return True
+
+def _do_move(player, word, direction):
+    if not direction or direction == "":
+        text_game_maker._wrap_print("Where do you want to go?")
+        return
+
+    if direction.startswith('to the '):
+        direction = direction[7:]
+    elif direction.startswith('to '):
+        direction = direction[3:]
+
+    if _move_direction(player, word, direction):
+        return
+
+    tile = builder.find_tile(player, direction)
+    if tile:
+        if _move_direction(player, word, player.current.direction_to(tile)):
+            return
+
+    text_game_maker._wrap_print("Don't know how to %s %s." % (word, direction))
+
+def _do_craft(player, word, item):
+    if not item or item == "":
+        text_game_maker.game_print("What do you want to %s?" % word)
+        helptext = text_game_maker.crafting.help_text()
+        if helptext:
+            text_game_maker._wrap_print(helptext)
+
+        return
+
+    if not player.inventory:
+        text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
+        text_game_maker.game_print("No bag to hold items. "
+                "Nothing to craft with.")
+        return
+
+    text_game_maker.crafting.craft(item, word, player.inventory)
+
+def _get_next_unused_save_id(save_dir):
+    default_num = 1
+    nums = [int(x.split('_')[2]) for x in os.listdir(save_dir)]
+
+    while default_num in nums:
+        default_num += 1
+
+    return default_num
+
+def _get_save_dir():
+    return os.path.join(os.path.expanduser("~"), '.text_game_maker_saves')
+
+def _get_save_files():
+    ret = []
+    save_dir = _get_save_dir()
+
+    if os.path.exists(save_dir):
+        ret = [os.path.join(save_dir, x) for x in os.listdir(save_dir)]
+
+    return ret
+
+def _do_save(player, word, setting):
+    filename = None
+    save_dir = _get_save_dir()
+
+    if not os.path.exists(save_dir):
+        try:
+            os.makedirs(save_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                text_game_maker._wrap_print("Error (%d) creating directory %s"
+                    % (e.errno, save_dir))
+                return
+
+    if player.loaded_file:
+        ret = text_game_maker.ask_yes_no("overwrite file %s?"
+            % os.path.basename(player.loaded_file))
+        if ret < 0:
+            return
+
+    if player.loaded_file and ret:
+        filename = player.loaded_file
+    else:
+        save_id = _get_next_unused_save_id(save_dir)
+        default_name = "save_state_%03d" % save_id
+
+        ret = text_game_maker.read_line_raw("Enter name to use for save file",
+            cancel_word="cancel", default=default_name)
+
+        if ret is None:
+            return
+
+        filename = os.path.join(save_dir, ret)
+
+    player.save_state(filename)
+    text_game_maker.game_print("Game state saved in %s." % filename)
+
+def _do_load(player, word, setting):
+    filename = None
+
+    ret = _get_save_files()
+    if ret:
+        files = [os.path.basename(x) for x in ret]
+        files.sort()
+        files.append("None of these (let me enter a path to a save file)")
+
+        index = text_game_maker.ask_multiple_choice(files,
+            "Which save file would you like to load?")
+
+        if index < 0:
+            return False
+
+        if index < (len(files) - 1):
+            filename = os.path.join(_get_save_dir(), files[index])
+    else:
+        text_game_maker._wrap_print("No save files found. Put save files in "
+            "%s, otherwise you can enter the full path to an alternate save "
+            "file." % _get_save_dir())
+        ret = text_game_maker.ask_yes_no("Enter path to alternate save file?")
+        if ret <= 0:
+            return False
+
+    if filename is None:
+        while True:
+            filename = text_game_maker.read_line("Enter name of file to load",
+                cancel_word="cancel")
+            if filename is None:
+                return False
+            elif os.path.exists(filename):
+                break
+            else:
+                text_game_maker._wrap_print("%s: no such file" % filename)
+
+    player.load_from_file = filename
+    text_game_maker._wrap_print("Loading game state from file %s."
+        % player.load_from_file)
+    return True
+
+###############################################
 
 def _has_badword(text):
     for word in BADWORDS:
@@ -44,10 +216,10 @@ def find_item(player, name, locations=None):
     """
     Find an item by name in the provided locations
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: name of item to find
-    :param [[text_game_maker.items.Item]] locations: location lists to search.\
-        If None, the item list of the current room/tile is used
+    :param [[text_game_maker.game_objects.items.Item]] locations: location\
+        lists to search. If None, the item list of the current tile is used
     :return: found item (None if no matching item is found)
     :rtype: text_game_maker.items.Item
     """
@@ -71,7 +243,7 @@ def is_location(player, name):
     Checks if text matches the name of an adjacent tile that is connected to
     the current tile
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: text to check
     :return: True if text matches adjacent tile name
     :rtype: bool
@@ -90,13 +262,13 @@ def get_all_items(player, locations=None, except_item=None):
     """
     Retrieves all items from specified locations
 
-    :param text_game_maker.player.Player player: player object
-    :param [[text_game_maker.items.Item]] locations: location lists to search.\
+    :param text_game_maker.player.player.Player player: player object
+    :param [[text_game_maker.game_objects.items.Item]] locations: location lists to search.\
         If None, the item list of the current room/tile is used
     :param object except_item: do not retrive item from location if it is the\
         same memory object as except_item. If None, no items are ignored.
     :return: list of retreived items
-    :rtype: [text_game_maker.items.Item]
+    :rtype: [text_game_maker.game_objects.items.Item]
     """
     if not locations:
         locations = player.current.items.values()
@@ -119,12 +291,12 @@ def find_item_wildcard(player, name, locations=None):
     Find the first item whose name matches a wildcard pattern ('*') in specific
     locations.
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: wildcard pattern
-    :param [[text_game_maker.items.Item]] locations: location lists to search.\
-        If None, the item list of the current room/tile is used
+    :param [[text_game_maker.game_objects.items.Item]] locations: location\
+        lists to search. If None, the item list of the current tile is used
     :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.items.Item
+    :rtype: text_game_maker.game_objects.items.Item
     """
     if name.startswith('the '):
         name = name[4:]
@@ -144,10 +316,10 @@ def find_person(player, name):
     """
     Find a person by name in the current tile
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: name of person to search for
     :return: found person. If no matching person is found, None is returned.
-    :rtype: text_game_maker.person.Person
+    :rtype: text_game_maker.game_objects.person.Person
     """
     for loc in player.current.people:
         itemlist = player.current.people[loc]
@@ -162,10 +334,10 @@ def find_inventory_item(player, name):
     """
     Find an item by name in player's inventory
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: name of item to search for
     :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.items.Item
+    :rtype: text_game_maker.game_objects.items.Item
     """
     if not player.inventory:
         return None
@@ -187,10 +359,10 @@ def find_any_item(player, name):
     """
     Find an item by name in either the player's inventory or in the current tile
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: name of item to search for
     :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.items.Item
+    :rtype: text_game_maker.game_objects.items.Item
     """
     ret = find_inventory_item(player, name)
     if not ret:
@@ -203,10 +375,10 @@ def find_inventory_item_class(player, classobj):
     Find first item in player's inventory which is an instance of a specific
     class
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param classobj: class to check for instances of
     :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.items.Item
+    :rtype: text_game_maker.game_objects.items.Item
     """
     if not player.inventory:
         return None
@@ -226,10 +398,10 @@ def find_inventory_wildcard(player, name):
     Find the first item in player's inventory whose name matches a wildcard
     pattern ('*').
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: wildcard pattern
     :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.items.Item
+    :rtype: text_game_maker.game_objects.items.Item
     """
     for item in player.inventory.items:
         if fnmatch.fnmatch(item.name, name):
@@ -241,11 +413,11 @@ def find_tile(player, name):
     """
     Find an adjacent tile that is connected to the current tile by name
 
-    :param text_game_maker.player.Player player: player object
+    :param text_game_maker.player.player.Player player: player object
     :param str name: name of adjacent tile to search for
     :return: adjacent matching tile. If no matching tiles are found, None is\
         returned
-    :rtype: text_game_maker.tile.Tile
+    :rtype: text_game_maker.tile.tile.Tile
     """
     for tile in player.current.iterate_directions():
         if tile and (name in tile.name):
@@ -379,7 +551,7 @@ class MapBuilder(object):
         """
         Initialises a MapBuilder instance.
 
-        :param text_game_maker.parser.CommandParser: command parser
+        :param text_game_maker.parser.parser.CommandParser: command parser
         """
 
         if info['instance']:
@@ -419,7 +591,7 @@ class MapBuilder(object):
             print '\n' + action
 
         if self._is_shorthand_direction(action):
-            defaults._do_move(player, 'go', action)
+            _do_move(player, 'go', action)
         else:
             i, cmd = text_game_maker.run_fsm(self.fsm, action)
             if cmd:
@@ -442,11 +614,12 @@ class MapBuilder(object):
 
             Callback parameters:
 
-            * *player* (text_game_maker.player.Player object): player instance
-            * *source* (text_game_maker.tile.Tile object): source tile (tile
-              that player is trying to exit
-            * *destination* (text_game_maker.tile.Tile object): destination tile
-              (tile that player is trying to enter
+            * *player* (text_game_maker.player.player.Player object): player
+              object
+            * *source* (text_game_maker.tile.tile.Tile object): source tile
+              (tile that player is trying to exit
+            * *destination* (text_game_maker.tile.tile.Tile object): destination
+              tile (tile that player is trying to enter
             * *Return value* (bool): If False, player's attempt to enter the
               current tile will be blocked (silently-- up to you to print
               something if you need it here). If True, player will be allowed
@@ -468,11 +641,12 @@ class MapBuilder(object):
 
             Callback parameters:
 
-            * *player* (text_game_maker.player.Player object): player instance
-            * *source* (text_game_maker.tile.Tile object): source tile (tile
-              that player is trying to exit
-            * *destination* (text_game_maker.tile.Tile object): destination tile
-              (tile that player is trying to enter
+            * *player* (text_game_maker.player.player.Player object): player
+              instance
+            * *source* (text_game_maker.tile.tile.Tile object): source tile
+              (tile that player is trying to exit
+            * *destination* (text_game_maker.tile.tile.Tile object): destination
+              tile (tile that player is trying to enter)
             * *Return value* (bool): If False, player's attempt to exit the
               current tile will be blocked (silently-- up to you to print
               something if you need it here). If True, player will be allowed
@@ -493,7 +667,7 @@ class MapBuilder(object):
 
             Callback parameters:
 
-            * *player* (text_game_maker.player.Player): player instance
+            * *player* (text_game_maker.player.player.Player): player instance
 
         :param callback: callback function
         """
@@ -540,7 +714,7 @@ class MapBuilder(object):
         """
         Add item to current tile
 
-        :param text_game_maker.base.Item item: the item to add
+        :param text_game_maker.game_objects.base.Item item: the item to add
         """
 
         self.current.add_item(item)
@@ -549,7 +723,8 @@ class MapBuilder(object):
         """
         Add multiple items to current tile
 
-        :param [text_game_maker.item.Item] items: list of items to add
+        :param [text_game_maker.game_objects.item.Item] items: list of items\
+            to add
         """
 
         for item in items:
@@ -559,7 +734,7 @@ class MapBuilder(object):
         """
         Add person to current tile
 
-        :param text_game_maker.person.Person person: the person to add
+        :param text_game_maker.game_objects.person.Person person: person to add
         """
 
         self.current.add_person(person)
@@ -717,7 +892,7 @@ class MapBuilder(object):
                 break
 
             elif choice == 1:
-                if defaults._do_load(self.player, '', ''):
+                if _do_load(self.player, '', ''):
                     break
 
             elif choice == 2:

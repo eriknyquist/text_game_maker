@@ -2,8 +2,8 @@ import sys
 import copy
 
 import text_game_maker
-from text_game_maker import map_builder
-from text_game_maker.base import GameEntity
+from text_game_maker.builder import map_builder
+from text_game_maker.game_objects.base import GameEntity
 
 class Person(GameEntity):
     """
@@ -50,7 +50,7 @@ class Person(GameEntity):
         Kill this person, and print a message to inform the player
         of this person's death.
 
-        :param text_game_maker.player.Player player: player instance
+        :param text_game_maker.player.player.Player player: player instance
         :param str msg: message to print informing player of person's death
         """
 
@@ -87,10 +87,10 @@ class Person(GameEntity):
         amount, and can still buy the item if the player says yes.
 
         :param player: player object
-        :type player: text_game_maker.player.Player
+        :type player: text_game_maker.player.player.Player
 
         :return: Returns the item if sale was successful, None otherwise
-        :rtype: text_game_maker.item.Item
+        :rtype: text_game_maker.game_objects.item.Item
         """
 
         equipped = player.equipped

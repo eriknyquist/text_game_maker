@@ -2,8 +2,8 @@ import time
 import pickle
 import text_game_maker
 
-from text_game_maker import audio
-from text_game_maker.items import SmallBag
+from text_game_maker.audio import audio
+from text_game_maker.game_objects.items import SmallBag
 
 MOVE_ENERGY_COST = 0.25
 
@@ -14,7 +14,7 @@ class Player(object):
 
     def __init__(self, start_tile=None, input_prompt=None):
         """
-        :param text_game_maker.tile.Tile start_tile: Game starting tile
+        :param text_game_maker.game_objects.tile.Tile start_tile: Starting tile
         :param str input_prompt: Custom string to prompt player for game input
         """
 
@@ -155,7 +155,7 @@ class Player(object):
 
             Callback parameters:
 
-            * *player* (text_game_maker.player.Player): player instance
+            * *player* (text_game_maker.player.player.Player): player instance
             * *turns* (int): number of turns this callback was scheduled for
 
             * *Return value* (bool): if True, this task will be scheduled

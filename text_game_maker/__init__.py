@@ -10,8 +10,8 @@ import Queue
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 
-import parser
-import map_builder
+from parser import parser
+from builder import map_builder
 
 history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
@@ -109,12 +109,13 @@ def get_all_contained_items(item, stoptest=None):
     """
     Recursively retrieve all items contained in another item
 
-    :param text_game_maker.items.Item item: item to retrieve items from
+    :param text_game_maker.game_objects.items.Item item: item to retrieve items\
+        from
     :param stoptest: callback to call on each sub-item to test whether\
         recursion should continue. If stoptest() == True, recursion will\
         continue
     :return: list of retrieved items
-    :rtype: [text_game_maker.items.Item]
+    :rtype: [text_game_maker.game_objects.items.Item]
     """
     ret = []
 
@@ -181,7 +182,7 @@ def save_sound(sound):
     Save a sound to be played when parsing of the current command is completed.
     Overwrites any previously saved sound.
 
-    :param sound: sound ID key needed by text_game_maker.audio.play_sound
+    :param sound: sound ID key needed by text_game_maker.audio.audio.play_sound
     """
     info['sound'] = sound
 
