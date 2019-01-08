@@ -7,64 +7,54 @@ class GameEntity(object):
     """
     Base class for anything that the player can interact with in the
     game, like usable items, food, people, etc
+
+    :ivar bool inanimate: defines whether this item is an inanimate object
+    :ivar bool combustible: defines whether this item can be destroyed by fire
+    :ivar bool scenery: defines whether this item is scenery; an immovable prop\
+        in the scene that should be mentioned before smaller interactive items\
+        when describing a room, e.g. furniture, architectural features of the\
+        room
+    :ivar bool edible: defines whether this item is edible
+    :ivar bool alive: defines whether this item is currently alive
+    :ivar int energy: defines hjow much energy player gains by consuming this\
+        item
+    :ivar int damage: defines how much health player loses if damaged by this\
+        item
+
+    :ivar int value: defines how much money player will make by selling this\
+        item
+    :ivar str name: name that this item will be referred to as in the game\
+        (e.g. "metal key")
+    :ivar str prefix: preceding word required when mentioning item, e.g. "a"\
+        for "a metal key", and "an" for "an apple"
+    :ivar list home: list that this Item instance lives inside; required for\
+        the deleting/moving items within the game world
+    :ivar bool is_container: defines whether this item can contain other items
+    :ivar int capacity: number of items this item can contain (if container)
+    :ivar list items: items contained inside this item (if container)
+    :ivar int size: size of this item; containers cannot contain items with a\
+        larger size than themselves
+    :ivar str verb: singluar verb e.g. "the key is on the floor", or plural\
+        e.g. "the coins are on the floor"
     """
 
     def __init__(self):
-        # Things are inanimate by default
         self.inanimate = True
-
-        # Most things are....
         self.combustible = True
-
-        # Immovable props in the scene that should be mentioned before smaller
-        # interactive items when describing a room, e.g. furniture,
-        # architectural features of the room
         self.scenery = False
-
-        # Things are not edible by default
         self.edible = False
-
-        # Things are not alive by default
         self.alive = False
-
-        # How much energy player gains by consuming this object
         self.energy = 0
-
-        # How much health player loses if damaged by this object
         self.damage = 0
-
-        # How much money player gets for selling this item
         self.value = 0
-
-        # Name of this object
+        self.prefix = "a"
         self.name = None
-
-        # Name of the object + any preceding word required when referring to
-        # this object as a definite article, if applicable; e.g., for an
-        # inanimate object, like "hammer" this will nearly always be
-        # "the hammer", as in "the hammer fell on the floor". For a person, like
-        # "John", this will be the same string as the name, just "John", as in
-        # "John fell on the floor"
         self.prep = None
-
-        # Ref. to the location list that this Item instance lives inside;
-        # required for the delete() method
         self.home = None
-
-        # Can this item contain other item
         self.is_container = False
-
-        # Number of items this item can hold (if container)
         self.capacity = 0
-
-        # Items contained inside this item (if item is a container)
         self.items = []
-
-        # Size of object (for putting inside containers)
         self.size = 1
-
-        # Singluar verb e.g. "the key is on the floor", or plural e.g.
-        # "the coins are on the floor"
         self.verb = "is"
 
     def add_item(self, item):
