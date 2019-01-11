@@ -247,7 +247,7 @@ def multisplit(s, *seps):
     :rtype: [str]
     """
     stack = [s]
-    for char in sep:
+    for char in seps:
         pieces = []
         for substr in stack:
             pieces.extend([x.strip() for x in substr.split(char)])

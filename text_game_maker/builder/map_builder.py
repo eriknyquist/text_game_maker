@@ -84,7 +84,7 @@ def _do_move(player, word, direction):
 def _do_craft(player, word, item):
     if not item or item == "":
         text_game_maker.game_print("What do you want to %s?" % word)
-        helptext = text_game_maker.crafting.help_text()
+        helptext = crafting.help_text()
         if helptext:
             text_game_maker._wrap_print(helptext)
 
@@ -96,7 +96,7 @@ def _do_craft(player, word, item):
                 "Nothing to craft with.")
         return
 
-    text_game_maker.crafting.craft(item, word, player.inventory)
+    crafting.craft(item, word, player.inventory)
 
 def _get_next_unused_save_id(save_dir):
     default_num = 1
