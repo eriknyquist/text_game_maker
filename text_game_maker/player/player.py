@@ -62,6 +62,11 @@ class Player(object):
         return val
 
     def increment_energy(self, val=1):
+        """
+        Increment player energy
+
+        :param int val: number to increment player energy by
+        """
         inc = self._inc_clamp(self.energy, val, self.max_energy)
         if inc > 0:
             self.energy += inc
@@ -69,6 +74,11 @@ class Player(object):
         return inc
 
     def decrement_energy(self, val=1):
+        """
+        Decrement player energy
+
+        :param int val: number to decrement player energy by
+        """
         dec = self._dec_clamp(self.energy, val, 0)
         if dec > 0:
             self.energy -= dec
@@ -76,6 +86,11 @@ class Player(object):
         return dec
 
     def increment_health(self, val=1):
+        """
+        Increment player health
+
+        :param int val: number to increment player health by
+        """
         inc = self._inc_clamp(self.health, val, self.max_health)
         if inc > 0:
             self.health += inc
@@ -83,6 +98,11 @@ class Player(object):
         return inc
 
     def decrement_health(self, val=1):
+        """
+        Decrement player health
+
+        :param int val: number to decrement player health by
+        """
         dec = self._dec_clamp(self.health, val, 0)
         if dec > 0:
             self.health -= dec
@@ -94,6 +114,9 @@ class Player(object):
             pickle.dump(self, fh)
 
     def death(self):
+        """
+        Called whenever the player dies
+        """
         try:
             audio.play_sound(audio.DEATH_SOUND)
             audio.wait()
@@ -138,6 +161,12 @@ class Player(object):
         self.name = name
 
     def get_equipped(self):
+        """
+        Get player equipped item
+
+        :return: equipped item. None if no item is equipped.
+        :rtype: text_game_maker.game_objects.items.Item
+        """
         if not self.equipped:
             return None
 
@@ -146,7 +175,7 @@ class Player(object):
     def schedule_task(self, callback, turns=1):
         """
         Add a function that will be invoked after the player has taken some
-        number of turns
+        number of moves (any valid input from the player counts as a move)
 
         The function should accept one parameter, and return a bool:
 
@@ -173,6 +202,11 @@ class Player(object):
         return ret
 
     def scheduler_tick(self):
+        """
+        'tick' function for task scheduler. Called on each move the player makes
+        (unparseable or otherwise invalid input does not incur a 'tick'), and
+        executes any tasks scheduled for that move.
+        """
         self.turns += 1
         for task_id in list(self.scheduled_tasks):
             callback, turns, start = self.scheduled_tasks[task_id]
@@ -250,6 +284,9 @@ class Player(object):
     def current_state(self):
         """
         Returns the full descriptive text for the current game state
+
+        :return: text description of current game state
+        :rtype: str
         """
 
         items = []

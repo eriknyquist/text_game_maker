@@ -53,6 +53,8 @@ def craft(name, word, inventory):
     :param str word: command/action word used by player
     :param text_game_maker.game_objects.items.Container inventory: inventory\
         object to use for crafting
+    :return: crafted item
+    :rtype: text_game_maker.game_objects.items.Item
     """
     if not name in craftables:
         text_game_maker.save_sound(audio.FAILURE_SOUND)

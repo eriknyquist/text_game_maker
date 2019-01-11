@@ -1,6 +1,14 @@
 import text_game_maker as gamemaker
 
 def reverse_direction(direction):
+    """
+    Returns the opposite direction for a given direction, e.g. "north" becomes
+    "south"
+
+    :param str direction: direction to reverse
+    :return: opposite direction. None if invalid direction is provided
+    :rtype: str
+    """
     if not direction:
         return None
 
@@ -50,6 +58,12 @@ class Tile(object):
         self.people = {}
 
     def iterate_directions(self):
+        """
+        Iterator for all tiles connected to this tile
+
+        :return: tile iterator
+        :rtype: Iterator[:class:`text_game_maker.tile.tile.Tile`]
+        """
         for tile in [self.north, self.south, self.east, self.west]:
             yield tile
 
@@ -89,10 +103,28 @@ class Tile(object):
         return reverse_direction(self.direction_to(tile))
 
     # Enter/exit methods
-    def on_enter(self, player, src, dest):
+    def on_enter(self, player, src):
+        """
+        Called when player tries to move into this tile. If on_enter returns
+        True, the player will be moved to this tile. If False, the move will
+        not be allowed.
+
+        :param text_game_maker.player.player.Player player: player object
+        :param text_game_maker.tile.tile.Tile src: tile that player is\
+            currently on
+        """
         return True
 
-    def on_exit(self, player, src, dest):
+    def on_exit(self, player, dest):
+        """
+        Called when player tries to move out of this tile. If on_exit returns
+        True, the player will be moved to ``dest``. If False, the move will
+        not be allowed.
+
+        :param text_game_maker.player.player.Player player: player object
+        :param text_game_maker.tile.tile.Tile dest: tile that player is\
+            trying to move to
+        """
         return True
 
     def _get_name(self, tile, name):
@@ -124,6 +156,9 @@ class Tile(object):
     def describe_scene(self):
         """
         Return sentences describing all scenery items on this tile
+
+        :return: description of scenery on this tile
+        :rtype: str
         """
 
         return self._item_descriptions(self.items, lambda x: x.scenery)
@@ -131,6 +166,9 @@ class Tile(object):
     def describe_items(self):
         """
         Return sentences describing all non-scenery items on this tile
+
+        :return: description of non-scenery on this tile
+        :rtype: str
         """
 
         return self._item_descriptions(self.items, lambda x: not x.scenery)
@@ -138,6 +176,9 @@ class Tile(object):
     def describe_people(self):
         """
         Return sentences describing all people on this tile
+
+        :return: description of all people (NPCs) on this tile
+        :rtype: str
         """
 
         return self._item_descriptions(self.people)
@@ -154,6 +195,11 @@ class Tile(object):
         item.move(self.items[item.location])
 
     def add_person(self, person):
+        """
+        Add person to this tile
+
+        :param text_game_maker.game_objects.person.Person: person to add
+        """
         if person.location not in self.people:
             self.people[person.location] = []
 
@@ -161,9 +207,12 @@ class Tile(object):
 
     def summary(self):
         """
-        Return a description of all available directions from this tile
-        """
+        Return a description of all available directions from this tile that the
+        player can see
 
+        :return: description of all available directions from this tile
+        :rtype: str
+        """
         ret = []
 
         north = self._get_name(self.north, 'north')
@@ -209,7 +258,7 @@ class LockedDoor(Tile):
         setattr(self.source_tile, direction, self.replacement_tile)
         gamemaker.game_print("You unlock the %s." % self.short_name)
 
-    def on_enter(self, player, src, dest):
+    def on_enter(self, player, src):
         if self.locked:
             gamemaker._wrap_print("%s is locked." % self.short_name)
             return False

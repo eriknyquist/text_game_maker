@@ -603,60 +603,6 @@ class MapBuilder(object):
         text_game_maker.info['last_command'] = action
         player.scheduler_tick()
 
-    def set_on_enter(self, callback):
-        """
-        Set callback function to be invoked when player attempts to enter the
-        current tile. The callback function should accept 3 parameters, and
-        return a bool:
-
-            def callback(player, source, dest):
-                pass
-
-            Callback parameters:
-
-            * *player* (text_game_maker.player.player.Player object): player
-              object
-            * *source* (text_game_maker.tile.tile.Tile object): source tile
-              (tile that player is trying to exit
-            * *destination* (text_game_maker.tile.tile.Tile object): destination
-              tile (tile that player is trying to enter
-            * *Return value* (bool): If False, player's attempt to enter the
-              current tile will be blocked (silently-- up to you to print
-              something if you need it here). If True, player will be allowed
-              to continue normally
-
-        :param callback: the callback function
-        """
-
-        self.current.set_on_enter(callback)
-
-    def set_on_exit(self, callback):
-        """
-        Set callback function to be invoked when player attempts to exit the
-        current tile. The callback should accept three parameters, and return
-        a bool:
-
-            def callback(player, source, dest):
-                pass
-
-            Callback parameters:
-
-            * *player* (text_game_maker.player.player.Player object): player
-              instance
-            * *source* (text_game_maker.tile.tile.Tile object): source tile
-              (tile that player is trying to exit
-            * *destination* (text_game_maker.tile.tile.Tile object): destination
-              tile (tile that player is trying to enter)
-            * *Return value* (bool): If False, player's attempt to exit the
-              current tile will be blocked (silently-- up to you to print
-              something if you need it here). If True, player will be allowed
-              to continue normally.
-
-        :param callback: the callback function
-        """
-
-        self.current.set_on_exit(callback)
-
     def set_on_game_run(self, callback):
         """
         Set callback function to be invoked when player starts a new game (i.e.
