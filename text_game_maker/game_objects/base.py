@@ -6,7 +6,7 @@ from text_game_maker.messages import messages
 class GameEntity(object):
     """
     Base class for anything that the player can interact with in the
-    game, like usable items, food, people, etc
+    game, like usable items, food, people, etc.
 
     :ivar bool inanimate: defines whether this item is an inanimate object
     :ivar bool combustible: defines whether this item can be destroyed by fire
@@ -58,26 +58,60 @@ class GameEntity(object):
         self.verb = "is"
 
     def add_item(self, item):
+        """
+        Put an item inside this item
+
+        :param text_game_maker.game_objects.base.GameEntity item: item to add
+        """
         item.move(self.items)
 
     def add_items(self, items):
+        """
+        Put multiple items inside this item
+
+        :param [text_game_maker.game_objects.base.GameEntity] items: list of\
+            items to add
+        """
         for item in items:
             item.move(self.items)
 
     def add_to_player_inventory(self, player):
+        """
+        Put this item inside player's inventory. If add_to_player_inventory
+        returns True, execution of the current command will continue normally.
+        If False, execution of the current command will stop immediately.
+
+        :param text_game_maker.player.player.Player player: player object
+        :return: True if command execution should continue
+        :rtype: bool
+        """
         return player.inventory.add_item(self)
 
     def delete(self):
+        """
+        Delete the instance of this item from whatever location list it lives in
+        (if any)
+        """
         if self.home:
             del self.home[self.home.index(self)]
             self.home = None
 
     def move(self, location):
+        """
+        Move this item to a different location list
+
+        :param list location: location list to move item to
+        """
         location.append(self)
         self.delete()
         self.home = location
 
     def on_burn(self, player):
+        """
+        Called when player burns this item.
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         if self.home is player.inventory.items:
             text_game_maker.game_print("The %s is in your inventory. You "
                 "shouldn't burn things in your inventory because your bag "
@@ -104,23 +138,56 @@ class GameEntity(object):
         text_game_maker.game_print(msg)
 
     def on_read(self, player):
+        """
+        Called when player reads this item
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         msg = 'read the %s' % self.name
         text_game_maker._wrap_print(messages.nonsensical_action_message(msg))
 
     def on_speak(self, player):
+        """
+        Called when player speaks to this item
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         text_game_maker.game_print("%s says nothing." % self.prep)
 
     def on_take(self, player):
+        """
+        Called when player attempts to take this item. If on_take returns True,
+        this item will be added to player's inventory. If False, this item will
+        not be added to player's inventory.
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         return True
 
     def on_look(self, player):
+        """
+        Called when player looks at this item
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         text_game_maker.game_print("It's a %s" % self.name)
 
     def on_look_under(self, player):
+        """
+        Called when player looks under this item
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         text_game_maker.game_print("There is not much to see under the %s"
             % self.name)
 
     def on_eat(self, player, word):
+        """
+        Called when player eats this item
+
+        :param text_game_maker.player.player.Player player: player object
+        :param str word: command word used by player
+        """
         if self.alive:
             msg = "%s is still alive. You cannot eat living things." % self.name
         elif self.edible:

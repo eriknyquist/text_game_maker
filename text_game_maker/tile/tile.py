@@ -112,6 +112,8 @@ class Tile(object):
         :param text_game_maker.player.player.Player player: player object
         :param text_game_maker.tile.tile.Tile src: tile that player is\
             currently on
+        :return: True if player move should be allowed
+        :rtype: bool
         """
         return True
 
@@ -124,6 +126,8 @@ class Tile(object):
         :param text_game_maker.player.player.Player player: player object
         :param text_game_maker.tile.tile.Tile dest: tile that player is\
             trying to move to
+        :return: True if player move should be allowed
+        :rtype: bool
         """
         return True
 
