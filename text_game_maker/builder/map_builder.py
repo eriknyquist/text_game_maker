@@ -14,6 +14,7 @@ from text_game_maker.player.player import Player
 from text_game_maker.audio import audio
 from text_game_maker.crafting import crafting
 from text_game_maker.messages import messages
+from text_game_maker.utils import utils
 
 MIN_LINE_WIDTH = 50
 MAX_LINE_WIDTH = 120
@@ -27,23 +28,31 @@ info = {
     'instance': None
 }
 
+_format_tokens = {
+    "<playername>": lambda: get_instance().player.name
+}
+
+def add_format_tokens():
+    for tok in _format_tokens:
+        utils.add_format_token(tok, _format_tokens[tok])
+
 ########## built-in command handlers ##########
 
 def _do_quit(player, word, name):
-    ret = text_game_maker.ask_yes_no("really stop playing?")
+    ret = utils.ask_yes_no("really stop playing?")
     if ret < 0:
         return
     elif ret:
         sys.exit()
 
 def _do_show_command_list(player, word, setting):
-    print text_game_maker.get_full_controls(player.fsm)
+    print utils.get_full_controls(player.fsm)
 
 def _do_help(player, word, setting):
     if not setting or setting == "":
-        print text_game_maker.basic_controls
+        print utils.basic_controls
     else:
-        i, cmd = text_game_maker.run_fsm(player.fsm, setting)
+        i, cmd = utils.run_fsm(player.fsm, setting)
         if cmd:
             print cmd.help_text().rstrip('\n')
 
@@ -63,7 +72,7 @@ def _move_direction(player, word, direction):
 
 def _do_move(player, word, direction):
     if not direction or direction == "":
-        text_game_maker._wrap_print("Where do you want to go?")
+        utils._wrap_print("Where do you want to go?")
         return
 
     if direction.startswith('to the '):
@@ -79,20 +88,20 @@ def _do_move(player, word, direction):
         if _move_direction(player, word, player.current.direction_to(tile)):
             return
 
-    text_game_maker._wrap_print("Don't know how to %s %s." % (word, direction))
+    utils._wrap_print("Don't know how to %s %s." % (word, direction))
 
 def _do_craft(player, word, item):
     if not item or item == "":
-        text_game_maker.game_print("What do you want to %s?" % word)
+        utils.game_print("What do you want to %s?" % word)
         helptext = crafting.help_text()
         if helptext:
-            text_game_maker._wrap_print(helptext)
+            utils._wrap_print(helptext)
 
         return
 
     if not player.inventory:
-        text_game_maker.save_sound(text_game_maker.audio.FAILURE_SOUND)
-        text_game_maker.game_print("No bag to hold items. "
+        utils.save_sound(text_game_maker.audio.FAILURE_SOUND)
+        utils.game_print("No bag to hold items. "
                 "Nothing to craft with.")
         return
 
@@ -128,12 +137,12 @@ def _do_save(player, word, setting):
             os.makedirs(save_dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                text_game_maker._wrap_print("Error (%d) creating directory %s"
+                utils._wrap_print("Error (%d) creating directory %s"
                     % (e.errno, save_dir))
                 return
 
     if player.loaded_file:
-        ret = text_game_maker.ask_yes_no("overwrite file %s?"
+        ret = utils.ask_yes_no("overwrite file %s?"
             % os.path.basename(player.loaded_file))
         if ret < 0:
             return
@@ -144,7 +153,7 @@ def _do_save(player, word, setting):
         save_id = _get_next_unused_save_id(save_dir)
         default_name = "save_state_%03d" % save_id
 
-        ret = text_game_maker.read_line_raw("Enter name to use for save file",
+        ret = utils.read_line_raw("Enter name to use for save file",
             cancel_word="cancel", default=default_name)
 
         if ret is None:
@@ -153,7 +162,7 @@ def _do_save(player, word, setting):
         filename = os.path.join(save_dir, ret)
 
     player.save_state(filename)
-    text_game_maker.game_print("Game state saved in %s." % filename)
+    utils.game_print("Game state saved in %s." % filename)
 
 def _do_load(player, word, setting):
     filename = None
@@ -164,7 +173,7 @@ def _do_load(player, word, setting):
         files.sort()
         files.append("None of these (let me enter a path to a save file)")
 
-        index = text_game_maker.ask_multiple_choice(files,
+        index = utils.ask_multiple_choice(files,
             "Which save file would you like to load?")
 
         if index < 0:
@@ -173,26 +182,26 @@ def _do_load(player, word, setting):
         if index < (len(files) - 1):
             filename = os.path.join(_get_save_dir(), files[index])
     else:
-        text_game_maker._wrap_print("No save files found. Put save files in "
+        utils._wrap_print("No save files found. Put save files in "
             "%s, otherwise you can enter the full path to an alternate save "
             "file." % _get_save_dir())
-        ret = text_game_maker.ask_yes_no("Enter path to alternate save file?")
+        ret = utils.ask_yes_no("Enter path to alternate save file?")
         if ret <= 0:
             return False
 
     if filename is None:
         while True:
-            filename = text_game_maker.read_line("Enter name of file to load",
+            filename = utils.read_line("Enter name of file to load",
                 cancel_word="cancel")
             if filename is None:
                 return False
             elif os.path.exists(filename):
                 break
             else:
-                text_game_maker._wrap_print("%s: no such file" % filename)
+                utils._wrap_print("%s: no such file" % filename)
 
     player.load_from_file = filename
-    text_game_maker._wrap_print("Loading game state from file %s."
+    utils._wrap_print("Loading game state from file %s."
         % player.load_from_file)
     return True
 
@@ -427,62 +436,63 @@ def find_tile(player, name):
 
 def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
-        text_game_maker._wrap_print("Fast or slow? e.g. 'print fast'")
+        utils._wrap_print("Fast or slow? e.g. 'print fast'")
         return
 
     if 'slow'.startswith(setting):
-        text_game_maker.info['slow_printing'] = True
-        text_game_maker._wrap_print("OK, will do.")
+        utils.set_slow_printing(True)
+        utils._wrap_print("OK, will do.")
     elif 'fast'.startswith(setting):
-        text_game_maker.info['slow_printing'] = False
-        text_game_maker._wrap_print("OK, got it.")
+        utils._wrap_print("OK, will do.")
+        utils.set_slow_printing(False)
+        utils._wrap_print("OK, got it.")
     else:
-        text_game_maker._wrap_print("Unrecognised speed setting '%s'. Please "
+        utils._wrap_print("Unrecognised speed setting '%s'. Please "
             "say 'fast' or 'slow'.")
 
 def _do_set_print_delay(player, word, setting):
     if not setting or setting == "":
-        text_game_maker._wrap_print("Please provide a delay value in seconds "
+        utils._wrap_print("Please provide a delay value in seconds "
                 "(e.g. 'print delay 0.01')")
         return
 
     try:
-        text_game_maker.info['chardelay'] = float(setting)
+        floatval = float(setting)
     except ValueError:
-        text_game_maker._wrap_print("Don't recognise that value for "
+        utils._wrap_print("Don't recognise that value for "
             "'print delay'. Enter a delay value in seconds (e.g. 'print "
             "delay 0.1')")
         return
 
-    text_game_maker._wrap_print("OK, character print delay is set to %.2f "
-        "seconds." % text_game_maker.info['chardelay'])
+    utils.set_chardelay(floatval)
+    utils._wrap_print("OK, character print delay is set to %.2f "
+        "seconds." % floatval)
 
-    if not text_game_maker.info['slow_printing']:
-        text_game_maker._wrap_print("(but it won't do anything unless "
-            "slow printing is enabled-- e.g. 'print slow' -- you fucking "
-            "idiot)")
+    if not utils.get_slow_printing():
+        utils._wrap_print("(but it won't do anything unless "
+            "slow printing is enabled e.g. 'print slow'")
 
 def _do_set_print_width(player, word, setting):
     if not setting or setting == "":
-        text_game_maker._wrap_print("Please provide a line width between "
+        utils._wrap_print("Please provide a line width between "
             "%d-%d (e.g. 'print width 60')" % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
         return
 
     try:
         val = int(setting)
     except ValueError:
-        text_game_maker._wrap_print("Don't recognise that value for "
+        utils._wrap_print("Don't recognise that value for "
             "'print width'. Enter a width value as an integer (e.g. "
             "'print width 60')")
         return
 
     if (val < MIN_LINE_WIDTH) or (val > MAX_LINE_WIDTH):
-        text_game_maker._wrap_print("Please enter a line width between "
+        utils._wrap_print("Please enter a line width between "
             "%d-%d" % (MIN_LINE_WIDTH, MAX_LINE_WIDTH))
         return
 
-    text_game_maker._wrap_print("OK, line width set to %d." % val)
-    text_game_maker.wrapper.width = val
+    utils._wrap_print("OK, line width set to %d." % val)
+    text_game_maker.utils.wrapper.width = val
 
 def _int_meter(name, val, maxval):
     hp_width = 17
@@ -500,29 +510,29 @@ def _player_health_listing(player, width):
         _int_meter("power", player.power, player.max_power)
     ]
 
-    return '\n'.join([text_game_maker.centre_text(x, width) for x in ret])
+    return '\n'.join([utils.centre_text(x, width) for x in ret])
 
 def _do_inventory_listing(player, word, setting):
     bannerwidth = 50
     fmt = "    {0:33}{1:1}({2})"
 
-    banner = text_game_maker.line_banner("status", bannerwidth)
+    banner = utils.line_banner("status", bannerwidth)
     print '\n' + banner + '\n'
     print _player_health_listing(player, bannerwidth) + '\n'
-    print text_game_maker.centre_text(("\n" + fmt).format('COINS', "",
+    print utils.centre_text(("\n" + fmt).format('COINS', "",
         player.coins), bannerwidth)
 
     if player.inventory is None:
         print("")
         print('-' * bannerwidth)
         print("")
-        print text_game_maker.centre_text('No bag to hold items', bannerwidth)
+        print utils.centre_text('No bag to hold items', bannerwidth)
         print("")
     else:
         banner_text = "%s (%d/%d)" % (player.inventory.name,
             len(player.inventory.items), player.inventory.capacity)
 
-        print '\n' + text_game_maker.line_banner(banner_text,
+        print '\n' + utils.line_banner(banner_text,
             bannerwidth) + '\n'
 
         if player.equipped:
@@ -587,20 +597,20 @@ class MapBuilder(object):
 
     def _parse_command(self, player, action):
         if action == '':
-            action = text_game_maker.info['last_command']
+            action = utils.get_last_command()
             print '\n' + action
 
         if self._is_shorthand_direction(action):
             _do_move(player, 'go', action)
         else:
-            i, cmd = text_game_maker.run_fsm(self.fsm, action)
+            i, cmd = utils.run_fsm(self.fsm, action)
             if cmd:
                 cmd.callback(player, action[:i].strip(), action[i:].strip())
             else:
-                text_game_maker.save_sound(audio.ERROR_SOUND)
+                utils.save_sound(audio.ERROR_SOUND)
                 return
 
-        text_game_maker.info['last_command'] = action
+        utils.set_last_command(action)
         player.scheduler_tick()
 
     def set_on_game_run(self, callback):
@@ -636,7 +646,7 @@ class MapBuilder(object):
         :param str desc: description text
         """
 
-        self.current.description = text_game_maker._remove_leading_whitespace(desc)
+        self.current.description = utils._remove_leading_whitespace(desc)
 
     def add_door(self, prefix, name, direction, doorclass=LockedDoor):
         """
@@ -780,19 +790,19 @@ class MapBuilder(object):
         """
 
         for c in data:
-            text_game_maker.input_queue.put(c)
+            utils.input_queue.put(c)
 
     def _run_command_sequence(self, player, sequence):
         # Inject commands into the input queue
-        text_game_maker.queue_command_sequence([s.strip() for s in sequence])
-        cmd = text_game_maker.pop_command()
+        utils.queue_command_sequence([s.strip() for s in sequence])
+        cmd = utils.pop_command()
 
         while not cmd is None:
             print("\n> %s" % cmd)
             self._parse_command(player, cmd)
-            cmd = text_game_maker.pop_command()
+            cmd = utils.pop_command()
 
-        text_game_maker.info['sequence_count'] = None
+        utils.set_sequence_count(None)
 
     def _do_scheduled_tasks(self, player):
         for task_id in player.scheduled_tasks:
@@ -819,13 +829,15 @@ class MapBuilder(object):
         """
 
         audio.init()
+        add_format_tokens()
+
         self.player = Player(self.start, self.prompt)
         self.player.fsm = self.fsm
         menu_choices = ["New game", "Load game", "Controls"]
 
         while True:
             print "\n------------ MAIN MENU ------------\n"
-            choice = text_game_maker.ask_multiple_choice(menu_choices)
+            choice = utils.ask_multiple_choice(menu_choices)
 
             if choice < 0:
                 sys.exit()
@@ -834,7 +846,7 @@ class MapBuilder(object):
                 if self.on_game_run:
                     self.on_game_run(self.player)
 
-                text_game_maker.game_print(self.player.current_state())
+                utils.game_print(self.player.current_state())
                 break
 
             elif choice == 1:
@@ -842,22 +854,22 @@ class MapBuilder(object):
                     break
 
             elif choice == 2:
-                print text_game_maker.get_full_controls()
+                print utils.get_full_controls()
 
         while True:
             while True:
                 if self.player.load_from_file:
                     self.player = self._load_state(self.player, self.player.load_from_file)
-                    text_game_maker.game_print(self.player.current_state())
+                    utils.game_print(self.player.current_state())
                     break
 
-                text_game_maker.save_sound(audio.SUCCESS_SOUND)
-                raw = text_game_maker.read_line_raw("%s" % self.player.prompt)
+                utils.save_sound(audio.SUCCESS_SOUND)
+                raw = utils.read_line_raw("%s" % self.player.prompt)
                 action = ' '.join(raw.split())
 
 
                 if _has_badword(action):
-                    text_game_maker.game_print(messages.badword_message())
+                    utils.game_print(messages.badword_message())
                     continue
 
                 delim = self._get_command_delimiter(action)
@@ -867,4 +879,4 @@ class MapBuilder(object):
                 else:
                     self._parse_command(self.player, action.strip().lower())
 
-                audio.play_sound(text_game_maker.last_saved_sound())
+                audio.play_sound(utils.last_saved_sound())

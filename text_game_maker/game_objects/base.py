@@ -2,6 +2,7 @@ import sys
 
 import text_game_maker
 from text_game_maker.messages import messages
+from text_game_maker.utils import utils
 
 class GameEntity(object):
     """
@@ -113,14 +114,14 @@ class GameEntity(object):
         :param text_game_maker.player.player.Player player: player object
         """
         if self.home is player.inventory.items:
-            text_game_maker.game_print("The %s is in your inventory. You "
+            utils.game_print("The %s is in your inventory. You "
                 "shouldn't burn things in your inventory because your bag "
                 "would catch fire." % self.name)
             return
 
         if self.combustible:
             if self.is_container:
-                items = text_game_maker.get_all_contained_items(self,
+                items = utils.get_all_contained_items(self,
                     lambda x: not x.combustible)
 
                 for item in items:
@@ -135,7 +136,7 @@ class GameEntity(object):
         else:
             msg = messages.burn_noncombustible_message(self.name)
 
-        text_game_maker.game_print(msg)
+        utils.game_print(msg)
 
     def on_read(self, player):
         """
@@ -144,7 +145,7 @@ class GameEntity(object):
         :param text_game_maker.player.player.Player player: player object
         """
         msg = 'read the %s' % self.name
-        text_game_maker._wrap_print(messages.nonsensical_action_message(msg))
+        utils._wrap_print(messages.nonsensical_action_message(msg))
 
     def on_speak(self, player):
         """
@@ -152,7 +153,7 @@ class GameEntity(object):
 
         :param text_game_maker.player.player.Player player: player object
         """
-        text_game_maker.game_print("%s says nothing." % self.prep)
+        utils.game_print("%s says nothing." % self.prep)
 
     def on_take(self, player):
         """
@@ -170,7 +171,7 @@ class GameEntity(object):
 
         :param text_game_maker.player.player.Player player: player object
         """
-        text_game_maker.game_print("It's a %s" % self.name)
+        utils.game_print("It's a %s" % self.name)
 
     def on_look_under(self, player):
         """
@@ -178,7 +179,7 @@ class GameEntity(object):
 
         :param text_game_maker.player.player.Player player: player object
         """
-        text_game_maker.game_print("There is not much to see under the %s"
+        utils.game_print("There is not much to see under the %s"
             % self.name)
 
     def on_eat(self, player, word):
@@ -206,7 +207,7 @@ class GameEntity(object):
                 self.damage))
 
             if player.health <= self.damage:
-                text_game_maker._wrap_print(msg + " You are dead.")
+                utils._wrap_print(msg + " You are dead.")
                 player.death()
                 sys.exit()
 

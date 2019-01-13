@@ -4,15 +4,16 @@ import example_map_rooms as rooms
 import text_game_maker
 from text_game_maker.builder.map_builder import MapBuilder
 from text_game_maker.crafting import crafting
+from text_game_maker.utils import utils
 
 def scheduler_test(player, turns):
-    text_game_maker.game_print("Scheduler: %d turns" % player.turns)
+    utils.game_print("Scheduler: %d turns" % player.turns)
     player.schedule_task(scheduler_test, turns + 1)
 
 # Called when the game starts
 def on_game_run(player):
     # read name from player
-    name = text_game_maker.read_line("What is your name?: ")
+    name = utils.read_line("What is your name?: ")
 
     # captialize with name.title() and set as player name
     player.set_name(name.title())

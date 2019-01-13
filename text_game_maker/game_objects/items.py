@@ -3,6 +3,7 @@ from text_game_maker.messages import messages
 from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.audio import audio
 from text_game_maker.crafting import crafting
+from text_game_maker.utils import utils
 
 ITEM_SIZE_SMALL = 1
 ITEM_SIZE_MEDIUM = 2
@@ -94,7 +95,7 @@ class Lighter(Item):
         super(Lighter, self).__init__("a", "lighter", **kwargs)
 
     def on_burn(self, player):
-        text_game_maker.game_print("You can't burn the %s with itself."
+        utils.game_print("You can't burn the %s with itself."
             % self.name)
 
 class Weapon(Item):
@@ -144,23 +145,23 @@ class Paper(Item):
 
         for p in self.paragraphs:
             centered_lines = []
-            lines = text_game_maker._wrap_text(p).split('\n')
+            lines = utils._wrap_text(p).split('\n')
 
             for line in lines:
-                formatted = text_game_maker.replace_format_tokens(line)
-                centered_lines.append(text_game_maker.centre_text(formatted))
+                formatted = utils.replace_format_tokens(line)
+                centered_lines.append(utils.centre_text(formatted))
 
             ret.append('\n'.join(centered_lines))
 
         return '\n\n'.join(ret)
 
     def header_text(self):
-        htxt = text_game_maker.replace_format_tokens(self.header)
-        return text_game_maker.line_banner(htxt)
+        htxt = utils.replace_format_tokens(self.header)
+        return utils.line_banner(htxt)
 
     def footer_text(self):
-        ftxt = text_game_maker.replace_format_tokens(self.footer)
-        return text_game_maker.line_banner(ftxt)
+        ftxt = utils.replace_format_tokens(self.footer)
+        return utils.line_banner(ftxt)
 
     def on_look(self, player):
         self.on_read(player)
@@ -187,8 +188,8 @@ class Blueprint(Item):
 
     def on_take(self, player):
         crafting.add(self.ingredients, self.item)
-        text_game_maker._wrap_print("You can now make %s" % self.item)
-        text_game_maker.save_sound(audio.NEW_ITEM_SOUND)
+        utils._wrap_print("You can now make %s" % self.item)
+        utils.save_sound(audio.NEW_ITEM_SOUND)
         self.delete()
         return True
 
@@ -209,16 +210,16 @@ class Container(Item):
 
     def add_item(self, item):
         if item is self:
-            text_game_maker.game_print("How can you put the %s inside itself?"
+            utils.game_print("How can you put the %s inside itself?"
                 % (item.name))
             return False
 
         if len(self.items) >= self.capacity:
-            text_game_maker._wrap_print("The %s is full" % self.name)
+            utils._wrap_print("The %s is full" % self.name)
             return False
 
         if self.size < item.size:
-            text_game_maker.game_print(messages.container_too_small_message(
+            utils.game_print(messages.container_too_small_message(
                 item.name, self.name))
             return False
 
@@ -259,8 +260,8 @@ class InventoryBag(Container):
         player.inventory = self
         self.delete()
 
-        text_game_maker.save_sound(audio.NEW_ITEM_SOUND)
-        text_game_maker.game_print("You now have a %s." % self.name)
+        utils.save_sound(audio.NEW_ITEM_SOUND)
+        utils.game_print("You now have a %s." % self.name)
 
 class PaperBag(Container):
     """

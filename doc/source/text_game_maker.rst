@@ -20,4 +20,5 @@ Subpackages
     text_game_maker.player
     text_game_maker.ptttl
     text_game_maker.tile
+    text_game_maker.utils
 

@@ -1,4 +1,5 @@
-import text_game_maker as gamemaker
+import text_game_maker
+from text_game_maker.utils import utils
 
 def reverse_direction(direction):
     """
@@ -43,7 +44,7 @@ class Tile(object):
 
         self.name = name
         if description:
-            self.description = gamemaker._remove_leading_whitespace(description)
+            self.description = utils._remove_leading_whitespace(description)
 
         # Adjacent tiles to the north, south, east and west of this tile
         self.north = None
@@ -148,7 +149,7 @@ class Tile(object):
             if not itemlist:
                 continue
             elif len(itemlist) > 1:
-                english = gamemaker.list_to_english(itemlist)
+                english = utils.list_to_english(itemlist)
                 sentence = '%s are %s. ' % (english, loc)
             else:
                 sentence = '%s %s %s. ' % (itemlist[0], items[loc][0].verb, loc)
@@ -248,7 +249,7 @@ class LockedDoor(Tile):
         if item.name == "lockpick":
             self.unlock()
         else:
-            text_game_maker._wrap_print("%s cannot be unlocked with %s"
+            utils._wrap_print("%s cannot be unlocked with %s"
                 % (self.short_name, item.prep))
 
     def unlock(self):
@@ -260,9 +261,9 @@ class LockedDoor(Tile):
             return
 
         setattr(self.source_tile, direction, self.replacement_tile)
-        gamemaker.game_print("You unlock the %s." % self.short_name)
+        utils.game_print("You unlock the %s." % self.short_name)
 
     def on_enter(self, player, src):
         if self.locked:
-            gamemaker._wrap_print("%s is locked." % self.short_name)
+            utils._wrap_print("%s is locked." % self.short_name)
             return False

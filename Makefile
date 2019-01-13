@@ -7,7 +7,7 @@ PYTHON_SRCDIR := text_game_maker
 BUILD := build
 
 all:
-	$(PYTHON) setup.py build_exe
+	$(PYTHON) cxfreeze-setup.py build_exe
 
 autodoc:
 	sphinx-apidoc -E -M -o $(RST_SRCDIR) $(PYTHON_SRCDIR) -f

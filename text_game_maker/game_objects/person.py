@@ -4,6 +4,7 @@ import copy
 import text_game_maker
 from text_game_maker.builder import map_builder
 from text_game_maker.game_objects.base import GameEntity
+from text_game_maker.utils import utils
 
 class Person(GameEntity):
     """
@@ -65,7 +66,7 @@ class Person(GameEntity):
         if msg is None or msg == "":
             msg = '%s has died.' % self.name
 
-        text_game_maker.game_print(msg)
+        utils.game_print(msg)
 
     def say(self, msg):
         """
@@ -75,7 +76,7 @@ class Person(GameEntity):
         :type msg: str
         """
 
-        text_game_maker.game_print('%s says:  "%s"' % (self.name, msg))
+        utils.game_print('%s says:  "%s"' % (self.name, msg))
 
     def buy_equipped_item(self, player):
         """
@@ -107,7 +108,7 @@ class Person(GameEntity):
 
         self.say(msg)
 
-        ret = text_game_maker.ask_yes_no("sell %s for %d coins?"
+        ret = utils.ask_yes_no("sell %s for %d coins?"
             % (equipped.name, cost))
 
         if ret < 0:
@@ -120,8 +121,8 @@ class Person(GameEntity):
             # Transfer item
             equipped.move(self.items)
             player.equipped = None
-            text_game_maker.game_print("Sale completed.")
+            utils.game_print("Sale completed.")
             return equipped
 
-        text_game_maker.game_print("Sale cancelled")
+        utils.game_print("Sale cancelled")
         return None

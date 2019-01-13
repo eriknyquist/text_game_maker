@@ -3,6 +3,7 @@ import sys
 import text_game_maker
 
 from text_game_maker.audio import audio
+from text_game_maker.utils import utils
 from text_game_maker.messages import messages
 from text_game_maker.builder import map_builder as builder
 from text_game_maker.game_objects.items import Lighter
@@ -94,12 +95,12 @@ def _split_word(string, word):
 
 def _do_eat(player, word, item_name):
     if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
+        utils._wrap_print("What do you want to %s?" % word)
         return
 
-    fields = text_game_maker.english_to_list(item_name)
+    fields = utils.english_to_list(item_name)
     if len(fields) > 1:
-        text_game_maker._wrap_print("Whoa there! how about eating one thing at "
+        utils._wrap_print("Whoa there! how about eating one thing at "
             "a time? And don't talk with your mouth full.")
         return
 
@@ -107,22 +108,22 @@ def _do_eat(player, word, item_name):
     if not item:
         item = builder.find_person(player, item_name)
         if not item:
-            text_game_maker._wrap_print(messages.no_item_message(item_name))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            utils._wrap_print(messages.no_item_message(item_name))
+            utils.save_sound(audio.FAILURE_SOUND)
             return
 
     msg = item.on_eat(player, word)
     if msg:
-        text_game_maker.game_print(msg)
+        utils.game_print(msg)
 
 def _do_read(player, word, item_name):
     if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
+        utils._wrap_print("What do you want to %s?" % word)
         return
 
-    fields = text_game_maker.english_to_list(item_name)
+    fields = utils.english_to_list(item_name)
     if len(fields) > 1:
-        text_game_maker._wrap_print("Really, now. You can only read *one* thing"
+        utils._wrap_print("Really, now. You can only read *one* thing"
             " at a time.")
         return
 
@@ -132,21 +133,21 @@ def _do_read(player, word, item_name):
         return
 
     if builder.is_location(player, item_name):
-        text_game_maker._wrap_print(messages.nonsensical_action_message(
+        utils._wrap_print(messages.nonsensical_action_message(
             '%s the %s' % (word, item_name)))
     else:
-        text_game_maker._wrap_print(messages.no_item_message(item_name))
+        utils._wrap_print(messages.no_item_message(item_name))
 
-    text_game_maker.save_sound(audio.FAILURE_SOUND)
+    utils.save_sound(audio.FAILURE_SOUND)
 
 def _do_unlock(player, word, remaining):
     if not remaining or remaining == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
+        utils._wrap_print("What do you want to %s?" % word)
         return
 
     door_name, item_name = _split_word(remaining, 'with')
     if door_name is None:
-        text_game_maker._wrap_print("What do you want to %s %s with?" % (word, remaining))
+        utils._wrap_print("What do you want to %s %s with?" % (word, remaining))
         return
 
     door = None
@@ -156,12 +157,12 @@ def _do_unlock(player, word, remaining):
             break
 
     if door is None:
-        text_game_maker._wrap_print(messages.no_item_message(door_name))
+        utils._wrap_print(messages.no_item_message(door_name))
         return
 
     item = builder.find_any_item(player, item_name)
     if not item:
-        text_game_maker._wrap_print(messages.no_item_message(item_name))
+        utils._wrap_print(messages.no_item_message(item_name))
         return
 
     door.on_unlock(player, item)
@@ -169,17 +170,17 @@ def _do_unlock(player, word, remaining):
 def _do_burn(player, word, item_name):
     lighter = builder.find_inventory_item_class(player, Lighter)
     if lighter is None:
-        text_game_maker._wrap_print("You can't %s anything without a lighter."
+        utils._wrap_print("You can't %s anything without a lighter."
             % word)
         return
 
     if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
+        utils._wrap_print("What do you want to %s?" % word)
         return
 
-    fields = text_game_maker.english_to_list(item_name)
+    fields = utils.english_to_list(item_name)
     if len(fields) > 1:
-        text_game_maker._wrap_print("Slow down, pyromaniac. We burn things one "
+        utils._wrap_print("Slow down, pyromaniac. We burn things one "
             "at a time around here.")
         return
 
@@ -190,19 +191,19 @@ def _do_burn(player, word, item_name):
 
     if builder.is_location(player, item_name):
         msg = messages.burn_noncombustible_message(item_name)
-        text_game_maker._wrap_print(msg)
+        utils._wrap_print(msg)
         return
     else:
-        text_game_maker._wrap_print(messages.no_item_message(item_name))
+        utils._wrap_print(messages.no_item_message(item_name))
 
 def _put(item, dest_item, location_name, location):
     if item is dest_item:
-        text_game_maker.game_print("How can you put the %s inside itself?"
+        utils.game_print("How can you put the %s inside itself?"
             % (item.name))
         return False
 
     if item.size >= dest_item.size:
-        text_game_maker.game_print(messages.container_too_small_message(
+        utils.game_print(messages.container_too_small_message(
                 item.name, dest_item.name))
         return False
 
@@ -238,7 +239,7 @@ def _do_put(player, word, remaining):
             return
 
         if not dest_item.is_container:
-            text_game_maker._wrap_print("Can't %s %s" % (word, remaining))
+            utils._wrap_print("Can't %s %s" % (word, remaining))
             return
 
         location = dest_item.items
@@ -247,27 +248,27 @@ def _do_put(player, word, remaining):
     items = []
     names = []
 
-    fields = text_game_maker.english_to_list(item_name)
+    fields = utils.english_to_list(item_name)
     if (len(fields) == 1) and (item_name in EVERYTHING_WORDS):
         items = builder.get_all_items(player, except_item=dest_item)
         if not items:
-            text_game_maker._wrap_print("Nothing to %s." % word)
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            utils._wrap_print("Nothing to %s." % word)
+            utils.save_sound(audio.FAILURE_SOUND)
             return
 
     elif fields:
         for name in fields:
             item = builder.find_any_item(player, name)
             if not item:
-                text_game_maker._wrap_print(messages.no_item_message(name))
-                text_game_maker.save_sound(audio.FAILURE_SOUND)
+                utils._wrap_print(messages.no_item_message(name))
+                utils.save_sound(audio.FAILURE_SOUND)
                 return
 
             items.append(item)
 
     if not items:
-        text_game_maker._wrap_print(messages.no_item_message(item_name))
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        utils._wrap_print(messages.no_item_message(item_name))
+        utils.save_sound(audio.FAILURE_SOUND)
         return
 
     for item in items:
@@ -275,26 +276,26 @@ def _do_put(player, word, remaining):
             return
 
     real_names = [x.name for x in items]
-    text_game_maker.game_print("You %s the %s %s"
-            % (word, text_game_maker.list_to_english(real_names), location_name))
+    utils.game_print("You %s the %s %s"
+            % (word, utils.list_to_english(real_names), location_name))
 
 def _do_look_inside(player, word, remaining):
     if not remaining or remaining == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
+        utils._wrap_print("What do you want to %s?" % word)
         return
 
     item = builder.find_any_item(player, remaining)
     if not item:
-        text_game_maker._wrap_print(messages.no_item_message(remaining))
+        utils._wrap_print(messages.no_item_message(remaining))
         return
 
     if item.is_container and item.items:
-        contains = text_game_maker.list_to_english(
+        contains = utils.list_to_english(
             [str(x) for x in item.items])
     else:
         contains = "nothing"
 
-    text_game_maker.game_print("%s contains %s." % (item.name, contains))
+    utils.game_print("%s contains %s." % (item.name, contains))
 
 def _take(player, item):
     # If on_take callback returns false, abort adding this item
@@ -302,8 +303,8 @@ def _take(player, item):
         return False
 
     if not player.inventory:
-        text_game_maker._wrap_print("No bag to hold items")
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        utils._wrap_print("No bag to hold items")
+        utils.save_sound(audio.FAILURE_SOUND)
         return False
 
     return item.add_to_player_inventory(player)
@@ -314,7 +315,7 @@ def _do_take(player, word, remaining):
     items = []
 
     if not remaining or remaining == "":
-        text_game_maker._wrap_print("What do you want to %s?" % word)
+        utils._wrap_print("What do you want to %s?" % word)
         return
 
     item_name, dest_name = _split_word(remaining, 'from')
@@ -333,7 +334,7 @@ def _do_take(player, word, remaining):
         items = builder.get_all_items(player, locations)
     else:
         names = []
-        fields = text_game_maker.english_to_list(item_name)
+        fields = utils.english_to_list(item_name)
         if len(fields) > 1:
             names = fields
         else:
@@ -342,15 +343,15 @@ def _do_take(player, word, remaining):
         for name in names:
             item = builder.find_item(player, name, locations)
             if not item:
-                text_game_maker._wrap_print(messages.no_item_message(name))
-                text_game_maker.save_sound(audio.FAILURE_SOUND)
+                utils._wrap_print(messages.no_item_message(name))
+                utils.save_sound(audio.FAILURE_SOUND)
                 return
 
             items.append(item)
 
     if not items:
-        text_game_maker._wrap_print("Nothing to %s" % word)
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        utils._wrap_print("Nothing to %s" % word)
+        utils.save_sound(audio.FAILURE_SOUND)
         return
 
     names = []
@@ -361,8 +362,8 @@ def _do_take(player, word, remaining):
 
             names.append(item.name)
 
-    msg = text_game_maker.list_to_english(names)
-    text_game_maker.game_print('%s added to inventory' % msg)
+    msg = utils.list_to_english(names)
+    utils.game_print('%s added to inventory' % msg)
     return
 
 def _drop(player, item):
@@ -372,33 +373,33 @@ def _drop(player, item):
 
 def _do_drop(player, word, item_name):
     if not player.inventory:
-        text_game_maker._wrap_print("No bag to %s items from." % word)
+        utils._wrap_print("No bag to %s items from." % word)
         return
 
     if not item_name or item_name == "":
-        text_game_maker._wrap_print("What do you want to drop?")
+        utils._wrap_print("What do you want to drop?")
         return
 
     item_names = []
     if item_name in EVERYTHING_WORDS:
         item_names = [x.name for x in player.inventory.items]
     else:
-        fields = text_game_maker.english_to_list(item_name)
+        fields = utils.english_to_list(item_name)
         if len(fields) > 1:
             item_names = fields
         else:
             item_names = [item_name]
 
     if not item_names:
-        text_game_maker._wrap_print("Nothing to %s." % word)
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        utils._wrap_print("Nothing to %s." % word)
+        utils.save_sound(audio.FAILURE_SOUND)
         return
 
     items = []
     for name in item_names:
         item = builder.find_inventory_item(player, name)
         if not item:
-            text_game_maker._wrap_print("No %s in your inventory to %s."
+            utils._wrap_print("No %s in your inventory to %s."
                 % (name, word))
             return
 
@@ -408,45 +409,45 @@ def _do_drop(player, word, item_name):
         if not _drop(player, item):
             return
 
-    text_game_maker.game_print("Dropped %s."
-        % text_game_maker.list_to_english([x.name for x in items]))
+    utils.game_print("Dropped %s."
+        % utils.list_to_english([x.name for x in items]))
 
 def _do_speak(player, word, name):
     if not name or name == "":
-        text_game_maker._wrap_print("Who do you want to speak to?")
+        utils._wrap_print("Who do you want to speak to?")
         return
 
     p = builder.find_person(player, name)
     if not p:
         p = builder.find_item(player, name)
         if not p:
-            text_game_maker._wrap_print("Don't know how to %s %s" % (word, name))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            utils._wrap_print("Don't know how to %s %s" % (word, name))
+            utils.save_sound(audio.FAILURE_SOUND)
             return
 
-    text_game_maker.game_print('You speak to %s.' % p.prep)
+    utils.game_print('You speak to %s.' % p.prep)
     if p.alive:
         response = p.on_speak(player)
         if response:
             p.say(response)
     else:
-        text_game_maker.game_print('%s says nothing.' % p.prep)
+        utils.game_print('%s says nothing.' % p.prep)
 
 def _do_equip(player, word, item_name):
     if not item_name or item_name == "":
-        text_game_maker._wrap_print("Which inventory item do you want to %s?"
+        utils._wrap_print("Which inventory item do you want to %s?"
             % word)
         return
 
     item = builder.find_inventory_item(player, item_name)
     if not item:
-        text_game_maker._wrap_print("No %s in your inventory to %s"
+        utils._wrap_print("No %s in your inventory to %s"
             % (item_name, word))
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        utils.save_sound(audio.FAILURE_SOUND)
         return
 
     if item is player.equipped:
-        text_game_maker.game_print("%s is already equipped." % item.name)
+        utils.game_print("%s is already equipped." % item.name)
         return
 
     # Move any already-equipped items back to unequipped
@@ -455,35 +456,35 @@ def _do_equip(player, word, item_name):
 
     player.equipped = item
     player.equipped.delete()
-    text_game_maker.game_print("Equipped %s." % item.name)
+    utils.game_print("Equipped %s." % item.name)
 
 def _do_unequip(player, word, fields):
     if not player.equipped:
-        text_game_maker.game_print('Nothing is currently equipped.')
+        utils.game_print('Nothing is currently equipped.')
         return
 
     player.equipped.move(player.inventory.items)
-    text_game_maker.game_print('%s unequipped' % player.equipped.name)
+    utils.game_print('%s unequipped' % player.equipped.name)
     player.equipped = None
 
 def _do_loot(player, word, name):
     if not name or name == "":
-        text_game_maker._wrap_print("Who do you want to %s?" % word)
+        utils._wrap_print("Who do you want to %s?" % word)
         return
 
     p = builder.find_person(player, name)
     if not p:
         p = builder.find_item(player, name)
         if not p:
-            text_game_maker.game_print("Not sure how to %s %s" % (word, name))
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            utils.game_print("Not sure how to %s %s" % (word, name))
+            utils.save_sound(audio.FAILURE_SOUND)
             return
 
     if p.alive:
-        text_game_maker.game_print("You are dead.")
-        text_game_maker.game_print("You were caught trying to %s %s."
+        utils.game_print("You are dead.")
+        utils.game_print("You were caught trying to %s %s."
             % (word, p.name))
-        text_game_maker.game_print("%s didn't like this, and killed you.\n"
+        utils.game_print("%s didn't like this, and killed you.\n"
             % p.name)
         player.death()
         sys.exit()
@@ -491,7 +492,7 @@ def _do_loot(player, word, name):
         player._loot(word, p)
 
 def _do_suicide(player, word, remaining):
-    text_game_maker.game_print(messages.suicide_message())
+    utils.game_print(messages.suicide_message())
     player.death()
     sys.exit()
 
@@ -510,12 +511,12 @@ def _do_inspect(player, word, item):
 
     tile = builder.find_tile(player, item)
     if tile:
-        text_game_maker.game_print("%s." % tile.name)
+        utils.game_print("%s." % tile.name)
     else:
-        text_game_maker._wrap_print(
+        utils._wrap_print(
             messages.dontknow_message("%s %s" % (word, item)))
 
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        utils.save_sound(audio.FAILURE_SOUND)
 
 
 def _do_look(player, word, item):
@@ -523,12 +524,12 @@ def _do_look(player, word, item):
         _do_inspect(player, word, item)
         return
 
-    text_game_maker.game_print(player.current_state())
+    utils.game_print(player.current_state())
 
 def _do_look_under(player, word, item):
     if item == '':
-        text_game_maker._wrap_print("What do you want to %s?" % word)
-        text_game_maker.save_sound(audio.FAILURE_SOUND)
+        utils._wrap_print("What do you want to %s?" % word)
+        utils.save_sound(audio.FAILURE_SOUND)
         return
 
     target = builder.find_any_item(player, item)
@@ -536,9 +537,9 @@ def _do_look_under(player, word, item):
         target.on_look_under(player)
         return
 
-    text_game_maker._wrap_print(messages.dontknow_message("%s %s"
+    utils._wrap_print(messages.dontknow_message("%s %s"
         % (word, item)))
-    text_game_maker.save_sound(audio.FAILURE_SOUND)
+    utils.save_sound(audio.FAILURE_SOUND)
 
 def build_parser():
     ret = CommandParser()

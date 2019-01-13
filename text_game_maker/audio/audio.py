@@ -5,7 +5,8 @@ import pygame
 import text_game_maker
 from text_game_maker.ptttl.ptttl_audio_encoder import ptttl_to_sample_data
 
-AUDIO_DIR = os.path.abspath("audio")
+dir_path = os.path.dirname(text_game_maker.__file__)
+AUDIO_DIR = os.path.join(dir_path, 'ptttl-data')
 SUCCESS_SOUND = os.path.join(AUDIO_DIR, "prompt_success.txt")
 FAILURE_SOUND = os.path.join(AUDIO_DIR, "prompt_fail.txt")
 NEW_ITEM_SOUND = os.path.join(AUDIO_DIR, "new_item.txt")

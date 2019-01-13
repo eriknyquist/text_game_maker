@@ -1,14 +1,33 @@
-import cx_Freeze
+import unittest
+import os
+from setuptools import setup, find_packages
 
-exe_options = {
-    "build_exe": {
-        "packages": ["pygame", "tones", "prompt_toolkit"],
-        "include_files": ["audio/"],
-        "excludes": ["tkinter", "numpy", "scipy", "PyQt5", "distutils",
-			"unittest", "test", "email", "pkg_resources"]
-    }
-}
+HERE = os.path.abspath(os.path.dirname(__file__))
+README = os.path.join(HERE, "README.rst")
 
-exes = [cx_Freeze.Executable("example_map.py")]
+classifiers = [
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
+]
 
-cx_Freeze.setup(name="test game", options=exe_options, executables=exes)
+with open(README, 'r') as f:
+    long_description = f.read()
+
+setup(
+    name='text_game_maker',
+    version='0.0.2',
+    description=('Framework for making text-based adventure games'),
+    long_description=long_description,
+    url='http://github.com/eriknyquist/text_game_maker',
+    author='Erik Nyquist',
+    author_email='eknyquist@gmail.com',
+    license='Apache 2.0',
+    packages=find_packages(exclude=['example-map']),
+    package_dir={'text_game_maker':'text_game_maker'},
+    package_data={'text_game_maker':['ptttl-data/*.txt']},
+    include_package_data=True,
+    zip_safe=False
+)

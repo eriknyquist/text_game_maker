@@ -4,6 +4,7 @@ import text_game_maker
 
 from text_game_maker.audio import audio
 from text_game_maker.game_objects.items import SmallBag
+from text_game_maker.utils import utils
 
 MOVE_ENERGY_COST = 0.25
 
@@ -127,27 +128,27 @@ class Player(object):
             return
 
     def _move(self, dest, word, name):
-        text_game_maker.save_sound(audio.SUCCESS_SOUND)
+        utils.save_sound(audio.SUCCESS_SOUND)
 
         if dest is None:
-            text_game_maker.game_print("Can't go %s from here." % name)
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            utils.game_print("Can't go %s from here." % name)
+            utils.save_sound(audio.FAILURE_SOUND)
             return self.current
 
         if self.current.on_exit and (not
                 self.current.on_exit(self, self.current, dest)):
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            utils.save_sound(audio.FAILURE_SOUND)
             return
 
         if dest.on_enter and not dest.on_enter(self, self.current, dest):
-            text_game_maker.save_sound(audio.FAILURE_SOUND)
+            utils.save_sound(audio.FAILURE_SOUND)
             return
 
         move_message = "You %s %s" % (word, name)
 
         self.current = dest
-        text_game_maker.game_print(move_message + ".")
-        text_game_maker.game_print(self.current_state())
+        utils.game_print(move_message + ".")
+        utils.game_print(self.current_state())
         self.decrement_energy(MOVE_ENERGY_COST)
         return dest
 
@@ -245,12 +246,12 @@ class Player(object):
         return [str(i) for i in items]
 
     def _loot_message(self, word, name, items, extra=""):
-        text_game_maker.game_print("You %s %s.\nYou find %s. %s"
-            % (word, name, text_game_maker.list_to_english(items), extra))
+        utils.game_print("You %s %s.\nYou find %s. %s"
+            % (word, name, utils.list_to_english(items), extra))
 
     def _loot(self, word, person):
         if not person.coins and not person.items:
-            text_game_maker.game_print('\nYou %s %s, and find nothing.'
+            utils.game_print('\nYou %s %s, and find nothing.'
                 % (word, person.name))
             return
 
@@ -310,7 +311,7 @@ class Player(object):
         if people:
             ret += people
 
-        return text_game_maker.capitalize(ret)
+        return utils.capitalize(ret)
 
     def _move_north(self, word):
         self._move(self.current.north, word, "north")
