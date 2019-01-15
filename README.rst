@@ -30,7 +30,7 @@ Run the example map
 
 ::
 
-    python scripts/test-game-runner.py example-map/example_map.py
+    python scripts/text-game-runner.py example-map/example_map.py
 
 Writing maps
 ============
