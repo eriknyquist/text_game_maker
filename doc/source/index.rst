@@ -1,12 +1,8 @@
-Welcome to text_game_maker's documentation!
-===========================================
+.. include:: ../../README.rst
 
 .. toctree::
 
    modules
-
-Indices and tables
-==================
 
 * :ref:`genindex`
 * :ref:`modindex`

@@ -51,7 +51,7 @@ Writing maps
    finds of a class which is a subclass of
    text_game_maker.utils.runner.MapRunner
 
-Documentation
-=============
+API Documentation
+=================
 
 `text-game-maker.readthedocs.io <https://text-game-maker.readthedocs.io>`_
