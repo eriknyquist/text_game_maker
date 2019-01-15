@@ -3,6 +3,8 @@
 Text Adventure Game Maker
 -------------------------
 
+.. contents:: Contents
+
 |projectname| is a framework for building simple text-based games.
 
 Features overview
