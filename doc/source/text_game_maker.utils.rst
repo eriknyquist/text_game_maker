@@ -9,6 +9,11 @@ text\_game\_maker.utils package
 Submodules
 ----------
 
+.. automodule:: text_game_maker.utils.runner
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. automodule:: text_game_maker.utils.utils
     :members:
     :undoc-members:

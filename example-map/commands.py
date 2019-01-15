@@ -7,7 +7,6 @@ from text_game_maker.utils import utils
 from text_game_maker.messages import messages
 from text_game_maker.builder import map_builder as builder
 from text_game_maker.game_objects.items import Lighter
-from text_game_maker.parser.parser import CommandParser
 
 EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
@@ -541,9 +540,7 @@ def _do_look_under(player, word, item):
         % (word, item)))
     utils.save_sound(audio.FAILURE_SOUND)
 
-def build_parser():
-    ret = CommandParser()
-
+def build_parser(parser):
     commands = [
         [EQUIP_WORDS, _do_equip, "equip an item from your inventory",
             "%s <item>"],
@@ -585,7 +582,7 @@ def build_parser():
     ]
 
     for arglist in commands:
-        ret.add_command(*arglist)
+        parser.add_command(*arglist)
 
-    return ret
+    return parser
 
