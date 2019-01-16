@@ -1,3 +1,4 @@
 prompt-toolkit
+cx_Freeze==5.1.1
 pygame
 tones

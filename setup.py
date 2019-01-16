@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 README = os.path.join(HERE, "README.rst")
+REQFILE = 'requirements.txt'
 
 classifiers = [
     'License :: OSI Approved :: Apache Software License',
@@ -16,6 +17,9 @@ classifiers = [
 with open(README, 'r') as f:
     long_description = f.read()
 
+with open(REQFILE, 'r') as fh:
+	dependencies = fh.readlines()
+
 setup(
     name='text_game_maker',
     version='0.0.2',
@@ -25,6 +29,7 @@ setup(
     author='Erik Nyquist',
     author_email='eknyquist@gmail.com',
     license='Apache 2.0',
+    install_requires=dependencies,
     packages=find_packages(exclude=['example-map']),
     package_dir={'text_game_maker':'text_game_maker'},
     package_data={'text_game_maker':['ptttl-data/*.txt']},
