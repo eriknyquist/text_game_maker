@@ -863,6 +863,18 @@ class MapBuilder(object):
                     utils.game_print(self.player.current_state())
                     break
 
+                if self.player.reset_game:
+                    self.player.reset_game = False
+
+                    ret = utils.ask_yes_no("Restart from the beginning?")
+                    if ret <= 0:
+                        sys.exit(0)
+
+                    self.player = Player(self.start, self.prompt)
+                    self.player.fsm = self.fsm
+                    self.player.current = self.player.start
+                    utils.game_print(self.player.current_state())
+
                 utils.save_sound(audio.SUCCESS_SOUND)
                 raw = utils.read_line_raw("%s" % self.player.prompt)
                 action = ' '.join(raw.split())

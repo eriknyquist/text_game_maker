@@ -486,14 +486,12 @@ def _do_loot(player, word, name):
         utils.game_print("%s didn't like this, and killed you.\n"
             % p.name)
         player.death()
-        sys.exit()
     else:
         player._loot(word, p)
 
 def _do_suicide(player, word, remaining):
     utils.game_print(messages.suicide_message())
     player.death()
-    sys.exit()
 
 def _do_inspect(player, word, item):
     if item == '':

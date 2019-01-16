@@ -31,6 +31,7 @@ class Player(object):
 
         self.loaded_file = None
         self.load_from_file = None
+        self.reset_game = None
         self.start = start_tile
         self.current = start_tile
         self.prompt = input_prompt
@@ -118,14 +119,9 @@ class Player(object):
         """
         Called whenever the player dies
         """
-        try:
-            audio.play_sound(audio.DEATH_SOUND)
-            audio.wait()
-
-            while True:
-                time.sleep(0.01)
-        except KeyboardInterrupt:
-            return
+        audio.play_sound(audio.DEATH_SOUND)
+        audio.wait()
+        self.reset_game = True
 
     def _move(self, dest, word, name):
         utils.save_sound(audio.SUCCESS_SOUND)
