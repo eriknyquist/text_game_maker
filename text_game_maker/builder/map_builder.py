@@ -514,7 +514,7 @@ def _player_health_listing(player, width):
 
 def _do_inventory_listing(player, word, setting):
     bannerwidth = 50
-    fmt = "    {0:33}{1:1}({2})"
+    fmt = "      {0:33}{1:1}({2})"
 
     banner = utils.line_banner("status", bannerwidth)
     print '\n' + banner + '\n'
