@@ -42,6 +42,7 @@ class Tile(object):
             the room e.g. "a dark, scary cellar with blah blah blah... "
         """
 
+        self.description = ""
         self.name = name
         if description:
             self.description = utils._remove_leading_whitespace(description)

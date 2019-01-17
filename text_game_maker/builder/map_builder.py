@@ -577,7 +577,7 @@ class MapBuilder(object):
         random.seed(time.time())
         self.player = None
 
-    def start_map(self, name, description):
+    def start_map(self, name="", description=""):
         """
         Start building the map; create the first tile
 

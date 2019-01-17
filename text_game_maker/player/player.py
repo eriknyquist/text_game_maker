@@ -132,11 +132,11 @@ class Player(object):
             return self.current
 
         if self.current.on_exit and (not
-                self.current.on_exit(self, self.current, dest)):
+                self.current.on_exit(self, dest)):
             utils.save_sound(audio.FAILURE_SOUND)
             return
 
-        if dest.on_enter and not dest.on_enter(self, self.current, dest):
+        if dest.on_enter and not dest.on_enter(self, self.current):
             utils.save_sound(audio.FAILURE_SOUND)
             return
 
