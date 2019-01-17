@@ -262,7 +262,10 @@ class LockedDoor(Tile):
             return
 
         setattr(self.source_tile, direction, self.replacement_tile)
-        utils.game_print("You unlock the %s." % self.short_name)
+        msg = "You unlock the %s, revealing %s to the %s." % (self.short_name,
+            self.replacement_tile.name, direction)
+
+        utils.game_print(msg)
 
     def on_enter(self, player, src):
         if self.locked:
