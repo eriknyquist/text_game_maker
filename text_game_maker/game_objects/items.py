@@ -15,7 +15,7 @@ class Item(GameEntity):
     Base class for collectable item
     """
 
-    def __init__(self, prefix, name, **kwargs):
+    def __init__(self, prefix="", name="", **kwargs):
         """
         Initialises an Item instance
 
@@ -103,7 +103,7 @@ class Weapon(Item):
     Class to represent a weapon
     """
 
-    def __init__(self, prefix, name, **kwargs):
+    def __init__(self, prefix="", name="", **kwargs):
         super(Weapon, self).__init__(prefix, name, **kwargs)
         self.edible = False
         self.damage = damage
@@ -113,7 +113,7 @@ class Food(Item):
     Class to represent a food item
     """
 
-    def __init__(self, prefix, name, **kwargs):
+    def __init__(self, prefix="", name="", **kwargs):
         super(Food, self).__init__(prefix, name, location, value)
         self.edbile = True
         self.energy = energy
@@ -134,7 +134,7 @@ class Coins(Item):
         return True
 
 class Paper(Item):
-    def __init__(self, prefix, name, **kwargs):
+    def __init__(self, prefix="", name="", **kwargs):
         self.paragraphs = []
         self.header = None
         self.footer = None
@@ -177,7 +177,7 @@ class Paper(Item):
         print('\n' + msg)
 
 class Blueprint(Item):
-    def __init__(self, ingredients, item, **kwargs):
+    def __init__(self, ingredients=[], item=None, **kwargs):
         super(Blueprint, self).__init__("a", "blueprint for %s" % item,
             **kwargs)
         self.ingredients = ingredients
@@ -194,7 +194,7 @@ class Blueprint(Item):
         return True
 
 class Furniture(Item):
-    def __init__(self, prefix, name, **kwargs):
+    def __init__(self, prefix="", name="", **kwargs):
         super(Furniture, self).__init__(prefix, name, **kwargs)
         self.scenery = True
         self.size = ITEM_SIZE_LARGE
