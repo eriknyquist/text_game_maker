@@ -3,6 +3,7 @@ import sys
 import time
 import inspect
 import textwrap
+import importlib
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
@@ -11,6 +12,9 @@ history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
 
 sequence = []
+
+serializable_classes = {
+}
 
 info = {
     'slow_printing': False,
@@ -24,6 +28,38 @@ wrapper = textwrap.TextWrapper()
 wrapper.width = 60
 
 _format_tokens = {}
+
+def _get_full_class_name(classobj):
+    module = classobj.__module__
+    if module is None or module == str.__class__.__module__:
+        return classobj.__name__  # Avoid reporting __builtin__
+    else:
+        return module + '.' + classobj.__name__
+
+def register_serializable_class(classobj, name):
+    serializable_classes[name] = classobj
+
+class SubclassTrackerMetaClass(type):
+    def __init__(cls, name, bases, clsdict):
+        if get_serializable_class(name):
+            raise RuntimeError("There is already a game object class called "
+                "'%s', please choose a different class name" % name)
+
+        cls.full_class_name = _get_full_class_name(cls)
+        register_serializable_class(cls, cls.full_class_name)
+        super(SubclassTrackerMetaClass, cls).__init__(name, bases, clsdict)
+
+def get_serializable_class(name):
+    if name not in serializable_classes:
+        return None
+
+    return serializable_classes[name]
+
+def get_class_from_full_name(fullname):
+    fields = fullname.split(".")
+    modname = ".",join(fields[:-1])
+    classname = fields[-1]
+    return getattr(importlib.import_module(modname), classname)
 
 def set_sequence_count(count):
     info['sequence_count'] = count

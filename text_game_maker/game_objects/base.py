@@ -4,6 +4,8 @@ import text_game_maker
 from text_game_maker.messages import messages
 from text_game_maker.utils import utils
 
+TYPE_KEY = 'game-class-type-key'
+
 class GameEntity(object):
     """
     Base class for anything that the player can interact with in the
@@ -17,7 +19,7 @@ class GameEntity(object):
         room
     :ivar bool edible: defines whether this item is edible
     :ivar bool alive: defines whether this item is currently alive
-    :ivar int energy: defines hjow much energy player gains by consuming this\
+    :ivar int energy: defines how much energy player gains by consuming this\
         item
     :ivar int damage: defines how much health player loses if damaged by this\
         item
@@ -39,6 +41,8 @@ class GameEntity(object):
         e.g. "the coins are on the floor"
     """
 
+    __metaclass__ = utils.SubclassTrackerMetaClass
+
     def __init__(self):
         self.inanimate = True
         self.combustible = True
@@ -57,6 +61,43 @@ class GameEntity(object):
         self.items = []
         self.size = 1
         self.verb = "is"
+
+    def get_attrs(self):
+        ret = {}
+        for key in self.__dict__:
+            attr = getattr(self, key)
+
+            if (type(attr) == list) and (key != 'home'):
+                ret[key] = []
+
+                if len(attr) == 0:
+                    continue
+
+                for item in attr:
+                    if isinstance(item, GameEntity):
+                        item = item.get_attrs()
+
+                    ret[key].append(item)
+
+            elif isinstance(attr, GameEntity):
+                ret[key] = attr.get_attrs()
+            else:
+                ret[key] = self.__dict__[key]
+
+        del ret['home']
+        ret.update({TYPE_KEY: self.__class__.full_class_name})
+        return ret
+
+    def set_attrs(self, attrs):
+        for attr in attrs:
+            if attr == TYPE_KEY:
+                continue
+
+            if hasattr(self, attr):
+                setattr(self, attr, attrs[attr])
+            else:
+                print('Error: %s object has no attribute %s'
+                    % (type(self).__name__, attr))
 
     def add_item(self, item):
         """
