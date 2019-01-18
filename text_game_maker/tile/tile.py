@@ -1,5 +1,8 @@
 import text_game_maker
 from text_game_maker.utils import utils
+from text_game_maker.game_objects.base import GameEntity
+
+tiles = {}
 
 def reverse_direction(direction):
     """
@@ -24,14 +27,47 @@ def reverse_direction(direction):
 
     return None
 
-class Tile(object):
+def tile_crawler(start):
+    ret = []
+    tilestack = [start]
+    seen = []
+
+    if not isinstance(start, Tile):
+        raise ValueError("%s should be called with a Tile object" % __func__)
+
+    while tilestack:
+        tile = tilestack.pop()
+        if tile.tile_id in seen:
+            continue
+
+        ret.append(tile.get_attrs())
+        seen.append(tile.tile_id)
+
+        if isinstance(tile, LockedDoor) and tile.replacement_tile:
+            tilestack.append(tile.replacement_tile)
+        else:
+            for t in tile.iterate_directions():
+                tilestack.append(t)
+
+    return ret
+
+class Tile(GameEntity):
     """
     Represents a single 'tile' or 'room' in the game
     """
 
+    tile_id = 0
+
     default_locations = [
         "on the ground"
     ]
+
+    @classmethod
+    def register_tile(cls, tile):
+        ret = Tile.tile_id
+        tiles[ret] = tile
+        Tile.tile_id += 1
+        return ret
 
     def __init__(self, name=None, description=None):
         """
@@ -41,6 +77,8 @@ class Tile(object):
         :param str description: long description, printed when player enters\
             the room e.g. "a dark, scary cellar with blah blah blah... "
         """
+
+        super(Tile, self).__init__()
 
         self.description = ""
         self.name = name
@@ -59,6 +97,26 @@ class Tile(object):
         # People on this tile
         self.people = {}
 
+        self.tile_id = Tile.register_tile(self)
+
+    def get_special_attrs(self):
+        ret = {}
+        for tile in self.iterate_directions():
+            d = self.direction_to(tile)
+            ret[d] = tile.tile_id
+
+        items = {x: [] for x in self.items.keys()}
+
+        for key in self.items:
+            for item in self.items[key]:
+                if isinstance(item, GameEntity):
+                    items[key].append(item.get_attrs())
+                else:
+                    items[key].append(item)
+
+        ret['items'] = items
+        return ret
+
     def iterate_directions(self):
         """
         Iterator for all tiles connected to this tile
@@ -67,6 +125,9 @@ class Tile(object):
         :rtype: Iterator[:class:`text_game_maker.tile.tile.Tile`]
         """
         for tile in [self.north, self.south, self.east, self.west]:
+            if tile is None:
+                continue
+
             yield tile
 
     def is_door(self):
@@ -243,6 +304,17 @@ class LockedDoor(Tile):
         self.source_tile = src_tile
         self.replacement_tile = replacement_tile
 
+    def get_special_attrs(self):
+        ret = super(LockedDoor, self).get_special_attrs()
+        for name in ['source_tile', 'replacement_tile']:
+            tile = getattr(self, name)
+            if isinstance(tile, GameEntity):
+                ret[name] = tile.tile_id
+            else:
+                ret[name] = tile
+
+        return ret
+
     def is_door(self):
         return True
 
@@ -266,6 +338,7 @@ class LockedDoor(Tile):
             self.replacement_tile.name, direction)
 
         utils.game_print(msg)
+        self.locked = False
 
     def on_enter(self, player, src):
         if self.locked:

@@ -62,9 +62,16 @@ class GameEntity(object):
         self.size = 1
         self.verb = "is"
 
+    def get_special_attrs(self):
+        return {}
+
     def get_attrs(self):
-        ret = {}
+        ret = self.get_special_attrs()
         for key in self.__dict__:
+            if key in ret:
+                continue
+
+            print key
             attr = getattr(self, key)
 
             if (type(attr) == list) and (key != 'home'):

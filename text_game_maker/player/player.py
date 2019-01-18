@@ -1,14 +1,16 @@
 import time
-import pickle
+import zlib
 import text_game_maker
 
 from text_game_maker.audio import audio
 from text_game_maker.game_objects.items import SmallBag
+from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.utils import utils
+from text_game_maker.tile.tile import tile_crawler
 
 MOVE_ENERGY_COST = 0.25
 
-class Player(object):
+class Player(GameEntity):
     """
     Base class to hold player related methods & data
     """
@@ -18,6 +20,8 @@ class Player(object):
         :param text_game_maker.game_objects.tile.Tile start_tile: Starting tile
         :param str input_prompt: Custom string to prompt player for game input
         """
+
+        super(Player, self).__init__()
 
         self.fsm = None
         self.turns = 0
@@ -44,6 +48,31 @@ class Player(object):
         self.equipped = None
         self.inventory = None
         self.name = "john"
+
+    def get_special_attrs(self):
+        ret = {}
+        inventory_data = None
+
+        if isinstance(self.inventory, GameEntity):
+            inventory_data = self.inventory.get_attrs()
+        else:
+            inventory_data = self.inventory
+
+        tasks = {}
+        for i in self.scheduled_tasks:
+            callback, turns, scheduled_turns = self.scheduled_tasks[i]
+            tasks[i] = [
+                utils.get_full_import_name(callback),
+                turns,
+                scheduled_turns
+            ]
+
+        ret['start'] = tile_crawler(self.start)
+        ret['current'] = self.current.tile_id
+        ret['scheduled_tasks'] = tasks
+        ret['inventory'] = inventory_data
+        ret['fsm'] = None
+        return ret
 
     def _dec_clamp(self, curr, val, min_val):
         if curr == min_val:
@@ -111,9 +140,12 @@ class Player(object):
 
         return dec
 
+    def serialize(self):
+        return zlib.compress(json_dumps(self.get_attrs()))
+
     def save_state(self, filename):
         with open(filename, 'w') as fh:
-            pickle.dump(self, fh)
+            fh.write(self.serialize())
 
     def death(self):
         """

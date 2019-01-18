@@ -29,7 +29,7 @@ wrapper.width = 60
 
 _format_tokens = {}
 
-def _get_full_class_name(classobj):
+def get_full_import_name(classobj):
     module = classobj.__module__
     if module is None or module == str.__class__.__module__:
         return classobj.__name__  # Avoid reporting __builtin__
@@ -45,7 +45,7 @@ class SubclassTrackerMetaClass(type):
             raise RuntimeError("There is already a game object class called "
                 "'%s', please choose a different class name" % name)
 
-        cls.full_class_name = _get_full_class_name(cls)
+        cls.full_class_name = get_full_import_name(cls)
         register_serializable_class(cls, cls.full_class_name)
         super(SubclassTrackerMetaClass, cls).__init__(name, bases, clsdict)
 
