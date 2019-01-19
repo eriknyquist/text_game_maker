@@ -1,7 +1,6 @@
 import time
 import random
 import sys
-import pickle
 import os
 import fnmatch
 import errno
@@ -10,7 +9,7 @@ import parser
 import text_game_maker
 from text_game_maker.tile.tile import Tile, LockedDoor, reverse_direction
 from text_game_maker.game_objects.items import Item
-from text_game_maker.player.player import Player
+from text_game_maker.player import player
 from text_game_maker.audio import audio
 from text_game_maker.crafting import crafting
 from text_game_maker.messages import messages
@@ -832,12 +831,9 @@ class MapBuilder(object):
                 else:
                     del player.scheduled_tasks[task_id]
 
-    def _load_state(self, player, filename):
-        loaded_file = player.load_from_file
-        with open(player.load_from_file, 'r') as fh:
-            ret = pickle.load(fh)
-
-        ret.loaded_file = loaded_file
+    def _load_state(self, filename):
+        ret = player.load_from_file(filename)
+        ret.loaded_file = filename
         ret.load_from_file = None
         return ret
 
@@ -849,7 +845,7 @@ class MapBuilder(object):
         audio.init()
         add_format_tokens()
 
-        self.player = Player(self.start, self.prompt)
+        self.player = player.Player(self.start, self.prompt)
         self.player.fsm = self.fsm
         menu_choices = ["New game", "Load game", "Controls"]
 
@@ -877,7 +873,7 @@ class MapBuilder(object):
         while True:
             while True:
                 if self.player.load_from_file:
-                    self.player = self._load_state(self.player, self.player.load_from_file)
+                    self.player = self._load_state(self.player.load_from_file)
                     utils.game_print(self.player.current_state())
                     break
 
@@ -888,7 +884,7 @@ class MapBuilder(object):
                     if ret <= 0:
                         sys.exit(0)
 
-                    self.player = Player(self.start, self.prompt)
+                    self.player = player.Player(self.start, self.prompt)
                     self.player.fsm = self.fsm
                     self.player.current = self.player.start
                     utils.game_print(self.player.current_state())

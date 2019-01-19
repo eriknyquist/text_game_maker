@@ -1,13 +1,15 @@
 import time
 import zlib
+import json
 import text_game_maker
 
 from text_game_maker.audio import audio
 from text_game_maker.game_objects.items import SmallBag
 from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.utils import utils
-from text_game_maker.tile.tile import tile_crawler
+from text_game_maker.tile import tile
 
+TILES_KEY = '_tile_list'
 MOVE_ENERGY_COST = 0.25
 
 _serializable_callbacks = {}
@@ -37,6 +39,15 @@ def serializable_callback(callback):
     """
     add_serializable_callback(callback)
     return callback
+
+def load_from_file(filename):
+    with open(filename, 'rb') as fh:
+        strdata = zlib.decompress(fh.read())
+        data = json.loads(strdata)
+
+    player = Player()
+    player.set_attrs(data)
+    return player
 
 class Player(GameEntity):
     """
@@ -81,11 +92,6 @@ class Player(GameEntity):
         ret = {}
         inventory_data = None
 
-        if isinstance(self.inventory, GameEntity):
-            inventory_data = self.inventory.get_attrs()
-        else:
-            inventory_data = self.inventory
-
         tasks = {}
         for i in self.scheduled_tasks:
             callback, turns, scheduled_turns = self.scheduled_tasks[i]
@@ -100,12 +106,30 @@ class Player(GameEntity):
                 cb_name, turns, scheduled_turns
             ]
 
-        ret['start'] = tile_crawler(self.start)
+        ret[TILES_KEY] = tile.crawler(self.start)
+        ret['start'] = self.start.tile_id
         ret['current'] = self.current.tile_id
         ret['scheduled_tasks'] = tasks
-        ret['inventory'] = inventory_data
         ret['fsm'] = None
         return ret
+
+    def set_special_attrs(self, attrs):
+        for taskid in attrs['scheduled_tasks']:
+            cb_name, turns, scheduled_turns = attrs['scheduled_tasks'][taskid]
+            if cb_name not in _serializable_callbacks:
+                raise RuntimeError("Cannot deserialize callback '%s'" % cb_name)
+
+            callback = _serializable_callbacks[cb_name]
+            self.scheduled_tasks[taskid] = (callback, turns, scheduled_turns)
+
+        self.start = tile.builder(attrs[TILES_KEY], attrs['start'])
+        self.current = tile.get_tile_by_id(attrs['current'])
+
+        del attrs['scheduled_tasks']
+        del attrs['start']
+        del attrs['current']
+        del attrs[TILES_KEY]
+        return attrs
 
     def _dec_clamp(self, curr, val, min_val):
         if curr == min_val:
@@ -177,8 +201,9 @@ class Player(GameEntity):
         return zlib.compress(json_dumps(self.get_attrs()))
 
     def save_state(self, filename):
-        with open(filename, 'w') as fh:
-            fh.write(self.serialize())
+        with open(filename, 'wb') as fh:
+            data = json.dumps(self.get_attrs(), fh)
+            fh.write(zlib.compress(data))
 
     def death(self):
         """

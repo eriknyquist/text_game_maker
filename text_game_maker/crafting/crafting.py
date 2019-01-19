@@ -61,7 +61,7 @@ def craft(name, word, inventory):
     item = None
 
     if name in craftables:
-        items, item = craftables[item]
+        items, item = craftables[name]
     else:
         for k in craftables:
             if k.startswith(name) or k.endswith(name) or (k in name):

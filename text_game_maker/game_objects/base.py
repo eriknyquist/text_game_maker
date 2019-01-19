@@ -6,6 +6,57 @@ from text_game_maker.utils import utils
 
 TYPE_KEY = '_type_key'
 
+def is_deserializable_type(obj):
+    return (type(obj) == dict) and (TYPE_KEY in obj)
+
+def build_instance(type_key):
+    classobj = utils.get_serializable_class(type_key)
+    if not classobj:
+        raise RuntimeError("Unable to de-serialize class %s" % type_key)
+
+    try:
+        ins = classobj()
+    except Exception as e:
+        raise RuntimeError("Can't create instance of %s: %s"
+            % (classobj.__name__, e))
+
+    return ins
+
+def deserialize(data):
+    if is_deserializable_type(data):
+        item = build_instance(data[TYPE_KEY])
+        item.set_attrs(data)
+    elif type(data) == list:
+        item = []
+
+        if len(data) > 0:
+            for sub in data:
+                if is_deserializable_type(sub):
+                    i = build_instance(sub[TYPE_KEY])
+                    i.set_attrs(sub)
+                    item.append(i)
+    else:
+        item = data
+
+    return item
+
+def serialize(attr):
+    if type(attr) == list:
+        ret = []
+
+        for item in attr:
+            if isinstance(item, GameEntity):
+                item = item.get_attrs()
+
+            ret.append(item)
+
+    elif isinstance(attr, GameEntity):
+        ret = attr.get_attrs()
+    else:
+        ret = attr
+
+    return ret
+
 class GameEntity(object):
     """
     Base class for anything that the player can interact with in the
@@ -65,6 +116,9 @@ class GameEntity(object):
     def get_special_attrs(self):
         return {}
 
+    def set_special_attrs(self, attrs):
+        return attrs
+
     def get_attrs(self):
         skip_attrs = ['home']
         ret = self.get_special_attrs()
@@ -74,37 +128,33 @@ class GameEntity(object):
                 continue
 
             attr = getattr(self, key)
-
-            if type(attr) == list:
-                ret[key] = []
-
-                if len(attr) == 0:
-                    continue
-
-                for item in attr:
-                    if isinstance(item, GameEntity):
-                        item = item.get_attrs()
-
-                    ret[key].append(item)
-
-            elif isinstance(attr, GameEntity):
-                ret[key] = attr.get_attrs()
-            else:
-                ret[key] = self.__dict__[key]
+            ret[key] = serialize(attr)
 
         ret.update({TYPE_KEY: self.__class__.full_class_name})
         return ret
 
     def set_attrs(self, attrs):
-        for attr in attrs:
-            if attr == TYPE_KEY:
+        item = None
+        attrs = self.set_special_attrs(attrs)
+
+        if ('items' in attrs) and (type(attrs['items']) == list):
+            for d in attrs['items']:
+                item = deserialize(d)
+                self.add_item(item)
+
+            del attrs['items']
+
+        for key in attrs:
+            if key == TYPE_KEY:
                 continue
 
-            if hasattr(self, attr):
-                setattr(self, attr, attrs[attr])
-            else:
-                print('Error: %s object has no attribute %s'
-                    % (type(self).__name__, attr))
+            attr = attrs[key]
+            if not hasattr(self, key):
+                raise RuntimeError("Error: %s object has no attribute '%s'"
+                    % (type(self).__name__, key))
+
+            item = deserialize(attr)
+            setattr(self, key, item)
 
     def add_item(self, item):
         """

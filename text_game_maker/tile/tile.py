@@ -1,8 +1,24 @@
 import text_game_maker
 from text_game_maker.utils import utils
-from text_game_maker.game_objects.base import GameEntity
+from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
 
 _tiles = {}
+
+def get_tile_by_id(tile_id):
+    if tile_id not in _tiles:
+        return None
+
+    return _tiles[tile_id]
+
+def register_tile(tile, tile_id=None):
+    if tile_id is None:
+        ret = Tile.tile_id
+        Tile.tile_id += 1
+    else:
+        ret = tile_id
+
+    _tiles[ret] = tile
+    return ret
 
 def reverse_direction(direction):
     """
@@ -27,7 +43,7 @@ def reverse_direction(direction):
 
     return None
 
-def tile_crawler(start):
+def crawler(start):
     ret = []
     tilestack = [start]
     seen = []
@@ -51,6 +67,43 @@ def tile_crawler(start):
 
     return ret
 
+def builder(tiledata, start_tile_id):
+    tiles = {}
+    _tiles.clear()
+    visited = []
+
+    for d in tiledata:
+        tile = deserialize(d)
+        tiles[tile.tile_id] = tile
+
+    if start_tile_id not in tiles:
+        raise RuntimeError("No tile found with ID '%s'" % start_tile_id)
+
+    tilestack = [tiles[start_tile_id]]
+    while tilestack:
+        t = tilestack.pop(0)
+        if t.tile_id in visited:
+            continue
+
+        visited.append(t.tile_id)
+        if isinstance(t, LockedDoor) and t.replacement_tile:
+            if t.replacement_tile:
+                t.replacement_tile = tiles[t.replacement_tile]
+                tilestack.append(t.replacement_tile)
+            if t.source_tile:
+                t.source_tile = tiles[t.source_tile]
+                tilestack.append(t.source_tile)
+        else:
+            for direction in ['north', 'south', 'east', 'west']:
+                tile_id = getattr(t, direction)
+                if not tile_id:
+                    continue
+
+                setattr(t, direction, tiles[tile_id])
+                tilestack.append(tiles[tile_id])
+
+    return tiles[start_tile_id]
+
 class Tile(GameEntity):
     """
     Represents a single 'tile' or 'room' in the game
@@ -61,13 +114,6 @@ class Tile(GameEntity):
     default_locations = [
         "on the ground"
     ]
-
-    @classmethod
-    def _register_tile(cls, tile):
-        ret = Tile.tile_id
-        _tiles[ret] = tile
-        Tile.tile_id += 1
-        return ret
 
     def __init__(self, name=None, description=None):
         """
@@ -97,7 +143,7 @@ class Tile(GameEntity):
         # People on this tile
         self.people = {}
 
-        self.tile_id = Tile._register_tile(self)
+        self.tile_id = register_tile(self)
 
     def set_tile_id(self, tile_id):
         """
@@ -123,17 +169,24 @@ class Tile(GameEntity):
             d = self.direction_to(tile)
             ret[d] = tile.tile_id
 
-        items = {x: [] for x in self.items.keys()}
+        ret['items'] = {x:serialize(self.items[x]) for x in self.items}
+        ret['people'] = {x:serialize(self.people[x]) for x in self.people}
 
-        for key in self.items:
-            for item in self.items[key]:
-                if isinstance(item, GameEntity):
-                    items[key].append(item.get_attrs())
-                else:
-                    items[key].append(item)
-
-        ret['items'] = items
         return ret
+
+    def set_special_attrs(self, data):
+        for loc in data['items']:
+            for d in data['items'][loc]:
+                item = deserialize(d)
+                self.add_item(item)
+
+        self.people = {x:deserialize(data['people'][x]) for x in data['people']}
+        self.set_tile_id(data['tile_id'])
+
+        del data['items']
+        del data['people']
+        del data['tile_id']
+        return data
 
     def iterate_directions(self):
         """
@@ -313,7 +366,7 @@ class Tile(GameEntity):
         return '. '.join(ret)
 
 class LockedDoor(Tile):
-    def __init__(self, prefix, name, src_tile, replacement_tile):
+    def __init__(self, prefix="", name="", src_tile="", replacement_tile=""):
         super(LockedDoor, self).__init__(name, "")
         self.name = '%s %s' % (prefix, name)
         self.short_name = name
