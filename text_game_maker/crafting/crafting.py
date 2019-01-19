@@ -57,13 +57,23 @@ def craft(name, word, inventory):
     :return: crafted item
     :rtype: text_game_maker.game_objects.items.Item
     """
-    if not name in craftables:
+    items = []
+    item = None
+
+    if name in craftables:
+        items, item = craftables[item]
+    else:
+        for k in craftables:
+            if k.startswith(name) or k.endswith(name) or (k in name):
+                items, item = craftables[k]
+                break
+
+    if (not items) or (not item):
         utils.save_sound(audio.FAILURE_SOUND)
         utils.game_print("Don't know how to %s %s" % (word, name))
         return
 
     ingredients = []
-    items, item = craftables[name]
 
     for i in items:
         ingredient = _get_inventory_item(i.name, inventory)
@@ -78,4 +88,4 @@ def craft(name, word, inventory):
 
     inventory.add_item(item)
     utils.save_sound(audio.NEW_ITEM_SOUND)
-    utils.game_print("Created %s." % name)
+    utils.game_print("Created %s." % item.name)

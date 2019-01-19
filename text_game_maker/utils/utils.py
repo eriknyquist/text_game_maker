@@ -55,9 +55,9 @@ def get_serializable_class(name):
 
     return serializable_classes[name]
 
-def get_class_from_full_name(fullname):
+def import_module_attribute(fullname):
     fields = fullname.split(".")
-    modname = ".",join(fields[:-1])
+    modname = ".".join(fields[:-1])
     classname = fields[-1]
     return getattr(importlib.import_module(modname), classname)
 

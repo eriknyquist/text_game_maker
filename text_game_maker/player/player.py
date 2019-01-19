@@ -10,10 +10,6 @@ from text_game_maker.tile.tile import tile_crawler
 
 MOVE_ENERGY_COST = 0.25
 
-_registered_callbacks = {}
-
-def register_serializable_callback(callback):
-    _registered_callbacks
 class Player(GameEntity):
     """
     Base class to hold player related methods & data
@@ -232,7 +228,6 @@ class Player(GameEntity):
         ret = self.task_id
         args = (callback, turns, self.turns)
         self.scheduled_tasks[self.task_id] = args
-        _registered_callbacks[self.task_id] = args
         self.task_id = (self.task_id + 1) % self.max_task_id
         return ret
 
@@ -251,7 +246,6 @@ class Player(GameEntity):
                     self.scheduled_tasks[task_id] = new
                 else:
                     del self.scheduled_tasks[task_id]
-                    del _registered_callbacks[task_id]
 
     def clear_tasks(self):
         """
@@ -260,7 +254,6 @@ class Player(GameEntity):
         """
 
         self.scheduled_tasks.clear()
-        _registered_callbacks.clear()
 
     def clear_task(self, task_id):
         """
@@ -276,7 +269,6 @@ class Player(GameEntity):
             return False
 
         del self.scheduled_tasks[task_id]
-        del _registered_callbacks[task_id]
         return True
 
     def _items_to_words(self, items):

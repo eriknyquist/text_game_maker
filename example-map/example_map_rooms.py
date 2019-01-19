@@ -6,10 +6,9 @@ from text_game_maker.crafting import crafting
 
 def prison_starting_cell(builder):
     # Start building the map; create the first tile/room
-    builder.start_map(
-        "your cell",
-        """in a small, windowless cell of bare concrete."""
-    )
+    builder.start_map()
+    builder.set_name("your cell")
+    builder.set_description("in a small, windowless cell of bare concrete.")
 
     # Create all the items in the room
     paperclip = Item("a", "paperclip", combustible=False)
@@ -51,4 +50,4 @@ def prison_starting_cell(builder):
 def prison_hallway_1(builder):
     # Move east and add a new room behind the locked door.
     builder.set_name("a dark hallway")
-    builder.set_description("a dark hallway, with a dim light at the end")
+    builder.set_description("in a dark hallway, with a dim light at the end")
