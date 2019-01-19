@@ -4,7 +4,7 @@ import text_game_maker
 from text_game_maker.messages import messages
 from text_game_maker.utils import utils
 
-TYPE_KEY = 'game-class-type-key'
+TYPE_KEY = '_type_key'
 
 class GameEntity(object):
     """
