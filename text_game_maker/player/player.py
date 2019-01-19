@@ -10,6 +10,34 @@ from text_game_maker.tile.tile import tile_crawler
 
 MOVE_ENERGY_COST = 0.25
 
+_serializable_callbacks = {}
+
+def add_serializable_callback(callback):
+    """
+    Add a callback object to registry of callbacks that can be securely
+    referenced in a save file. An ID will be assigned to represent this
+    callback in save files. When loading a save file, whatever object you
+    pass here will be used when the same ID is seen.
+
+    :param callback: callback object to register
+    """
+    _serializable_callbacks[utils.get_full_import_name(callback)] = callback
+
+def serializable_callback(callback):
+    """
+    Decorator version od add_serializable_callback. Example:
+
+    ::
+
+        from text_game_maker.player.player import serializable_callback
+
+        @serializable_callback
+        def my_callback_function():
+            pass
+    """
+    add_serializable_callback(callback)
+    return callback
+
 class Player(GameEntity):
     """
     Base class to hold player related methods & data
@@ -61,10 +89,15 @@ class Player(GameEntity):
         tasks = {}
         for i in self.scheduled_tasks:
             callback, turns, scheduled_turns = self.scheduled_tasks[i]
+            cb_name = utils.get_full_import_name(callback)
+
+            if cb_name not in _serializable_callbacks:
+                raise RuntimeError("Not allowed to serialize callback '%s'. See"
+                    " text_game_maker.player.player.add_serializable_callback"
+                    % cb_name)
+
             tasks[i] = [
-                utils.get_full_import_name(callback),
-                turns,
-                scheduled_turns
+                cb_name, turns, scheduled_turns
             ]
 
         ret['start'] = tile_crawler(self.start)

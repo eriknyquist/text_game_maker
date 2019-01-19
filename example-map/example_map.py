@@ -4,9 +4,10 @@ import example_map_rooms as rooms
 import text_game_maker
 from text_game_maker.crafting import crafting
 from text_game_maker.utils import utils, runner
+from text_game_maker.player.player import serializable_callback
 
+@serializable_callback
 def scheduler_test(player, turns):
-
     utils.game_print("Scheduler: %d turns" % player.turns)
     player.schedule_task(scheduler_test, turns + 1)
 

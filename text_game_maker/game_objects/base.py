@@ -66,15 +66,17 @@ class GameEntity(object):
         return {}
 
     def get_attrs(self):
+        skip_attrs = ['home']
         ret = self.get_special_attrs()
+
         for key in self.__dict__:
-            if key in ret:
+            if (key in ret) or (key in skip_attrs):
                 continue
 
             print key
             attr = getattr(self, key)
 
-            if (type(attr) == list) and (key != 'home'):
+            if type(attr) == list:
                 ret[key] = []
 
                 if len(attr) == 0:
@@ -91,7 +93,6 @@ class GameEntity(object):
             else:
                 ret[key] = self.__dict__[key]
 
-        del ret['home']
         ret.update({TYPE_KEY: self.__class__.full_class_name})
         return ret
 
