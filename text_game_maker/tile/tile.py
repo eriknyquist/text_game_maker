@@ -2,7 +2,7 @@ import text_game_maker
 from text_game_maker.utils import utils
 from text_game_maker.game_objects.base import GameEntity
 
-tiles = {}
+_tiles = {}
 
 def reverse_direction(direction):
     """
@@ -63,9 +63,9 @@ class Tile(GameEntity):
     ]
 
     @classmethod
-    def register_tile(cls, tile):
+    def _register_tile(cls, tile):
         ret = Tile.tile_id
-        tiles[ret] = tile
+        _tiles[ret] = tile
         Tile.tile_id += 1
         return ret
 
@@ -97,7 +97,25 @@ class Tile(GameEntity):
         # People on this tile
         self.people = {}
 
-        self.tile_id = Tile.register_tile(self)
+        self.tile_id = Tile._register_tile(self)
+
+    def set_tile_id(self, tile_id):
+        """
+        Sets the ID for this tile. This ID will be used to represent the tile in
+        save files. Setting explicit tile names is recommended, as it ensures
+        that the tile IDs will not change. If the ID of a tile changes, save
+        files created with previous tile IDs will no longer work as expected.
+
+        :param tile_id: tile ID
+        """
+        if tile_id in _tiles:
+            raise RuntimeError("tile ID '%s' is already in use" % tile_id)
+
+        if self.tile_id in _tiles:
+            del _tiles[self.tile_id]
+
+        _tiles[tile_id] = self
+        self.tile_id = tile_id
 
     def get_special_attrs(self):
         ret = {}

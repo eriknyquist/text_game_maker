@@ -633,22 +633,34 @@ class MapBuilder(object):
     def set_name(self, name):
         """
         Add short description for current tile
+        (see text_game_maker.tile.tile.Tile.set_tile_id)
 
         :param str desc: description text
         """
 
         self.current.name = name
 
+    def set_tile_id(self, tile_id):
+        """
+        Set tile ID for current tile
+        (see text_game_maker.tile.tile.Tile.set_tile_id)
+
+        :param tile_id: tile ID
+        """
+        self.current.set_tile_id(tile_id)
+
     def set_description(self, desc):
         """
         Add long description for current tile
+        (see text_game_maker.tile.tile.Tile.set_description)
 
         :param str desc: description text
         """
 
         self.current.description = utils._remove_leading_whitespace(desc)
 
-    def add_door(self, prefix, name, direction, doorclass=LockedDoor):
+    def add_door(self, prefix, name, direction, doorclass=LockedDoor,
+            door_id=None):
         """
         Add a locked door that blocks the player from exiting the current room
 
@@ -657,6 +669,7 @@ class MapBuilder(object):
         :param str direction: direction to locked door from current tile, e.g.\
             "north"
         :param doorclass: class object to instantiate for door
+        :param door_id: unique ID to represent door in save files
         """
         dirs = ['north', 'south', 'east', 'west']
         if direction not in dirs:
@@ -664,11 +677,15 @@ class MapBuilder(object):
 
         replace = getattr(self.current, direction)
         door = doorclass(prefix, name, self.current, replace)
+        if door_id:
+            door.set_tile_id(door_id)
+
         setattr(self.current, direction, door)
 
     def add_item(self, item):
         """
         Add item to current tile
+        (see text_game_maker.tile.tile.Tile.add_item)
 
         :param text_game_maker.game_objects.base.Item item: the item to add
         """
@@ -689,6 +706,7 @@ class MapBuilder(object):
     def add_person(self, person):
         """
         Add person to current tile
+        (see text_game_maker.tile.tile.Tile.add_person)
 
         :param text_game_maker.game_objects.person.Person person: person to add
         """

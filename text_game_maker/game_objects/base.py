@@ -73,7 +73,6 @@ class GameEntity(object):
             if (key in ret) or (key in skip_attrs):
                 continue
 
-            print key
             attr = getattr(self, key)
 
             if type(attr) == list:

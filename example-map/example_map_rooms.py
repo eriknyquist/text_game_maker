@@ -4,9 +4,14 @@ from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
 
 from text_game_maker.crafting import crafting
 
+celldoor_id = "locked_door_1"
+startingcell_id = "room_01"
+darkhallway_id = "room_02"
+
 def prison_starting_cell(builder):
     # Start building the map; create the first tile/room
     builder.start_map()
+    builder.set_tile_id(startingcell_id)
     builder.set_name("your cell")
     builder.set_description("in a small, windowless cell of bare concrete.")
 
@@ -45,9 +50,10 @@ def prison_starting_cell(builder):
 
     # Add a door to the east. The door will be locked and will require a
     # lockpick to unlock.
-    builder.add_door("a", "cell door", "east")
+    builder.add_door("a", "cell door", "east", door_id=celldoor_id)
 
 def prison_hallway_1(builder):
     # Move east and add a new room behind the locked door.
+    builder.set_tile_id(darkhallway_id)
     builder.set_name("a dark hallway")
     builder.set_description("in a dark hallway, with a dim light at the end")
