@@ -22,7 +22,7 @@ def prison_starting_cell(builder):
     lockpick = Item("a", "lockpick")
     lighter = Lighter(location="on the bunk")
 
-    idcard = Paper("an", "ID badge", locations="on the floor", paragraphs=[
+    idcard = Paper("an", "ID badge", location="on the floor", paragraphs=[
             "name: <playername>",
             "occupation: field agent",
             "CID: 5545658868"

@@ -18,12 +18,11 @@ def on_game_run(player):
 
     # captialize with name.title() and set as player name
     player.set_name(name.title())
-
     player.schedule_task(scheduler_test, 5)
 
 class ExampleMapRunner(runner.MapRunner):
     def build_parser(self, parser):
-       return commands.build_parser(parser)
+        return commands.build_parser(parser)
 
     def build_map(self, builder):
         rooms.prison_starting_cell(builder)
