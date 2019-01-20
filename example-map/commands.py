@@ -13,7 +13,8 @@ EAT_WORDS = [
 ]
 
 SUICIDE_WORDS = [
-    "kill self", "kill myself", "suicide", "kill player", "die", "goodbye cruel world"
+    "kill self", "kill myself", "suicide", "kill player", "die",
+    "goodbye cruel world"
 ]
 
 UNLOCK_WORDS = ['unlock']
@@ -77,11 +78,23 @@ for x in LOOK_WORDS:
         LOOK_UNDER_WORDS.append('%s %s' % (x, y))
 
 LOOK_INSIDE_WORDS = [
-    'look in', 'look inside', 'peep in' , 'peep inside',
+    'look in', 'look inside', 'look into', 'peep in' , 'peep inside',
+    'peep into'
 ]
 
 LOOT_WORDS = [
     'loot', 'search', 'rob', 'pickpocket'
+]
+
+INNOCUOUS = [
+    "pick nose", "pick my nose", "dance", "do a dance", "do a little dance",
+    "do the worm", "do a backflip", "do a flip", "do a push up", "do a pushup",
+    "do pushups", "do push ups", "breakdance", "jog on the spot", "meditate",
+    "cough up a hairball", "clap", "recite poetry", "take a nap"
+]
+
+ALLSTAR_SONG = [
+    "smashmouth"
 ]
 
 def _split_word(string, word):
@@ -91,6 +104,12 @@ def _split_word(string, word):
             return ' '.join(inlist[:i]), ' '.join(inlist[i + 1:])
 
     return None, None
+
+def _do_allstar_song(player, word, remaining):
+    utils.save_sound(audio.ALLSTAR_SOUND)
+
+def _do_innocuous(player, word, remaining):
+    utils.game_print(messages.strange_action_message(word))
 
 def _do_eat(player, word, item_name):
     if not item_name or item_name == "":
@@ -111,9 +130,7 @@ def _do_eat(player, word, item_name):
             utils.save_sound(audio.FAILURE_SOUND)
             return
 
-    msg = item.on_eat(player, word)
-    if msg:
-        utils.game_print(msg)
+    item.on_eat(player, word)
 
 def _do_read(player, word, item_name):
     if not item_name or item_name == "":
@@ -189,9 +206,7 @@ def _do_burn(player, word, item_name):
         return
 
     if builder.is_location(player, item_name):
-        msg = messages.burn_noncombustible_message(item_name)
-        utils._wrap_print(msg)
-        return
+        utils._wrap_print(messages.burn_noncombustible_message(item_name))
     else:
         utils._wrap_print(messages.no_item_message(item_name))
 
@@ -229,12 +244,14 @@ def _do_put(player, word, remaining):
                 break
 
         if item_name is None:
-            messages.dontknow_message('%s %s' % (word, remaining))
+            utils._wrap_print(messages.dontknow_message('%s %s'
+                % (word, remaining)))
             return
 
         dest_item = builder.find_any_item(player, dest_name)
         if not dest_item:
-            messages.dontknow_message('%s %s' % (word, remaining))
+            utils._wrap_print(messages.dontknow_message('%s %s'
+                % (word, remaining)))
             return
 
         if not dest_item.is_container:
@@ -324,7 +341,8 @@ def _do_take(player, word, remaining):
     else:
         dest_item = builder.find_any_item(player, dest_name)
         if not dest_item:
-            messages.dontknow_message('%s %s' % (word, remaining))
+            utils._wrap_print(messages.dontknow_message('%s %s'
+                % (word, remaining)))
             return
 
         locations = [dest_item.items]
@@ -576,7 +594,11 @@ def build_parser(parser):
         [LOOK_INSIDE_WORDS, _do_look_inside,
             "examine the contents of an object"],
 
-        [LOOK_WORDS, _do_look, "examine your current surroundings"]
+        [LOOK_WORDS, _do_look, "examine your current surroundings"],
+
+        [INNOCUOUS, _do_innocuous],
+
+        [ALLSTAR_SONG, _do_allstar_song]
     ]
 
     for arglist in commands:

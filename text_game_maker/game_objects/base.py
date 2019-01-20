@@ -3,6 +3,7 @@ import sys
 import text_game_maker
 from text_game_maker.messages import messages
 from text_game_maker.utils import utils
+from text_game_maker.audio import audio
 
 TYPE_KEY = '_type_key'
 
@@ -338,26 +339,11 @@ class GameEntity(object):
         """
         if self.alive:
             msg = "%s is still alive. You cannot eat living things." % self.name
-        elif self.edible:
-            msg = "You %s %s and gain %d energy point" % (word, self.prep,
-                self.energy)
 
-            if (self.energy == 0) or (self.energy > 1):
-                msg += "s"
-
-            player.increment_energy(self.energy)
+        if self.edible:
+            utils.game_print("You %s %s." % (word, self.prep, self.energy))
             self.delete()
-
         else:
-            msg = ("You try your best to %s %s, but you fail, and injure "
-                "yourself. You have lost %d health points." % (word, self.prep,
-                self.damage))
-
-            if player.health <= self.damage:
-                utils._wrap_print(msg + " You are dead.")
-                player.death()
-                sys.exit()
-
-            player.decrement_health(self.damage)
-
-        return msg
+            utils.game_print(messages.nonsensical_action_message('%s %s'
+                % (word, self.name)))
+            utils.save_sound(audio.FAILURE_SOUND)

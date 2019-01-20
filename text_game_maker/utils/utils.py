@@ -598,7 +598,7 @@ def get_full_controls(fsm):
     ret = ""
     for cmd in fsm.iterate():
         text = cmd.help_text()
-        if text not in descs:
+        if text and (text not in descs):
             ret += '\n' + text
             descs.append(text)
 

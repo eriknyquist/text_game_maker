@@ -41,6 +41,50 @@ class Item(GameEntity):
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
+    def on_eat(self, player, word):
+        """
+        Called when player eats this item
+
+        :param text_game_maker.player.player.Player player: player object
+        :param str word: command word used by player
+        """
+        if self.alive:
+            msg = "%s is still alive. You cannot eat living things." % self.name
+
+        if self.size > ITEM_SIZE_SMALL:
+            utils.game_print(messages.nonsensical_action_message('%s %s'
+                % (word, self.name)))
+            utils.save_sound(audio.FAILURE_SOUND)
+            return
+
+        if self.edible:
+            msg = "You %s %s and gain %d energy point" % (word, self.prep,
+                self.energy)
+
+            if (self.energy == 0) or (self.energy > 1):
+                msg += "s"
+
+            player.increment_energy(self.energy)
+            self.delete()
+
+        elif self.damage > 0:
+            msg = ("You try your best to %s %s, but you fail, and injure "
+                "yourself. You have lost %d health points." % (word, self.prep,
+                self.damage))
+
+            if player.health <= self.damage:
+                utils._wrap_print(msg + " You are dead.")
+                player.death()
+                sys.exit()
+
+            player.decrement_health(self.damage)
+
+        else:
+            msg = "You %s the %s. %s" % messages.bad_taste_message()
+
+        if msg:
+            utils.game_print(msg)
+
     def set_prefix(self, prefix):
         """
         Set item prefix word (usually 'an' or 'a')

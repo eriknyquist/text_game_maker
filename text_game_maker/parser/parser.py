@@ -51,14 +51,15 @@ class Command(object):
         self.word_list = word_list
         self.callback = callback
         self.desc = desc
+        self.phrase_fmt = phrase_fmt
 
-        self.desc = self.desc[0].upper() + self.desc[1:]
-        if not phrase_fmt or phrase_fmt == "":
-            self.phrase_fmt = '%s'
-        else:
-            self.phrase_fmt = phrase_fmt
+        if self.desc:
+            self.desc = self.desc[0].upper() + self.desc[1:]
 
     def help_text(self):
+        if (not self.desc) or (not self.phrase_fmt):
+            return None
+
         ret = '\n' + self.desc + ':\n\n'
         for w in self.word_list:
             ret += ('    "' + self.phrase_fmt + '"\n') % w
@@ -196,7 +197,7 @@ class CommandParser(SimpleTextFSM):
         for arglist in default_commands:
             self.add_command(*arglist)
 
-    def add_command(self, word_set, callback, help_text, fmt=""):
+    def add_command(self, word_set, callback, help_text=None, fmt=None):
         cmd = Command(word_set, callback, help_text, fmt)
         for word in word_set:
             self.add_token(word, cmd)

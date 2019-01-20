@@ -13,6 +13,7 @@ NEW_ITEM_SOUND = os.path.join(AUDIO_DIR, "new_item.txt")
 ERROR_SOUND = os.path.join(AUDIO_DIR, "prompt_error.txt")
 DEATH_SOUND = os.path.join(AUDIO_DIR, "death.txt")
 FANFARE_SOUND = os.path.join(AUDIO_DIR, "fanfare.txt")
+ALLSTAR_SOUND = os.path.join(AUDIO_DIR, "allstar_bach_chorale.txt")
 
 FREQ = 44100
 SAMPLESIZE = -16
@@ -65,6 +66,7 @@ def init(frequency=FREQ, samplewidth=SAMPLESIZE, numchannels=CHANNELS,
     load_file(ERROR_SOUND)
     load_file(DEATH_SOUND)
     load_file(FANFARE_SOUND)
+    load_file(ALLSTAR_SOUND)
 
 def wait():
     """
