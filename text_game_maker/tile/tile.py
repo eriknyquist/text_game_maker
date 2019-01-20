@@ -4,13 +4,7 @@ from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
 
 _tiles = {}
 
-def get_tile_by_id(tile_id):
-    if tile_id not in _tiles:
-        return None
-
-    return _tiles[tile_id]
-
-def register_tile(tile, tile_id=None):
+def _register_tile(tile, tile_id=None):
     if tile_id is None:
         ret = Tile.tile_id
         Tile.tile_id += 1
@@ -19,6 +13,19 @@ def register_tile(tile, tile_id=None):
 
     _tiles[ret] = tile
     return ret
+
+def get_tile_by_id(tile_id):
+    """
+    Get Tile instance by tile ID
+
+    :param tile_id: ID of tile to fetch
+    :return: tile instance
+    :rtype: text_game_maker.tile.tile.Tile
+    """
+    if tile_id not in _tiles:
+        return None
+
+    return _tiles[tile_id]
 
 def reverse_direction(direction):
     """
@@ -44,6 +51,13 @@ def reverse_direction(direction):
     return None
 
 def crawler(start):
+    """
+    Crawl over a map and serialize all tiles and contained items
+
+    :param text_game_maker.tile.tile.Tile start: map starting tile
+    :return: serializable dict representing all tiles and contained items
+    :rtype: dict
+    """
     ret = []
     tilestack = [start]
     seen = []
@@ -68,6 +82,15 @@ def crawler(start):
     return ret
 
 def builder(tiledata, start_tile_id):
+    """
+    Deserialize a list of serialized tiles, then re-link all the tiles to
+    re-create the map described by the tile links
+
+    :param list tiledata: list of serialized tiles
+    :param start_tile_id: tile ID of tile that should be used as the start tile
+    :return: starting tile of built map
+    :rtype: text_game_maker.tile.tile.Tile
+    """
     tiles = {}
     _tiles.clear()
     visited = []
@@ -143,7 +166,7 @@ class Tile(GameEntity):
         # People on this tile
         self.people = {}
 
-        self.tile_id = register_tile(self)
+        self.tile_id = _register_tile(self)
 
     def set_tile_id(self, tile_id):
         """

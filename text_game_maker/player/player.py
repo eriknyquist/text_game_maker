@@ -41,6 +41,13 @@ def serializable_callback(callback):
     return callback
 
 def load_from_file(filename):
+    """
+    Load a save file and create a new player instance
+
+    :param str filename: name of save file to read
+    :return: new Player instance
+    :rtype: text_game_maker.player.player.Player
+    """
     with open(filename, 'rb') as fh:
         strdata = zlib.decompress(fh.read())
         data = json.loads(strdata)

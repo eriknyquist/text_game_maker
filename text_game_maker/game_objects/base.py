@@ -10,6 +10,13 @@ def is_deserializable_type(obj):
     return (type(obj) == dict) and (TYPE_KEY in obj)
 
 def build_instance(type_key):
+    """
+    Build an instance of a registered serializable class, by the registered
+    class name
+
+    :param type_key: registered class name
+    :return: instance of class associated with class name
+    """
     classobj = utils.get_serializable_class(type_key)
     if not classobj:
         raise RuntimeError("Unable to de-serialize class %s" % type_key)
@@ -23,6 +30,12 @@ def build_instance(type_key):
     return ins
 
 def deserialize(data):
+    """
+    Recursively deserialize item and all contained items
+
+    :param dict data: data to deserialize
+    :return: deserialized object
+    """
     if is_deserializable_type(data):
         item = build_instance(data[TYPE_KEY])
         item.set_attrs(data)
@@ -31,16 +44,21 @@ def deserialize(data):
 
         if len(data) > 0:
             for sub in data:
-                if is_deserializable_type(sub):
-                    i = build_instance(sub[TYPE_KEY])
-                    i.set_attrs(sub)
-                    item.append(i)
+                item.append(deserialize(sub))
     else:
         item = data
 
     return item
 
 def serialize(attr):
+    """
+    Recursively serialize item and return a serializable dict representing the
+    item and all contained items
+
+    :param attr: object to serialize
+    :return: serialized object
+    :rtype: dict
+    """
     if type(attr) == list:
         ret = []
 
@@ -114,12 +132,37 @@ class GameEntity(object):
         self.verb = "is"
 
     def get_special_attrs(self):
+        """
+        Serialize any attributes that you want to handle specially here. Any
+        attributes present in the dict returned by this function will not be
+        serialized by the main get_attrs method. Intended for subclasses to
+        override
+
+        :return: serializable dict of special attributes
+        :rtype: dict
+        """
         return {}
 
     def set_special_attrs(self, attrs):
+        """
+        Deserialize any attributes that you want to handle specially here.
+        Make sure to delete any specially handled attributes from the return
+        dict so that they are not deserialized by the main set_attrs method
+
+        :param dict attrs: all serialized attributes for this object
+        :return: all attributes not serialized by this method
+        :rtype: dict
+        """
         return attrs
 
     def get_attrs(self):
+        """
+        Recursively serialize all attributes of this item and any contained
+        items
+
+        :return: serializable dict of item and contained items
+        :rtype: dict
+        """
         skip_attrs = ['home']
         ret = self.get_special_attrs()
 
@@ -134,6 +177,12 @@ class GameEntity(object):
         return ret
 
     def set_attrs(self, attrs):
+        """
+        Recursively deserialize all attributes of this item and any contained
+        items
+
+        :param dict attrs: item attributes
+        """
         item = None
         attrs = self.set_special_attrs(attrs)
 
