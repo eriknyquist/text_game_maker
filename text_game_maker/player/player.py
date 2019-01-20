@@ -40,21 +40,36 @@ def serializable_callback(callback):
     add_serializable_callback(callback)
     return callback
 
-def load_from_file(filename):
+def load_from_string(strdata, compression=True):
     """
-    Load a save file and create a new player instance
+    Load a serialized state from a string and create a new player instance
 
-    :param str filename: name of save file to read
+    :param str strdata: string data to load
+    :param bool compression: whether data is compressed
     :return: new Player instance
     :rtype: text_game_maker.player.player.Player
     """
-    with open(filename, 'rb') as fh:
-        strdata = zlib.decompress(fh.read())
-        data = json.loads(strdata)
+    if compression:
+        strdata = zlib.decompress(strdata)
+
+    data = json.loads(strdata)
 
     player = Player()
     player.set_attrs(data)
     return player
+
+def load_from_file(filename, compression=True):
+    """
+    Load a serialized state from a file and create a new player instance
+
+    :param str filename: name of save file to read
+    :param bool compression: whether data is compressed
+    :return: new Player instance
+    :rtype: text_game_maker.player.player.Player
+    """
+
+    with open(filename, 'rb') as fh:
+        return load_from_string(fh.read(), compression)
 
 class Player(GameEntity):
     """
@@ -204,20 +219,35 @@ class Player(GameEntity):
 
         return dec
 
-    def serialize(self):
-        return zlib.compress(json_dumps(self.get_attrs()))
+    def save_to_string(self, compression=True):
+        """
+        Serialize entire map and player state and return as a string
 
-    def save_state(self, filename):
+        :param bool compression: whether to compress string
+        :return: serialized game state
+        :rtype: str
+        """
+        data = json.dumps(self.get_attrs())
+        if compression:
+            return zlib.compress(data)
+
+        return data
+
+    def save_to_file(self, filename, compression=True):
+        """
+        Serialize entire map and player state and write to a file
+
+        :param str filename: name of file to write serialized state to
+        :param bool compression: whether to compress string
+        """
         with open(filename, 'wb') as fh:
-            data = json.dumps(self.get_attrs(), fh)
-            fh.write(zlib.compress(data))
+            fh.write(self.save_to_string(compression))
 
     def death(self):
         """
         Called whenever the player dies
         """
-        audio.play_sound(audio.DEATH_SOUND)
-        audio.wait()
+        utils.save_sound(audio.DEATH_SOUND)
         self.reset_game = True
 
     def _move(self, dest, word, name):

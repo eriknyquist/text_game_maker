@@ -160,7 +160,7 @@ def _do_save(player, word, setting):
 
         filename = os.path.join(save_dir, ret)
 
-    player.save_state(filename)
+    player.save_to_file(filename)
     utils.game_print("Game state saved in %s." % filename)
 
 def _do_load(player, word, setting):
@@ -568,6 +568,8 @@ class MapBuilder(object):
                 % self.__class__.__name__)
 
         info['instance'] = self
+
+        self.reset_state_data = None
         self.on_game_run = None
         self.fsm = parser
         self.start = None
@@ -831,17 +833,7 @@ class MapBuilder(object):
                 else:
                     del player.scheduled_tasks[task_id]
 
-    def _load_state(self, filename):
-        ret = player.load_from_file(filename)
-        ret.loaded_file = filename
-        ret.load_from_file = None
-        return ret
-
-    def run_game(self):
-        """
-        Start running the game
-        """
-
+    def _do_init(self):
         audio.init()
         add_format_tokens()
 
@@ -870,29 +862,43 @@ class MapBuilder(object):
             elif choice == 2:
                 print utils.get_full_controls()
 
+        self.reset_state_data = self.player.save_to_string()
+
+    def _check_flags(self):
+        if self.player.load_from_file:
+            filename = self.player.load_from_file
+            self.player = player.load_from_file(filename)
+            self.player.loaded_file = filename
+            self.player.load_from_file = False
+            self.player.fsm = self.fsm
+            self.reset_state_data = self.player.save_to_string()
+            utils.game_print(self.player.current_state())
+
+        elif self.player.reset_game:
+            ret = utils.ask_yes_no("Restart from the beginning?")
+            if ret <= 0:
+                sys.exit(0)
+
+            self.player = player.load_from_string(self.reset_state_data)
+            self.player.reset_game = False
+            self.player.fsm = self.fsm
+            self.reset_state_data = self.player.save_to_string()
+            utils.game_print(self.player.current_state())
+
+    def run_game(self):
+        """
+        Start running the game
+        """
+
+        self._do_init()
+
         while True:
             while True:
-                if self.player.load_from_file:
-                    self.player = self._load_state(self.player.load_from_file)
-                    utils.game_print(self.player.current_state())
-                    break
-
-                if self.player.reset_game:
-                    self.player.reset_game = False
-
-                    ret = utils.ask_yes_no("Restart from the beginning?")
-                    if ret <= 0:
-                        sys.exit(0)
-
-                    self.player = player.Player(self.start, self.prompt)
-                    self.player.fsm = self.fsm
-                    self.player.current = self.player.start
-                    utils.game_print(self.player.current_state())
+                self._check_flags()
 
                 utils.save_sound(audio.SUCCESS_SOUND)
                 raw = utils.read_line_raw("%s" % self.player.prompt)
                 action = ' '.join(raw.split())
-
 
                 if _has_badword(action):
                     utils.game_print(messages.badword_message())
@@ -905,4 +911,6 @@ class MapBuilder(object):
                 else:
                     self._parse_command(self.player, action.strip().lower())
 
-                audio.play_sound(utils.last_saved_sound())
+                sound = utils.last_saved_sound()
+                if sound:
+                    audio.play_sound(sound)
