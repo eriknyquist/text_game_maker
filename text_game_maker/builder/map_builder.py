@@ -90,7 +90,7 @@ def _do_move(player, word, direction):
     if _move_direction(player, word, direction):
         return
 
-    tile = builder.find_tile(player, direction)
+    tile = find_tile(player, direction)
     if tile:
         if _move_direction(player, word, player.current.direction_to(tile)):
             return
@@ -479,6 +479,22 @@ def _do_set_print_delay(player, word, setting):
         utils._wrap_print("(but it won't do anything unless "
             "slow printing is enabled e.g. 'print slow'")
 
+def _do_set_audio(player, word, setting):
+    if not setting or setting == "":
+        utils._wrap_print("Do you want %s on or %s off?" % (word, word))
+        return
+
+    setting = setting.lower()
+    if setting == 'on':
+        audio.init()
+    elif setting == 'off':
+        audio.quit()
+    else:
+        utils._wrap_print("Don't understand %s setting '%s'" % (word, setting))
+        return
+
+    utils._wrap_print("OK, %s is %s." % (word, setting))
+
 def _do_set_print_width(player, word, setting):
     if not setting or setting == "":
         utils._wrap_print("Please provide a line width between "
@@ -648,6 +664,15 @@ class MapBuilder(object):
         """
 
         self.current.name = name
+
+    def set_first_visit_message(self, message):
+        """
+        Add text to be printed only once, on the player's first visit to the
+        current tile
+
+        :param str messsage: message to show on first player visit
+        """
+        self.current.first_visit_message = message
 
     def set_tile_id(self, tile_id):
         """
@@ -842,7 +867,6 @@ class MapBuilder(object):
                     del player.scheduled_tasks[task_id]
 
     def _do_init(self):
-        audio.init()
         add_format_tokens()
 
         self.player = player.Player(self.start, self.prompt)

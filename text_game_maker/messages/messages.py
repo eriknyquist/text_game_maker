@@ -49,7 +49,35 @@ def suicide_message():
         "ground. You land squarely on your head with a loud crack, as your body "
         "crumples like an accordion and your spine snaps in several places. You are very dead."
     ])
- 
+
+def gross_action_message(gross_action):
+    return _randmsg([
+        "You {0}. How lovely.",
+        "You force us all to watch while you {0}.",
+        "{0}? Really?",
+        "You {0}. It looks disgusting.",
+        "You {0}, like a filthy animal.",
+        "For no apparent reason, you {0}. Yuck.",
+        "OK, we'll all look away while you {0}.",
+        "You {0}. Nearby, somewhere, a bird stops singing.",
+        "Despite knowing that all your dead relatives may be watching, "
+        "you {0}.",
+        "With a very stupid expression on your face, you {0}."
+    ], gross_action)
+
+def sleep_message(sleepword):
+    return _randmsg([
+        "You {0} for several hours.",
+        "You curl up on the ground and {0}. Several hours later, you awake.",
+        "For some unknown reason, and despite being a fictional character who "
+        "does not need sleep and who lives inside a game that does not require"
+        "you to sleep, you {0}.",
+        "For what we're sure must be good reasons, you {0} instead of actually"
+        " doing something.",
+        "Sure, you go ahead and {0}. We'll just set up the next bit of the game"
+        " while you rest."
+    ], sleepword)
+
 def nonsensical_action_message(nonsensical_action):
     return _randmsg([
         "How can you {0}?",

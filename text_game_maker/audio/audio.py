@@ -1,7 +1,7 @@
 import sys
 import os
 import time
-import pygame
+from pygame import mixer
 import text_game_maker
 from text_game_maker.ptttl.ptttl_audio_encoder import ptttl_to_sample_data
 
@@ -24,6 +24,7 @@ class _Control(object):
     def __init__(self):
         self.sounds = {}
         self.last_played = None
+        self.files_loaded = False
 
 ctrl = _Control()
 
@@ -42,7 +43,7 @@ def load_file(filename, sound_id=None):
         ptttl_data = fh.read()
 
     rawdata = ptttl_to_sample_data(ptttl_data)
-    ctrl.sounds[sound_id] = pygame.mixer.Sound(buffer=rawdata)
+    ctrl.sounds[sound_id] = mixer.Sound(buffer=rawdata)
 
 def init(frequency=FREQ, samplewidth=SAMPLESIZE, numchannels=CHANNELS,
         buffersize=BUFSIZE):
@@ -56,17 +57,21 @@ def init(frequency=FREQ, samplewidth=SAMPLESIZE, numchannels=CHANNELS,
     :param int buffersize: size in bytes of the buffer to be used for playing\
         audio samples
     """
-    pygame.mixer.pre_init(frequency, samplewidth, numchannels, buffersize)
-    pygame.mixer.init()
-    pygame.init()
+    if mixer.get_init() is not None:
+        return
 
-    load_file(SUCCESS_SOUND)
-    load_file(FAILURE_SOUND)
-    load_file(NEW_ITEM_SOUND)
-    load_file(ERROR_SOUND)
-    load_file(DEATH_SOUND)
-    load_file(FANFARE_SOUND)
-    load_file(ALLSTAR_SOUND)
+    mixer.pre_init(frequency, samplewidth, numchannels, buffersize)
+    mixer.init()
+
+    if not ctrl.files_loaded:
+        load_file(SUCCESS_SOUND)
+        load_file(FAILURE_SOUND)
+        load_file(NEW_ITEM_SOUND)
+        load_file(ERROR_SOUND)
+        load_file(DEATH_SOUND)
+        load_file(FANFARE_SOUND)
+        load_file(ALLSTAR_SOUND)
+        ctrl.files_loaded = True
 
 def wait():
     """
@@ -78,16 +83,31 @@ def wait():
     while ctrl.last_played.get_busy():
         time.sleep(0.01)
 
+def quit():
+    """
+    Disable audio after it has been initialized
+    """
+    wait()
+
+    if mixer.get_init() is None:
+        return
+
+    ctrl.last_played = None
+    mixer.quit()
+
 def play_sound(sound_id):
     """
     Play a loaded sound
 
     :param sound_id: key for sound to play
     """
+    if mixer.get_init() is None:
+        return
+
     if (not ctrl.last_played is None) and ctrl.last_played.get_busy():
         return
 
     if sound_id not in ctrl.sounds:
         raise ValueError("No sound with ID '%s'" % sound_id)
 
-    ctrl.last_played = pygame.mixer.Sound.play(ctrl.sounds[sound_id])
+    ctrl.last_played = mixer.Sound.play(ctrl.sounds[sound_id])

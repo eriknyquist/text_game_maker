@@ -8,12 +8,14 @@ PRINT_DELAY_WORDS = ['print delay']
 
 PRINT_WIDTH_WORDS = ['print width']
 
+SOUND_WORDS = ['sound', 'audio']
+
 KILL_WORDS = [
     'quit', 'stop', 'finish', 'end', 'exit'
 ]
 
 GO_WORDS = [
-    'go', 'move', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip',
+    'go', 'walk', 'travel', 'crawl', 'shuffle', 'run', 'skip',
     'creep', 'sneak', 'tiptoe'
 ]
 
@@ -178,6 +180,9 @@ class CommandParser(SimpleTextFSM):
             [PRINT_DELAY_WORDS, map_builder._do_set_print_delay, "set the "
                 "per-character print delay when slow printing is enabled",
                 "%s <seconds>"],
+
+            [SOUND_WORDS, map_builder._do_set_audio, "turn audio on or off",
+                "%s [on|off]"],
 
             [PRINT_WIDTH_WORDS, map_builder._do_set_print_width,
                 "set the maximum line width for game output", "%s <width>"],

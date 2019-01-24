@@ -417,11 +417,14 @@ class Player(GameEntity):
         items = []
 
         ret = "You are %s. " % self.current.description.rstrip('.')
-        #print get_nouns(self.current.description)
+
+        if self.current.first_visit and self.current.first_visit_message:
+            ret += "%s. " % self.current.first_visit_message.rstrip('.')
+            self.current.first_visit = False
 
         summary = self.current.summary()
         if summary:
-            ret += "%s. " % summary
+            ret += summary
 
         scene = self.current.describe_scene()
         if scene:

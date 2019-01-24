@@ -151,6 +151,7 @@ class Tile(GameEntity):
 
         self.description = ""
         self.name = name
+
         if description:
             self.description = utils._remove_leading_whitespace(description)
 
@@ -159,6 +160,10 @@ class Tile(GameEntity):
         self.south = None
         self.east = None
         self.west = None
+
+        # First time visiting this tile?
+        self.first_visit = True
+        self.first_visit_message = None
 
         # Items on this tile
         self.items = {loc: [] for loc in self.default_locations}
@@ -386,7 +391,7 @@ class Tile(GameEntity):
         if east: ret.append(east)
         if west: ret.append(west)
 
-        return '. '.join(ret)
+        return '%s. ' % ('. '.join(ret))
 
 class LockedDoor(Tile):
     def __init__(self, prefix="", name="", src_tile="", replacement_tile=""):

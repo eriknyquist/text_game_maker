@@ -13,7 +13,8 @@ def prison_starting_cell(builder):
     builder.start_map()
     builder.set_tile_id(startingcell_id)
     builder.set_name("your cell")
-    builder.set_description("in a small, windowless cell of bare concrete.")
+    builder.set_description("in a small, windowless cell of bare concrete")
+    builder.set_first_visit_message("It is dark, cold and damp.")
 
     # Create all the items in the room
     paperclip = Item("a", "paperclip", combustible=False)
@@ -56,4 +57,5 @@ def prison_hallway_1(builder):
     # Move east and add a new room behind the locked door.
     builder.set_tile_id(darkhallway_id)
     builder.set_name("a dark hallway")
-    builder.set_description("in a dark hallway, with a dim light at the end")
+    builder.set_description("in the prison hallway")
+    builder.set_first_visit_message("You can faintly smell some meat cooking")

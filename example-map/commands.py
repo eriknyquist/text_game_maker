@@ -87,10 +87,18 @@ LOOT_WORDS = [
 ]
 
 INNOCUOUS = [
-    "pick nose", "pick my nose", "dance", "do a dance", "do a little dance",
-    "do the worm", "do a backflip", "do a flip", "do a push up", "do a pushup",
-    "do pushups", "do push ups", "breakdance", "jog on the spot", "meditate",
-    "cough up a hairball", "clap", "recite poetry", "take a nap"
+    "dance", "do a dance", "do a little dance", "do the worm", "do a backflip",
+    "do a flip", "do a push up", "do a pushup", "do pushups", "do push ups",
+    "breakdance", "jog on the spot", "meditate", "cough up a hairball",
+    "recite poetry", "take a nap"
+]
+
+PICK_NOSE_WORDS = [
+    "pick nose", "pick my nose", "pick own nose"
+]
+
+SLEEP_WORDS = [
+    "take a nap", "sleep", "have a nap", "nap", "take a sleep", "have a sleep"
 ]
 
 ALLSTAR_SONG = [
@@ -255,7 +263,7 @@ def _do_put(player, word, remaining):
             return
 
         if not dest_item.is_container:
-            utils._wrap_print("Can't %s %s" % (word, remaining))
+            utils._wrap_print("%s cannot contain other items." % dest_item.name)
             return
 
         location = dest_item.items
@@ -556,6 +564,12 @@ def _do_look_under(player, word, item):
         % (word, item)))
     utils.save_sound(audio.FAILURE_SOUND)
 
+def _do_picknose(player, word, remaining):
+    utils.game_print(messages.gross_action_message("pick your nose"))
+
+def _do_sleep(player, word, remaining):
+    utils.game_print(messages.sleep_message(word))
+
 def build_parser(parser):
     commands = [
         [EQUIP_WORDS, _do_equip, "equip an item from your inventory",
@@ -597,6 +611,10 @@ def build_parser(parser):
         [LOOK_WORDS, _do_look, "examine your current surroundings"],
 
         [INNOCUOUS, _do_innocuous],
+
+        [PICK_NOSE_WORDS, _do_picknose],
+
+        [SLEEP_WORDS, _do_sleep],
 
         [ALLSTAR_SONG, _do_allstar_song]
     ]
