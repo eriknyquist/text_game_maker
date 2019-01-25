@@ -106,6 +106,10 @@ def _do_craft(player, word, item):
 
         return
 
+    fields = item.split()
+    if (len(fields) > 1) and fields[0] == 'a':
+        item = ' '.join(fields[1:])
+
     if not player.inventory:
         utils.save_sound(text_game_maker.audio.FAILURE_SOUND)
         utils.game_print("No bag to hold items. "

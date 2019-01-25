@@ -6,9 +6,11 @@ import text_game_maker
 from text_game_maker.audio import audio
 from text_game_maker.game_objects.items import SmallBag
 from text_game_maker.game_objects.base import GameEntity
+from text_game_maker.crafting import crafting
 from text_game_maker.utils import utils
 from text_game_maker.tile import tile
 
+CRAFTABLES_KEY = '_craftables_data'
 TILES_KEY = '_tile_list'
 MOVE_ENERGY_COST = 0.25
 
@@ -129,6 +131,7 @@ class Player(GameEntity):
             ]
 
         ret[TILES_KEY] = tile.crawler(self.start)
+        ret[CRAFTABLES_KEY] = crafting.serialize()
         ret['start'] = self.start.tile_id
         ret['current'] = self.current.tile_id
         ret['scheduled_tasks'] = tasks
@@ -147,10 +150,13 @@ class Player(GameEntity):
         self.start = tile.builder(attrs[TILES_KEY], attrs['start'])
         self.current = tile.get_tile_by_id(attrs['current'])
 
+        crafting.deserialize(attrs[CRAFTABLES_KEY])
+
         del attrs['scheduled_tasks']
         del attrs['start']
         del attrs['current']
         del attrs[TILES_KEY]
+        del attrs[CRAFTABLES_KEY]
         return attrs
 
     def _dec_clamp(self, curr, val, min_val):

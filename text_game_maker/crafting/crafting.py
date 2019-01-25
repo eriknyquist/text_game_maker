@@ -2,8 +2,27 @@ import text_game_maker
 
 from text_game_maker.audio import audio
 from text_game_maker.utils import utils
+from text_game_maker.game_objects.base import serialize as base_serialize
+from text_game_maker.game_objects.base import deserialize as base_deserialize
 
 craftables = {}
+
+def serialize():
+    ret = {}
+    for name in craftables:
+        items, item = craftables[name]
+        ret[name] = [base_serialize(items), base_serialize(item)]
+
+    return ret
+
+def deserialize(data):
+    d = {}
+    for key in data:
+        items, item = data[key]
+        d[key] = [base_deserialize(items), base_deserialize(item)]
+
+    craftables.clear()
+    craftables.update(d)
 
 def add(items, item):
     """
@@ -13,7 +32,7 @@ def add(items, item):
     :param text_game_maker.game_objects.items.Item item: new item created by\
         combining ingredients
     """
-    craftables[item.name] = (items, item)
+    craftables[item.name] = [items, item]
 
 def help_text():
     """

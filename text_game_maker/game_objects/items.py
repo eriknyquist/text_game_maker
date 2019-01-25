@@ -232,7 +232,7 @@ class Blueprint(Item):
 
     def on_take(self, player):
         crafting.add(self.ingredients, self.item)
-        utils._wrap_print("You can now make %s" % self.item)
+        utils._wrap_print("You have learned how to make %s." % self.item)
         utils.save_sound(audio.NEW_ITEM_SOUND)
         self.delete()
         return True
