@@ -6,6 +6,8 @@ import inspect
 import textwrap
 import importlib
 
+from prompt_toolkit.completion import PathCompleter
+from prompt_toolkit import prompt as prompt_toolkit_prompt
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 
@@ -628,6 +630,9 @@ def del_from_lists(item, *lists):
     for l in lists:
         if item in l:
             del l[l.index(item)]
+
+def read_path_autocomplete(msg):
+    return prompt_toolkit_prompt(msg, completer=PathCompleter())
 
 def read_line_raw(msg, cancel_word=None, default=None):
     """

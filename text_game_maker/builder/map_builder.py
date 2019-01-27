@@ -1,3 +1,4 @@
+from __future__ import unicode_literals, print_function
 import time
 import random
 import sys
@@ -44,7 +45,7 @@ def _do_quit(player, word, name):
         sys.exit()
 
 def _do_show_command_list(player, word, setting):
-    print utils.get_full_controls(player.fsm)
+    print(utils.get_full_controls(player.fsm))
 
 def _do_help(player, word, setting):
     text = None
@@ -60,7 +61,7 @@ def _do_help(player, word, setting):
             utils._wrap_print("No help available for '%s'." % setting)
             return
 
-        print text.rstrip('\n')
+        print(text.rstrip('\n'))
 
 def _move_direction(player, word, direction):
     if 'north'.startswith(direction):
@@ -157,9 +158,7 @@ def _do_save(player, word, setting):
         save_id = _get_next_unused_save_id(save_dir)
         default_name = "save_state_%03d" % save_id
 
-        ret = utils.read_line_raw("Enter name to use for save file",
-            cancel_word="cancel", default=default_name)
-
+        ret = utils.read_path_autocomplete("Enter save file path: ")
         if ret is None:
             return
 
@@ -195,8 +194,7 @@ def _do_load(player, word, setting):
 
     if filename is None:
         while True:
-            filename = utils.read_line("Enter name of file to load",
-                cancel_word="cancel")
+            filename = utils.read_path_autocomplete("Enter path of file to load: ")
             if filename is None:
                 return False
             elif os.path.exists(filename):
@@ -345,18 +343,18 @@ def _do_inventory_listing(player, word, setting):
     fmt = "      {0:33}{1:1}({2})"
 
     banner = utils.line_banner("status", bannerwidth)
-    print '\n' + banner + '\n'
-    print _player_health_listing(player, bannerwidth) + '\n'
+    print('\n' + banner + '\n')
+    print(_player_health_listing(player, bannerwidth) + '\n')
     if player.equipped:
-        print (fmt).format(player.equipped.name + " (equipped)", "",
-            player.equipped.value)
+        print((fmt).format(player.equipped.name + " (equipped)", "",
+            player.equipped.value))
         print("")
 
     if player.inventory:
-            print _container_listing(player.inventory, fmt)
+            print(_container_listing(player.inventory, fmt))
 
-    print _container_listing(player.pockets, fmt, name="pockets",
-            bottom_border=True)
+    print(_container_listing(player.pockets, fmt, name="pockets",
+            bottom_border=True))
 
 def get_instance():
     return info['instance']
@@ -409,7 +407,7 @@ class MapBuilder(object):
     def _parse_command(self, player, action):
         if action == '':
             action = utils.get_last_command()
-            print '\n' + action
+            print('\n' + action)
 
         if self._is_shorthand_direction(action):
             _do_move(player, 'go', action)
@@ -670,7 +668,7 @@ class MapBuilder(object):
         menu_choices = ["New game", "Load game", "Controls"]
 
         while True:
-            print "\n------------ MAIN MENU ------------\n"
+            print("\n------------ MAIN MENU ------------\n")
             choice = utils.ask_multiple_choice(menu_choices)
 
             if choice < 0:
@@ -688,7 +686,7 @@ class MapBuilder(object):
                     break
 
             elif choice == 2:
-                print utils.get_full_controls()
+                print(utils.get_full_controls())
 
         self.reset_state_data = self.player.save_to_string()
 
