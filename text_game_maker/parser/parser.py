@@ -41,8 +41,7 @@ LOAD_WORDS = [
 ]
 
 INVENTORY_WORDS = [
-    'i', 'inventory', 'show inventory', 'look in inventory', 'look in pockets',
-    'show pockets', 'pockets'
+    'i', 'inventory', 'show inventory', 'show pockets', 'pockets'
 ]
 
 class Command(object):
