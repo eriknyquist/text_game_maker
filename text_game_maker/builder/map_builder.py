@@ -469,6 +469,16 @@ class MapBuilder(object):
         """
         self.current.first_visit_message = message
 
+    def set_first_visit_message_in_dark(self, value):
+        """
+        Defines whether the current tile shows a first visit message in the
+        dark. if False, first visit message for current tile will be shown
+        the first player is on the current tile and has a light source.
+
+        :param bool value: value to set
+        """
+        self.current.first_visit_message_in_dark = value
+
     def set_tile_id(self, tile_id):
         """
         Set tile ID for current tile

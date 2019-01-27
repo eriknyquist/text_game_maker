@@ -473,7 +473,8 @@ class Player(GameEntity):
 
         ret = "You are %s. " % self.current.description.rstrip('.')
 
-        if self.current.first_visit and self.current.first_visit_message:
+        if (self.current.first_visit and self.current.first_visit_message and
+                (self.can_see() or self.current.first_visit_message_in_dark)):
             ret += "%s. " % self.current.first_visit_message.rstrip('.')
             self.current.first_visit = False
 

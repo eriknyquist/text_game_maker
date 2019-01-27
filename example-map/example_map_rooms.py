@@ -6,6 +6,8 @@ from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
 
 from text_game_maker.crafting import crafting
 
+# Tile IDs.
+# WARNING: changing these names will break any previously created save files
 celldoor_id = "cell_door"
 prisondoor_id = "prison_main_door"
 startingcell_id = "cell_01"
@@ -26,6 +28,7 @@ def prison_starting_cell(builder):
     )
 
     builder.set_dark(True)
+    builder.set_first_visit_message_in_dark(True)
 
     # Create all the items in the room
     paperclip = Item("a", "paperclip", location="on the floor", combustible=False)
@@ -85,6 +88,7 @@ def prison_office(builder):
     builder.set_name("the prison office")
     builder.set_description("in the prison office")
     builder.set_first_visit_message("It looks like the office has been ransacked.")
+    builder.set_dark(True)
 
     coins = Coins(location="on the desk", value=32)
     desk = Furniture("a", "small wooden desk", location="against the wall",
@@ -102,6 +106,3 @@ def prison_office(builder):
     cabinet = LargeContainer("a", "filing cabinet", location="in the corner")
     cabinet.add_item(idcard)
     builder.add_items([desk, chair, cabinet, coins])
-
-def outside_prison_front(builder):
-    builder.set_tile_id

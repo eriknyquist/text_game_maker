@@ -7,9 +7,18 @@ from text_game_maker.tile import tile
 from text_game_maker.utils import utils, runner
 from text_game_maker.player.player import serializable_callback
 
+# If player is still locked in the starting room and does not yet have the
+# lighter equipped, give them a hint
 @serializable_callback
 def lighter_equip_hint(player, turns):
+    # No need for a hint if player has already gotten out, or equipped lighter
     if (player.current.tile_id != rooms.startingcell_id) or player.can_see():
+        return
+
+    # No need for a hint if player has already unlocked the cell door but is
+    # still/back in the cell with no light source for some reason
+    if ((not player.current.east.is_door())
+            or (not player.current.east.locked)):
         return
 
     utils._wrap_print("Hint: say things like 'look in pockets', 'pockets',"
@@ -31,15 +40,21 @@ class ExampleMapRunner(runner.MapRunner):
         return commands.build_parser(parser)
 
     def build_map(self, builder):
+        # Build starting cell
         rooms.prison_starting_cell(builder)
+
+        # Build prison hallway
         builder.move_east()
         rooms.prison_hallway_1(builder)
+
+        # Build other cell
         builder.move_south()
         rooms.other_cell(builder)
+
+        # Build prison office
         builder.move_north()
         builder.move_north()
         rooms.prison_office(builder)
-        builder.move_south()
 
         # Set the input prompt
         builder.set_input_prompt(" > ")

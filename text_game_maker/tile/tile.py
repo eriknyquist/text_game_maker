@@ -165,6 +165,9 @@ class Tile(GameEntity):
         self.first_visit = True
         self.first_visit_message = None
 
+        # Show first visit message even if player can't see anything?
+        self.first_visit_message_in_dark = False
+
         # Does this tile require a light source?
         self.dark = False
 

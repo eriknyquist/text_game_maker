@@ -151,7 +151,13 @@ class Lighter(Item):
         utils.game_print("You take out the %s, illuminating everything around "
             "you with a soft, pulsating orange glow." % self.name)
 
-        utils.game_print(player.current.summary() + player.describe_current_tile_contents())
+        txt = player.current.summary() + player.describe_current_tile_contents()
+        if player.current.first_visit:
+            player.current.first_visit = False
+            if player.current.first_visit_message:
+                txt += player.current.first_visit_message
+
+        utils.game_print(txt)
 
     def on_unequip(self, player):
         if not player.can_see():
