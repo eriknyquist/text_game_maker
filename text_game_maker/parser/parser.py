@@ -41,7 +41,8 @@ LOAD_WORDS = [
 ]
 
 INVENTORY_WORDS = [
-    'i', 'inventory'
+    'i', 'inventory', 'show inventory', 'look in inventory', 'look in pockets',
+    'show pockets', 'pockets'
 ]
 
 class Command(object):
@@ -166,13 +167,13 @@ class CommandParser(SimpleTextFSM):
             [HELP_WORDS, map_builder._do_help, "show basic help information"],
 
             [SHOW_COMMAND_LIST_WORDS, map_builder._do_show_command_list,
-                "show all game commands"],
+                "show all game commands", "%s"],
 
             [SAVE_WORDS, map_builder._do_save,
-                "save the current game state to a file"],
+                "save the current game state to a file", "%s"],
 
             [LOAD_WORDS, map_builder._do_load,
-                "load a previously saved game state file"],
+                "load a previously saved game state file", "%s"],
 
             [PRINT_SPEED_WORDS, map_builder._do_set_print_speed,
                 "set printing speed", "%s fast/slow"],
@@ -187,7 +188,7 @@ class CommandParser(SimpleTextFSM):
             [PRINT_WIDTH_WORDS, map_builder._do_set_print_width,
                 "set the maximum line width for game output", "%s <width>"],
 
-            [KILL_WORDS, map_builder._do_quit, "guit the game"],
+            [KILL_WORDS, map_builder._do_quit, "guit the game", "%s"],
 
             [GO_WORDS, map_builder._do_move,
                 "move the player (north/south/east/west)", "%s <direction>"],
@@ -196,7 +197,7 @@ class CommandParser(SimpleTextFSM):
                 "Craft an item", "%s <item name>"],
 
             [INVENTORY_WORDS, map_builder._do_inventory_listing,
-            "show player's inventory"]
+            "show player's inventory", "%s"]
         ]
 
         for arglist in default_commands:

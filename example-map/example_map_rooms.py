@@ -58,8 +58,8 @@ def prison_hallway_1(builder):
     builder.set_tile_id(darkhallway_id)
     builder.set_name("a dark hallway")
     builder.set_description("in the prison hallway")
-    builder.set_first_visit_message("It is not quite so dark in here, and you"
-        "can see clearly.")
+    builder.set_first_visit_message("It is not quite so dark in here, and you "
+        "can see clearly. There doesn't seem to be anyone around.")
 
     # Add a door to the east. The door will be locked and will require a
     # lockpick to unlock.
@@ -92,13 +92,16 @@ def prison_office(builder):
     chair = Furniture("a", "chair", location="against the wall",
         combustible=False)
 
-    idcard = Paper("an", "ID badge", location="on the floor", paragraphs=[
-            "name: <playername>",
-            "occupation: field agent",
-            "CID: 5545658868"
-        ], header="ID CARD", footer="ID CARD"
+    idcard = Paper("a", "business card", paragraphs=[
+            "<playername>, Senior Accountant",
+            "Branch: 115N",
+            "CID: 55458868"
+        ], header="Central Bank", footer="Central Bank"
     )
 
     cabinet = LargeContainer("a", "filing cabinet", location="in the corner")
     cabinet.add_item(idcard)
     builder.add_items([desk, chair, cabinet, coins])
+
+def outside_prison_front(builder):
+    builder.set_tile_id

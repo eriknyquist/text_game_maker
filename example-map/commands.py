@@ -629,9 +629,9 @@ def build_parser(parser):
         [LOOK_UNDER_WORDS, _do_look_under, "look under an item", "%s <item>"],
 
         [LOOK_INSIDE_WORDS, _do_look_inside,
-            "examine the contents of an object"],
+            "examine the contents of an object", "%s <item>"],
 
-        [LOOK_WORDS, _do_look, "examine your current surroundings"],
+        [LOOK_WORDS, _do_look, "examine your current surroundings", "%s"],
 
         [INNOCUOUS, _do_innocuous],
 
