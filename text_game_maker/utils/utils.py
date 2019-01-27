@@ -1,6 +1,8 @@
 from __future__ import unicode_literals, print_function
 import sys
+import os
 import time
+import random
 import fnmatch
 import inspect
 import textwrap
@@ -31,6 +33,39 @@ wrapper = textwrap.TextWrapper()
 wrapper.width = 60
 
 _format_tokens = {}
+
+_location = os.path.dirname(__file__)
+_first_names = os.path.join(_location, "first-names.txt")
+_middle_names = os.path.join(_location, "middle-names.txt")
+
+def _fpeek(fh):
+    ret = fh.read(1)
+    fh.seek(-1, 1)
+    return ret
+
+def _rand_line(filename):
+    with open(filename, 'r') as fh:
+        # Get file size in bytes
+        fh.seek(0, 2)
+        size = fh.tell()
+        fh.seek(0)
+
+        # Seek to random byte offset in file
+        pos = random.randrange(0, size)
+        fh.seek(pos)
+
+        # Seek backwards to a newline
+        while (fh.tell() > 0) and (_fpeek(fh) != '\n'):
+            fh.seek(-1, 1)
+
+        if _fpeek(fh) == '\n':
+            fh.seek(1, 1)
+
+        name = fh.readline().strip().lower()
+        return name[:1].upper() + name[1:]
+
+def get_random_name():
+    return '%s %s' % (_rand_line(_first_names), _rand_line(_middle_names))
 
 def get_full_import_name(classobj):
     module = classobj.__module__

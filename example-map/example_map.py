@@ -29,7 +29,10 @@ def lighter_equip_hint(player, turns):
 # Called when the game starts
 def on_game_run(player):
     # read name from player
-    name = utils.read_line("What is your name?: ")
+    default_name = utils.get_random_name()
+    name = utils.read_line_raw("What is your name? [default: %s]: " % default_name)
+    if name.strip() == "":
+        name = default_name
 
     # captialize with name.title() and set as player name
     player.set_name(name.title())
