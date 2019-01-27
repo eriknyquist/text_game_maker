@@ -184,8 +184,8 @@ class Food(Item):
 class Coins(Item):
     def __init__(self, **kwargs):
         self.value = 1
-        self.combustible = False
         super(Coins, self).__init__(None, "", **kwargs)
+        self.combustible = False
         self._set_name()
 
     def _set_name(self):
@@ -296,6 +296,12 @@ class Container(Item):
 
         item.move(self.items)
         return True
+
+class LargeContainer(Container):
+    def __init__(self, *args, **kwargs):
+        super(LargeContainer, self).__init__(*args, **kwargs)
+        self.size = ITEM_SIZE_LARGE
+        self.capacity = 2
 
 class SmallTin(Container):
     def __init__(self, *args, **kwargs):

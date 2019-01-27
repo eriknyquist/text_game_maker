@@ -28,6 +28,12 @@ class ExampleMapRunner(runner.MapRunner):
         rooms.prison_starting_cell(builder)
         builder.move_east()
         rooms.prison_hallway_1(builder)
+        builder.move_south()
+        rooms.other_cell(builder)
+        builder.move_north()
+        builder.move_north()
+        rooms.prison_office(builder)
+        builder.move_south()
 
         # Set the input prompt
         builder.set_input_prompt(" > ")

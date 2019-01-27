@@ -158,11 +158,12 @@ def _do_save(player, word, setting):
         save_id = _get_next_unused_save_id(save_dir)
         default_name = "save_state_%03d" % save_id
 
-        ret = utils.read_path_autocomplete("Enter save file path: ")
-        if ret is None:
-            return
-
-        filename = os.path.join(save_dir, ret)
+        ret = utils.read_path_autocomplete("Enter save file path [default: %s]: "
+                % default_name)
+        if not ret or ret.strip() == "":
+            filename = os.path.join(save_dir, default_name)
+        else:
+            filename = os.path.join(save_dir, ret)
 
     player.save_to_file(filename)
     utils.game_print("Game state saved in %s." % filename)
@@ -556,14 +557,18 @@ class MapBuilder(object):
         new_tile = None
         replace = False
 
-        new_tile = tileclass(name, description)
-
         if dest is None:
+            new_tile = tileclass(name, description)
             setattr(self.current, direction, new_tile)
         elif dest.is_door():
             door = True
             if dest.replacement_tile is None:
+                new_tile = tileclass(name, description)
                 dest.replacement_tile = new_tile
+            else:
+                new_tile = dest.replacement_tile
+        else:
+            new_tile = dest
 
         old = self.current
 
