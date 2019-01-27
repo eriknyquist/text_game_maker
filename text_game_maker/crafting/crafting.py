@@ -52,8 +52,8 @@ def help_text():
 
     return None
 
-def _get_inventory_item(name, inventory):
-    for item in inventory.items:
+def _find_item(name, items):
+    for item in items:
         if item.name == name:
             return item
 
@@ -65,14 +65,14 @@ def _need_items(name, word, items):
     utils.game_print("Can't %s %s. Need %s."
             % (word, name, utils.list_to_english(names)))
 
-def craft(name, word, inventory):
+def craft(name, word, player):
     """
-    Craft an item by name
+    Craft an item by name. Deletes ingredients from player's inventory and
+    places crafted item into player's inventory.
 
     :param str name: name of the item to craft
     :param str word: command/action word used by player
-    :param text_game_maker.game_objects.items.Container inventory: inventory\
-        object to use for crafting
+    :param Player player: player object
     :return: crafted item
     :rtype: text_game_maker.game_objects.items.Item
     """
@@ -94,8 +94,13 @@ def craft(name, word, inventory):
 
     ingredients = []
 
+    player_items = []
+    player_items.extend(player.pockets.items)
+    if player.inventory:
+        player_items.extend(player.inventory.items)
+
     for i in items:
-        ingredient = _get_inventory_item(i.name, inventory)
+        ingredient = _find_item(i.name, player_items)
         if ingredient is None:
             _need_items(name, word, items)
             return
@@ -105,6 +110,6 @@ def craft(name, word, inventory):
     for i in ingredients:
         i.delete()
 
-    inventory.add_item(item)
+    item.add_to_player_inventory(player)
     utils.save_sound(audio.NEW_ITEM_SOUND)
     utils.game_print("Created %s." % item.name)

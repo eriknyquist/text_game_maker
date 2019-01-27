@@ -39,6 +39,10 @@ class Item(GameEntity):
         self.size = ITEM_SIZE_SMALL
 
         for key in kwargs:
+            if not hasattr(self, key):
+                raise KeyError("keyword argument '%s': %s instance has no such "
+                    "attribute" % (key, self.full_class_name))
+
             setattr(self, key, kwargs[key])
 
     def on_eat(self, player, word):
@@ -137,6 +141,21 @@ class Item(GameEntity):
 class Lighter(Item):
     def __init__(self, **kwargs):
         super(Lighter, self).__init__("a", "lighter", **kwargs)
+        self.is_light_source = True
+
+    def on_equip(self, player):
+        if player.can_see():
+            super(Lighter, self).on_equip(player)
+            return
+
+        utils.game_print("You take out the %s, illuminating everything around "
+            "you with a soft, pulsating orange glow." % self.name)
+
+        utils.game_print(player.current.summary() + player.describe_current_tile_contents())
+
+    def on_unequip(self, player):
+        if not player.can_see():
+            utils.game_print(player.darkness_message())
 
     def on_burn(self, player):
         utils.game_print("You can't burn the %s with itself."
@@ -167,13 +186,21 @@ class Coins(Item):
         self.value = 1
         self.combustible = False
         super(Coins, self).__init__(None, "", **kwargs)
+        self._set_name()
+
+    def _set_name(self):
         self.name = "%s coin" % self.value
         if self.value > 1:
             self.verb = "are"
             self.name += "s"
 
     def add_to_player_inventory(self, player):
-        player.coins += self.value
+        other_coins = utils.find_inventory_item_class(player, Coins)
+        if not other_coins:
+            return super(Coins, self).add_to_player_inventory(player)
+
+        other_coins.value += self.value
+        other_coins._set_name()
         self.delete()
         return True
 
@@ -313,7 +340,7 @@ class PaperBag(Container):
     """
     def __init__(self, *args, **kwargs):
         super(PaperBag, self).__init__(*args, **kwargs)
-        self.capacity = 10
+        self.capacity = 5
         self.size = ITEM_SIZE_MEDIUM
 
 class SmallBag(InventoryBag):

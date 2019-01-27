@@ -92,8 +92,8 @@ def builder(tiledata, start_tile_id):
     :rtype: text_game_maker.tile.tile.Tile
     """
     tiles = {}
-    _tiles.clear()
     visited = []
+    _tiles.clear()
 
     for d in tiledata:
         tile = deserialize(d)
@@ -164,6 +164,9 @@ class Tile(GameEntity):
         # First time visiting this tile?
         self.first_visit = True
         self.first_visit_message = None
+
+        # Does this tile require a light source?
+        self.dark = False
 
         # Items on this tile
         self.items = {loc: [] for loc in self.default_locations}

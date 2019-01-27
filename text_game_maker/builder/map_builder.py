@@ -2,7 +2,6 @@ import time
 import random
 import sys
 import os
-import fnmatch
 import errno
 
 import parser
@@ -90,7 +89,7 @@ def _do_move(player, word, direction):
     if _move_direction(player, word, direction):
         return
 
-    tile = find_tile(player, direction)
+    tile = utils.find_tile(player, direction)
     if tile:
         if _move_direction(player, word, player.current.direction_to(tile)):
             return
@@ -110,13 +109,7 @@ def _do_craft(player, word, item):
     if (len(fields) > 1) and fields[0] == 'a':
         item = ' '.join(fields[1:])
 
-    if not player.inventory:
-        utils.save_sound(text_game_maker.audio.FAILURE_SOUND)
-        utils.game_print("No bag to hold items. "
-                "Nothing to craft with.")
-        return
-
-    crafting.craft(item, word, player.inventory)
+    crafting.craft(item, word, player)
 
 def _get_next_unused_save_id(save_dir):
     default_num = 1
@@ -232,219 +225,6 @@ def _translate(val, min1, max1, min2, max2):
     scaled = float(val - min1) / float(span1)
     return min2 + (scaled * span2)
 
-def find_item(player, name, locations=None):
-    """
-    Find an item by name in the provided locations
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: name of item to find
-    :param [[text_game_maker.game_objects.items.Item]] locations: location\
-        lists to search. If None, the item list of the current tile is used
-    :return: found item (None if no matching item is found)
-    :rtype: text_game_maker.items.Item
-    """
-    if name.startswith('the '):
-        name = name[4:]
-
-    if locations is None:
-        locations = player.current.items.values()
-
-    for itemlist in locations:
-        for item in itemlist:
-            if ((item.name.lower().startswith(name.lower())
-                    or name.lower() in item.name.lower())):
-                return item
-
-    return None
-
-
-def is_location(player, name):
-    """
-    Checks if text matches the name of an adjacent tile that is connected to
-    the current tile
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: text to check
-    :return: True if text matches adjacent tile name
-    :rtype: bool
-    """
-    for direction in player.current.iterate_directions():
-        if direction and direction.is_door() and (name in direction.name):
-            return True
-
-    for loc in player.current.items:
-        if name in loc:
-            return True
-
-    return False
-
-def get_all_items(player, locations=None, except_item=None):
-    """
-    Retrieves all items from specified locations
-
-    :param text_game_maker.player.player.Player player: player object
-    :param [[text_game_maker.game_objects.items.Item]] locations: location lists to search.\
-        If None, the item list of the current room/tile is used
-    :param object except_item: do not retrive item from location if it is the\
-        same memory object as except_item. If None, no items are ignored.
-    :return: list of retreived items
-    :rtype: [text_game_maker.game_objects.items.Item]
-    """
-    if not locations:
-        locations = player.current.items.values()
-
-    ret = []
-    for loc in locations:
-        for item in loc:
-            if (not except_item is None) and (except_item is item):
-                continue
-
-            if item.scenery:
-                continue
-
-            ret.append(item)
-
-    return ret
-
-def find_item_wildcard(player, name, locations=None):
-    """
-    Find the first item whose name matches a wildcard pattern ('*') in specific
-    locations.
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: wildcard pattern
-    :param [[text_game_maker.game_objects.items.Item]] locations: location\
-        lists to search. If None, the item list of the current tile is used
-    :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.game_objects.items.Item
-    """
-    if name.startswith('the '):
-        name = name[4:]
-
-    if locations is None:
-        locations = player.current.items.values()
-
-    ret = []
-    for loc in locations:
-        for item in loc:
-            if (not item.scenery) and fnmatch.fnmatch(item.name, name):
-                return item
-
-    return None
-
-def find_person(player, name):
-    """
-    Find a person by name in the current tile
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: name of person to search for
-    :return: found person. If no matching person is found, None is returned.
-    :rtype: text_game_maker.game_objects.person.Person
-    """
-    for loc in player.current.people:
-        itemlist = player.current.people[loc]
-        for item in itemlist:
-            if (item.name.lower().startswith(name.lower())
-                    or name.lower() in item.name.lower()):
-                return item
-
-    return None
-
-def find_inventory_item(player, name):
-    """
-    Find an item by name in player's inventory
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: name of item to search for
-    :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.game_objects.items.Item
-    """
-    if not player.inventory:
-        return None
-
-    if name.startswith('the '):
-        name = name[4:]
-
-    if player.equipped:
-        if player.equipped.name.startswith(name) or name in player.equipped.name:
-            return player.equipped
-
-    for item in player.inventory.items:
-        if item.name.startswith(name) or name in item.name:
-            return item
-
-    return None
-
-def find_any_item(player, name):
-    """
-    Find an item by name in either the player's inventory or in the current tile
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: name of item to search for
-    :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.game_objects.items.Item
-    """
-    ret = find_inventory_item(player, name)
-    if not ret:
-        return find_item(player, name)
-
-    return ret
-
-def find_inventory_item_class(player, classobj):
-    """
-    Find first item in player's inventory which is an instance of a specific
-    class
-
-    :param text_game_maker.player.player.Player player: player object
-    :param classobj: class to check for instances of
-    :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.game_objects.items.Item
-    """
-    if not player.inventory:
-        return None
-
-    if player.equipped:
-        if isinstance(player.equipped, classobj):
-            return player.equipped
-
-    for item in player.inventory.items:
-        if isinstance(item, classobj):
-            return item
-
-    return None
-
-def find_inventory_wildcard(player, name):
-    """
-    Find the first item in player's inventory whose name matches a wildcard
-    pattern ('*').
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: wildcard pattern
-    :return: found item. If no matching item is found, None is returned.
-    :rtype: text_game_maker.game_objects.items.Item
-    """
-    for item in player.inventory.items:
-        if fnmatch.fnmatch(item.name, name):
-            return item
-
-    return None
-
-def find_tile(player, name):
-    """
-    Find an adjacent tile that is connected to the current tile by name
-
-    :param text_game_maker.player.player.Player player: player object
-    :param str name: name of adjacent tile to search for
-    :return: adjacent matching tile. If no matching tiles are found, None is\
-        returned
-    :rtype: text_game_maker.tile.tile.Tile
-    """
-    for tile in player.current.iterate_directions():
-        if tile and (name in tile.name):
-            return tile
-
-    return None
-
 def _do_set_print_speed(player, word, setting):
     if not setting or setting == "":
         utils._wrap_print("Fast or slow? e.g. 'print fast'")
@@ -539,6 +319,27 @@ def _player_health_listing(player, width):
 
     return '\n'.join([utils.centre_text(x, width) for x in ret])
 
+def _container_listing(container, item_fmt, width=50, bottom_border=False,
+        name=None):
+    if name is None:
+        name = container.name
+
+    banner_text = "%s (%d/%d)" % (name, len(container.items),
+        container.capacity)
+
+    ret = utils.line_banner(banner_text, width) + '\n'
+
+    if container.items:
+        ret += '\n'
+        for item in container.items:
+            ret += item_fmt.format(item.name, "", item.value) + '\n'
+
+    if bottom_border:
+        ret += '\n'
+        ret += ('-' * width)
+
+    return ret
+
 def _do_inventory_listing(player, word, setting):
     bannerwidth = 50
     fmt = "      {0:33}{1:1}({2})"
@@ -546,35 +347,16 @@ def _do_inventory_listing(player, word, setting):
     banner = utils.line_banner("status", bannerwidth)
     print '\n' + banner + '\n'
     print _player_health_listing(player, bannerwidth) + '\n'
-    print utils.centre_text(("\n" + fmt).format('COINS', "",
-        player.coins), bannerwidth)
-
-    if player.inventory is None:
-        print("")
-        print('-' * bannerwidth)
-        print("")
-        print utils.centre_text('No bag to hold items', bannerwidth)
-        print("")
-    else:
-        banner_text = "%s (%d/%d)" % (player.inventory.name,
-            len(player.inventory.items), player.inventory.capacity)
-
-        print '\n' + utils.line_banner(banner_text,
-            bannerwidth) + '\n'
-
-        if player.equipped:
-            print ("\n" + fmt).format(player.equipped.name + " (equipped)", "",
-                player.equipped.value)
-
+    if player.equipped:
+        print (fmt).format(player.equipped.name + " (equipped)", "",
+            player.equipped.value)
         print("")
 
-        if player.inventory.items:
-            for item in player.inventory.items:
-                print fmt.format(item.name, "", item.value)
+    if player.inventory:
+            print _container_listing(player.inventory, fmt)
 
-            print("")
-
-    print('-' * bannerwidth)
+    print _container_listing(player.pockets, fmt, name="pockets",
+            bottom_border=True)
 
 def get_instance():
     return info['instance']
@@ -658,6 +440,16 @@ class MapBuilder(object):
         """
 
         self.on_game_run = callback
+
+    def set_dark(self, value):
+        """
+        Set whether this tile is dark or not. Dark tiles require player to equip
+        a light source
+
+        :param bool value: True for dark, False for not dark
+        """
+
+        self.current.dark = value
 
     def set_name(self, name):
         """
@@ -888,7 +680,7 @@ class MapBuilder(object):
                 if self.on_game_run:
                     self.on_game_run(self.player)
 
-                utils.game_print(self.player.current_state())
+                utils.game_print(self.player.describe_current_tile())
                 break
 
             elif choice == 1:
@@ -908,7 +700,7 @@ class MapBuilder(object):
             self.player.load_from_file = False
             self.player.fsm = self.fsm
             self.reset_state_data = self.player.save_to_string()
-            utils.game_print(self.player.current_state())
+            utils.game_print(self.player.describe_current_tile())
 
         elif self.player.reset_game:
             ret = utils.ask_yes_no("Restart from the beginning?")
@@ -919,7 +711,7 @@ class MapBuilder(object):
             self.player.reset_game = False
             self.player.fsm = self.fsm
             self.reset_state_data = self.player.save_to_string()
-            utils.game_print(self.player.current_state())
+            utils.game_print(self.player.describe_current_tile())
 
     def run_game(self):
         """

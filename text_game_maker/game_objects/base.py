@@ -103,6 +103,8 @@ class GameEntity(object):
     :ivar list home: list that this Item instance lives inside; required for\
         the deleting/moving items within the game world
     :ivar bool is_container: defines whether this item can contain other items
+    :ivar bool is_light_source: defines whether this item can be used as a \
+        light source
     :ivar int capacity: number of items this item can contain (if container)
     :ivar list items: items contained inside this item (if container)
     :ivar int size: size of this item; containers cannot contain items with a\
@@ -127,6 +129,7 @@ class GameEntity(object):
         self.prep = None
         self.home = None
         self.is_container = False
+        self.is_light_source = False
         self.capacity = 0
         self.items = []
         self.size = 1
@@ -234,7 +237,18 @@ class GameEntity(object):
         :return: True if command execution should continue
         :rtype: bool
         """
-        return player.inventory.add_item(self)
+
+        if len(player.pockets.items) < player.pockets.capacity:
+            return player.pockets.add_item(self)
+        elif not player.inventory:
+            utils._wrap_print("No bag to hold items")
+            utils.save_sound(audio.FAILURE_SOUND)
+            return False
+        elif len(player.inventory.items) < player.inventory.capacity:
+            return player.inventory.add_item(self)
+
+        utils._wrap_print("No space to hold the %s." % self.name)
+        return False
 
     def delete(self):
         """
@@ -254,6 +268,23 @@ class GameEntity(object):
         location.append(self)
         self.delete()
         self.home = location
+
+    def on_equip(self, player):
+        """
+        Called when player equips this item from inventory
+
+        :param text_game_maker.player.player.Player player: player object
+        """
+        utils.game_print("Equipped %s." % self.name)
+
+    def on_unequip(self, player):
+        """
+        Called when player unequips this item from inventory (by unequipping
+        explicitly, by dropping or by equipping a different item)
+
+        :param text_game_maker.player.player.Player player: player object
+        """
+        pass
 
     def on_burn(self, player):
         """

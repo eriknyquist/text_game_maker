@@ -4,11 +4,12 @@ import json
 import text_game_maker
 
 from text_game_maker.audio import audio
-from text_game_maker.game_objects.items import SmallBag
+from text_game_maker.game_objects.items import SmallBag, Lighter
 from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.crafting import crafting
 from text_game_maker.utils import utils
 from text_game_maker.tile import tile
+from text_game_maker.messages import messages
 
 CRAFTABLES_KEY = '_craftables_data'
 TILES_KEY = '_tile_list'
@@ -92,6 +93,7 @@ class Player(GameEntity):
         self.max_energy = 100
         self.max_power = 100
 
+        self.move_history = []
         self.health = self.max_health
         self.energy = 25
         self.power = 10
@@ -107,10 +109,34 @@ class Player(GameEntity):
         self.task_id = 0
         self.scheduled_tasks = {}
 
-        self.coins = 0
         self.equipped = None
         self.inventory = None
         self.name = "john"
+
+        self.pockets = SmallBag("", "your pockets")
+        self.pockets.capacity = 2
+        lighter = Lighter()
+        self.pockets.add_item(lighter)
+
+    def can_see(self):
+        return ((not self.current.dark)
+            or (self.equipped and self.equipped.is_light_source))
+
+    def inventory_space(self):
+        used = len(self.pockets.items)
+        capacity = self.pockets.capacity
+
+        if self.inventory:
+            used += len(self.inventory.items)
+            capacity += self.inventory.capacity
+
+        return capacity - used
+
+    def previous_tile(self):
+        if not self.move_history:
+            return None
+
+        return tile.get_tile_by_id(self.move_history[-1])
 
     def get_special_attrs(self):
         ret = {}
@@ -259,6 +285,11 @@ class Player(GameEntity):
     def _move(self, dest, word, name):
         utils.save_sound(audio.SUCCESS_SOUND)
 
+        if not self.can_see():
+            if not (dest is self.previous_tile()):
+                utils._wrap_print(messages.dark_stumble_message())
+                return
+
         if dest is None:
             utils.game_print("Can't go %s from here." % name)
             utils.save_sound(audio.FAILURE_SOUND)
@@ -273,11 +304,11 @@ class Player(GameEntity):
             utils.save_sound(audio.FAILURE_SOUND)
             return
 
-        move_message = "You %s %s" % (word, name)
-
+        self.move_history.append(self.current.tile_id)
         self.current = dest
+        move_message = "You %s %s" % (word, name)
         utils.game_print(move_message + ".")
-        utils.game_print(self.current_state())
+        utils.game_print(self.describe_current_tile())
         self.decrement_energy(MOVE_ENERGY_COST)
         return dest
 
@@ -380,41 +411,59 @@ class Player(GameEntity):
             % (word, name, utils.list_to_english(items), extra))
 
     def _loot(self, word, person):
-        if not person.coins and not person.items:
+        if not person.items:
             utils.game_print('\nYou %s %s, and find nothing.'
                 % (word, person.name))
             return
 
         print_items = []
-        if person.coins:
-            print_items.append('%d coins' % person.coins)
-            self.coins += person.coins
-            person.coins = 0
+        if not self.inventory:
+            self._loot_message(word, person.name,
+                self._items_to_words(person.items), "However, you have no "
+                "bag to carry items, so you can't take anything.")
+            return
 
-        if person.items:
-            if not self.inventory:
-                self._loot_message(word, person.name,
-                    self._items_to_words(person.items), "However, you have no "
-                    "bag to carry items, so you can't take anything.")
+        if len(self.inventory.items) >= self.inventory.capacity:
+            self._loot_message(word, person.name,
+                self._items_to_words(person.items), "However, your bag is "
+                "full, so you can't take anything.")
+            return
+
+        remaining = (self.inventory.capacity - len(self.inventory.items))
+        for _ in range(remaining):
+            print_items.append(str(person.items[0]))
+            if not self.inventory.add_item(person.items[0]):
                 return
-
-            if len(self.inventory.items) >= self.inventory.capacity:
-                self._loot_message(word, person.name,
-                    self._items_to_words(person.items), "However, your bag is "
-                    "full, so you can't take anything.")
-                return
-
-            remaining = (self.inventory.capacity - len(self.inventory.items))
-            for _ in range(remaining):
-                print_items.append(str(person.items[0]))
-                if not self.inventory.add_item(person.items[0]):
-                    return
 
         self._loot_message(word, person.name, print_items)
 
-    def current_state(self):
+    def describe_current_tile_contents(self, capitalize=True):
+        ret =""
+        scene = self.current.describe_scene()
+        if scene:
+            ret += scene
+
+        items = self.current.describe_items()
+        if items:
+            ret += items
+
+        people = self.current.describe_people()
+        if people:
+            ret += people
+
+        if capitalize:
+            ret = utils.capitalize(ret)
+
+        return ret
+
+    def darkness_message(self):
+        return "It is pitch black, and you cannot see anything."
+
+    def describe_current_tile(self):
         """
-        Returns the full descriptive text for the current game state
+        Returns the full descriptive text for the tile player is currently on,
+        including everything contained in the tile and all adjacent tiles
+        visible to the player
 
         :return: text description of current game state
         :rtype: str
@@ -428,21 +477,19 @@ class Player(GameEntity):
             ret += "%s. " % self.current.first_visit_message.rstrip('.')
             self.current.first_visit = False
 
-        summary = self.current.summary()
-        if summary:
-            ret += summary
+        if self.can_see():
+            summary = self.current.summary()
+            if summary:
+                ret += summary
 
-        scene = self.current.describe_scene()
-        if scene:
-            ret += scene
+            ret += self.describe_current_tile_contents(capitalize=False)
+        else:
+            ret += self.darkness_message() + " "
 
-        items = self.current.describe_items()
-        if items:
-            ret += items
-
-        people = self.current.describe_people()
-        if people:
-            ret += people
+            last = self.previous_tile()
+            if last is not None:
+                direction = self.current.direction_to(last)
+                ret += "To the %s is %s. " % (direction, last.name)
 
         return utils.capitalize(ret)
 

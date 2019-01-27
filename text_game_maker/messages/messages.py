@@ -4,6 +4,22 @@ def _randmsg(choices, *args):
     choice = random.choice(choices)
     return choice.format(*args)
 
+def dark_stumble_message():
+    return _randmsg([
+        "You stumble about blindly in the darkness, going nowhere.",
+        "You can't see where you're going. It is too dark.",
+        "You try to feel your way along in the dark, but it's hopeless. You "
+        "have no idea where you're going."
+    ])
+
+def dark_search_message():
+    return _randmsg([
+        "You grasp out into the darkness, finding nothing to grab",
+        "You can't see anything right now, it is too dark.",
+        "You stretch out your hands and feel around in the darkness, searching,"
+        " to no avail. You won't be able to find anything without some light."
+    ])
+
 def dontknow_message(ambiguous_action):
     return _randmsg([
         "Don't know how to {0}.",

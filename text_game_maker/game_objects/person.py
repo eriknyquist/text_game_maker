@@ -2,7 +2,6 @@ import sys
 import copy
 
 import text_game_maker
-from text_game_maker.builder import map_builder
 from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.utils import utils
 
@@ -11,7 +10,7 @@ class Person(GameEntity):
     Represents a person that the player can interact with
     """
 
-    def __init__(self, name, location, items=[], alive=True, coins=50):
+    def __init__(self, name, location, items=[], alive=True):
         """
         Initialises a Person instance
 
@@ -20,7 +19,6 @@ class Person(GameEntity):
             "squatting in the corner"
         :param bool alive: Initial living state of person .If True, person will\
             be alive. If false, person will be dead
-        :param int coins: Number of coins this person has
         :param list items: List of Items held by this person
         """
 
@@ -35,7 +33,6 @@ class Person(GameEntity):
 
         self.location = location
         self.alive = alive
-        self.coins = coins
 
         for item in items:
             self.add_item(item)
@@ -55,7 +52,7 @@ class Person(GameEntity):
         :param str msg: message to print informing player of person's death
         """
 
-        p = map_builder.find_person(player, self.name)
+        p = utils.find_person(player, self.name)
 
         self.alive = False
         self.name = "%s's corpse" % self.name
@@ -77,52 +74,3 @@ class Person(GameEntity):
         """
 
         utils.game_print('%s says:  "%s"' % (self.name, msg))
-
-    def buy_equipped_item(self, player):
-        """
-        Ask player to buy equipped item. Expects player to have something
-        equipped (so check before uing this method).
-
-        If player's equipped item costs more coins than this person has, the
-        person will automatically ask if the player will accept the lower
-        amount, and can still buy the item if the player says yes.
-
-        :param player: player object
-        :type player: text_game_maker.player.player.Player
-
-        :return: Returns the item if sale was successful, None otherwise
-        :rtype: text_game_maker.game_objects.item.Item
-        """
-
-        equipped = player.equipped
-        cost = equipped.value
-        msg = "Ah, I see you have %s %s." % (equipped)
-
-        if self.coins >= cost:
-            msg += " I would like to buy it for %d coins." % cost
-        else:
-            msg += (" I would like to buy it from you,\n"
-                    "but I only have %d coins. Will you accept that price\n"
-                    "instead?" % self.coins)
-            cost = self.coins
-
-        self.say(msg)
-
-        ret = utils.ask_yes_no("sell %s for %d coins?"
-            % (equipped.name, cost))
-
-        if ret < 0:
-            return None
-        elif ret:
-            # Transfer money
-            player.coins += cost
-            self.coins -= cost
-
-            # Transfer item
-            equipped.move(self.items)
-            player.equipped = None
-            utils.game_print("Sale completed.")
-            return equipped
-
-        utils.game_print("Sale cancelled")
-        return None
