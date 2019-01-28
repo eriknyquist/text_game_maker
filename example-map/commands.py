@@ -129,17 +129,18 @@ def _do_allstar_song(player, word, remaining):
 
 def _do_innocuous(player, word, remaining):
     utils.game_print(messages.strange_action_message(word))
+    return True
 
 def _do_eat(player, word, item_name):
     if not item_name or item_name == "":
         utils._wrap_print("What do you want to %s?" % word)
-        return
+        return False
 
     fields = utils.english_to_list(item_name)
     if len(fields) > 1:
         utils._wrap_print("Whoa there! how about eating one thing at "
             "a time? And don't talk with your mouth full.")
-        return
+        return False
 
     item = utils.find_any_item(player, item_name)
     if not item:
@@ -147,25 +148,30 @@ def _do_eat(player, word, item_name):
         if not item:
             utils._wrap_print(messages.no_item_message(item_name))
             utils.save_sound(audio.FAILURE_SOUND)
-            return
+            return False
 
     item.on_eat(player, word)
+    return True
 
 def _do_read(player, word, item_name):
+    if not player.can_see():
+        utils._wrap_print(messages.dark_search_message())
+        return False
+
     if not item_name or item_name == "":
         utils._wrap_print("What do you want to %s?" % word)
-        return
+        return False
 
     fields = utils.english_to_list(item_name)
     if len(fields) > 1:
         utils._wrap_print("Really, now. You can only read *one* thing"
             " at a time.")
-        return
+        return False
 
     item = utils.find_any_item(player, item_name)
     if item:
         item.on_read(player)
-        return
+        return True
 
     if utils.is_location(player, item_name):
         utils._wrap_print(messages.nonsensical_action_message(
@@ -174,20 +180,21 @@ def _do_read(player, word, item_name):
         utils._wrap_print(messages.no_item_message(item_name))
 
     utils.save_sound(audio.FAILURE_SOUND)
+    return False
 
 def _do_unlock(player, word, remaining):
     if not player.can_see():
         utils._wrap_print(messages.dark_search_message())
-        return
+        return False
 
     if not remaining or remaining == "":
         utils._wrap_print("What do you want to %s?" % word)
-        return
+        return False
 
     door_name, item_name = _split_word(remaining, 'with')
     if door_name is None:
         utils._wrap_print("What do you want to %s %s with?" % (word, remaining))
-        return
+        return False
 
     door = None
     for tile in player.current.iterate_directions():
@@ -197,41 +204,44 @@ def _do_unlock(player, word, remaining):
 
     if door is None:
         utils._wrap_print(messages.no_item_message(door_name))
-        return
+        return False
 
     item = utils.find_any_item(player, item_name)
     if not item:
         utils._wrap_print(messages.no_item_message(item_name))
-        return
+        return False
 
     door.on_unlock(player, item)
+    return True
 
 def _do_burn(player, word, item_name):
     lighter = utils.find_inventory_item_class(player, Lighter)
     if lighter is None:
         utils._wrap_print("You can't %s anything without a lighter."
             % word)
-        return
+        return False
 
     if not item_name or item_name == "":
         utils._wrap_print("What do you want to %s?" % word)
-        return
+        return False
 
     fields = utils.english_to_list(item_name)
     if len(fields) > 1:
         utils._wrap_print("Slow down, pyromaniac. We burn things one "
             "at a time around here.")
-        return
+        return False
 
     item = utils.find_any_item(player, item_name)
     if item:
         item.on_burn(player)
-        return
+        return True
 
     if utils.is_location(player, item_name):
         utils._wrap_print(messages.burn_noncombustible_message(item_name))
     else:
         utils._wrap_print(messages.no_item_message(item_name))
+
+    return False
 
 def _put(item, dest_item, location_name, location):
     if item is dest_item:
@@ -269,17 +279,17 @@ def _do_put(player, word, remaining):
         if item_name is None:
             utils._wrap_print(messages.dontknow_message('%s %s'
                 % (word, remaining)))
-            return
+            return False
 
         dest_item = utils.find_any_item(player, dest_name)
         if not dest_item:
             utils._wrap_print(messages.dontknow_message('%s %s'
                 % (word, remaining)))
-            return
+            return False
 
         if not dest_item.is_container:
             utils._wrap_print("%s cannot contain other items." % dest_item.name)
-            return
+            return False
 
         location = dest_item.items
         location_name = 'in the %s' % dest_item.name
@@ -293,7 +303,7 @@ def _do_put(player, word, remaining):
         if not items:
             utils._wrap_print("Nothing to %s." % word)
             utils.save_sound(audio.FAILURE_SOUND)
-            return
+            return False
 
     elif fields:
         for name in fields:
@@ -301,32 +311,33 @@ def _do_put(player, word, remaining):
             if not item:
                 utils._wrap_print(messages.no_item_message(name))
                 utils.save_sound(audio.FAILURE_SOUND)
-                return
+                return False
 
             items.append(item)
 
     if not items:
         utils._wrap_print(messages.no_item_message(item_name))
         utils.save_sound(audio.FAILURE_SOUND)
-        return
+        return False
 
     for item in items:
         if not dest_item.add_item(item):
-            return
+            return False
 
     real_names = [x.name for x in items]
     utils.game_print("You %s the %s %s"
             % (word, utils.list_to_english(real_names), location_name))
+    return True
 
 def _do_look_inside(player, word, remaining):
     if not remaining or remaining == "":
         utils._wrap_print("What do you want to %s?" % word)
-        return
+        return False
 
     item = utils.find_any_item(player, remaining)
     if not item:
         utils._wrap_print(messages.no_item_message(remaining))
-        return
+        return False
 
     if item.is_container and item.items:
         contains = utils.list_to_english(
@@ -335,6 +346,7 @@ def _do_look_inside(player, word, remaining):
         contains = "nothing"
 
     utils.game_print("%s contains %s." % (item.name, contains))
+    return True
 
 def _take(player, item):
     # If on_take callback returns false, abort adding this item
@@ -350,7 +362,7 @@ def _do_take(player, word, remaining):
 
     if not remaining or remaining == "":
         utils._wrap_print("What do you want to %s?" % word)
-        return
+        return False
 
     item_name, dest_name = _split_word(remaining, 'from')
     if dest_name is None:
@@ -361,7 +373,7 @@ def _do_take(player, word, remaining):
         if not dest_item:
             utils._wrap_print(messages.dontknow_message('%s %s'
                 % (word, remaining)))
-            return
+            return False
 
         locations = [dest_item.items]
 
@@ -380,26 +392,26 @@ def _do_take(player, word, remaining):
             if not item:
                 _no_item_message(player, name)
                 utils.save_sound(audio.FAILURE_SOUND)
-                return
+                return False
 
             items.append(item)
 
     if not items:
         _nothing_message(player, word)
         utils.save_sound(audio.FAILURE_SOUND)
-        return
+        return False
 
     names = []
     for item in items:
         if item:
             if not _take(player, item):
-                return
+                return False
 
             names.append(item.name)
 
     msg = utils.list_to_english(names)
     utils.game_print('%s added to inventory' % msg)
-    return
+    return True
 
 def _drop(player, items):
     equipped = None
@@ -423,7 +435,7 @@ def _drop(player, items):
 def _do_drop(player, word, item_name):
     if not item_name or item_name == "":
         utils._wrap_print("What do you want to drop?")
-        return
+        return False
 
     item_names = []
     if item_name in EVERYTHING_WORDS:
@@ -440,7 +452,7 @@ def _do_drop(player, word, item_name):
     if not item_names:
         utils._wrap_print("Nothing to %s." % word)
         utils.save_sound(audio.FAILURE_SOUND)
-        return
+        return False
 
     items = []
     for name in item_names:
@@ -448,16 +460,17 @@ def _do_drop(player, word, item_name):
         if not item:
             utils._wrap_print("No %s in your inventory to %s."
                 % (name, word))
-            return
+            return False
 
         items.append(item)
 
     _drop(player, items)
+    return True
 
 def _do_speak(player, word, name):
     if not name or name == "":
         utils._wrap_print("Who do you want to speak to?")
-        return
+        return False
 
     p = utils.find_person(player, name)
     if not p:
@@ -465,7 +478,7 @@ def _do_speak(player, word, name):
         if not p:
             utils._wrap_print("Don't know how to %s %s" % (word, name))
             utils.save_sound(audio.FAILURE_SOUND)
-            return
+            return False
 
     utils.game_print('You speak to %s.' % p.prep)
     if p.alive:
@@ -475,22 +488,24 @@ def _do_speak(player, word, name):
     else:
         utils.game_print('%s says nothing.' % p.prep)
 
+    return True
+
 def _do_equip(player, word, item_name):
     if not item_name or item_name == "":
         utils._wrap_print("Which inventory item do you want to %s?"
             % word)
-        return
+        return False
 
     item = utils.find_inventory_item(player, item_name)
     if not item:
         utils._wrap_print("No %s in your inventory to %s"
             % (item_name, word))
         utils.save_sound(audio.FAILURE_SOUND)
-        return
+        return False
 
     if item is player.equipped:
         utils.game_print("%s is already equipped." % item.name)
-        return
+        return False
 
     # Move any already-equipped items back to unequipped
     if player.equipped:
@@ -499,26 +514,28 @@ def _do_equip(player, word, item_name):
     item.on_equip(player)
     player.equipped = item
     player.equipped.delete()
+    return True
 
 def _do_unequip(player, word, fields):
     if not player.equipped:
         utils.game_print('Nothing is currently equipped.')
-        return
+        return False
 
     if player.inventory_space() == 0:
         _drop(player, [player.equipped])
-        return
+        return False
 
     utils.game_print("Unequipped %s." % player.equipped.name)
     player.equipped.add_to_player_inventory(player)
     item = player.equipped
     player.equipped = None
     item.on_unequip(player)
+    return True
 
 def _do_loot(player, word, name):
     if not name or name == "":
         utils._wrap_print("Who do you want to %s?" % word)
-        return
+        return False
 
     p = utils.find_person(player, name)
     if not p:
@@ -526,7 +543,7 @@ def _do_loot(player, word, name):
         if not p:
             utils.game_print("Not sure how to %s %s" % (word, name))
             utils.save_sound(audio.FAILURE_SOUND)
-            return
+            return False
 
     if p.alive:
         utils.game_print("You are dead.")
@@ -538,6 +555,8 @@ def _do_loot(player, word, name):
     else:
         player._loot(word, p)
 
+    return True
+
 def _do_suicide(player, word, remaining):
     utils.game_print(messages.suicide_message())
     player.death()
@@ -545,7 +564,7 @@ def _do_suicide(player, word, remaining):
 def _do_inspect(player, word, item):
     if item == '':
         _do_look(player, word, item)
-        return
+        return True
 
     target = utils.find_any_item(player, item)
     if not target:
@@ -553,45 +572,51 @@ def _do_inspect(player, word, item):
 
     if target:
         target.on_look(player)
-        return
+        return True
 
     tile = utils.find_tile(player, item)
     if tile:
         utils.game_print("%s." % tile.name)
+        return True
     else:
         utils._wrap_print(
             messages.dontknow_message("%s %s" % (word, item)))
 
         utils.save_sound(audio.FAILURE_SOUND)
 
+    return False
+
 
 def _do_look(player, word, item):
     if item != '':
-        _do_inspect(player, word, item)
-        return
+        return _do_inspect(player, word, item)
 
     utils.game_print(player.describe_current_tile())
+    return True
 
 def _do_look_under(player, word, item):
     if item == '':
         utils._wrap_print("What do you want to %s?" % word)
         utils.save_sound(audio.FAILURE_SOUND)
-        return
+        return False
 
     target = utils.find_any_item(player, item)
     if target:
         target.on_look_under(player)
-        return
+        return True
 
     utils._wrap_print(messages.dontknow_message("%s %s"
         % (word, item)))
     utils.save_sound(audio.FAILURE_SOUND)
+    return False
 
 def _do_picknose(player, word, remaining):
     utils.game_print(messages.gross_action_message("pick your nose"))
+    return True
 
 def _do_sleep(player, word, remaining):
     utils.game_print(messages.sleep_message(word))
+    return True
 
 def build_parser(parser):
     commands = [

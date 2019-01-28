@@ -325,7 +325,7 @@ class InventoryBag(Container):
         self.capacity = 10
         self.size = ITEM_SIZE_MEDIUM
 
-    def on_take(self, player):
+    def add_to_player_inventory(self, player):
         # Copy existing player items from old bag
         if player.inventory and player.inventory.items:
             for i in range(len(player.inventory.items)):
@@ -345,6 +345,7 @@ class InventoryBag(Container):
 
         utils.save_sound(audio.NEW_ITEM_SOUND)
         utils.game_print("You now have a %s." % self.name)
+        return True
 
 class PaperBag(Container):
     """

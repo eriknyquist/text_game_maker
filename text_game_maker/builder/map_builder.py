@@ -80,7 +80,7 @@ def _move_direction(player, word, direction):
 def _do_move(player, word, direction):
     if not direction or direction == "":
         utils._wrap_print("Where do you want to go?")
-        return
+        return False
 
     if direction.startswith('to the '):
         direction = direction[7:]
@@ -88,14 +88,15 @@ def _do_move(player, word, direction):
         direction = direction[3:]
 
     if _move_direction(player, word, direction):
-        return
+        return True
 
     tile = utils.find_tile(player, direction)
     if tile:
         if _move_direction(player, word, player.current.direction_to(tile)):
-            return
+            return True
 
     utils._wrap_print("Don't know how to %s %s." % (word, direction))
+    return False
 
 def _do_craft(player, word, item):
     if not item or item == "":
@@ -104,13 +105,17 @@ def _do_craft(player, word, item):
         if helptext:
             utils._wrap_print(helptext)
 
-        return
+        return False
 
     fields = item.split()
     if (len(fields) > 1) and fields[0] == 'a':
         item = ' '.join(fields[1:])
 
-    crafting.craft(item, word, player)
+    item = crafting.craft(item, word, player)
+    if not item:
+        return False
+
+    return True
 
 def _get_next_unused_save_id(save_dir):
     default_num = 1
@@ -357,6 +362,8 @@ def _do_inventory_listing(player, word, setting):
     print(_container_listing(player.pockets, fmt, name="pockets",
             bottom_border=True))
 
+    return True
+
 def get_instance():
     return info['instance']
 
@@ -411,13 +418,16 @@ class MapBuilder(object):
             print('\n' + action)
 
         if self._is_shorthand_direction(action):
-            _do_move(player, 'go', action)
+            if not _do_move(player, 'go', action):
+                return
         else:
             i, cmd = utils.run_fsm(self.fsm, action)
-            if cmd:
-                cmd.callback(player, action[:i].strip(), action[i:].strip())
-            else:
+            if not cmd:
                 utils.save_sound(audio.ERROR_SOUND)
+                return
+
+            ret = cmd.callback(player, action[:i].strip(), action[i:].strip())
+            if not ret:
                 return
 
         utils.set_last_command(action)

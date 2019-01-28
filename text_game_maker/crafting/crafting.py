@@ -73,7 +73,7 @@ def craft(name, word, player):
     :param str name: name of the item to craft
     :param str word: command/action word used by player
     :param Player player: player object
-    :return: crafted item
+    :return: crafted item, or None if crafting fails
     :rtype: text_game_maker.game_objects.items.Item
     """
     items = []
@@ -90,7 +90,7 @@ def craft(name, word, player):
     if (not items) or (not item):
         utils.save_sound(audio.FAILURE_SOUND)
         utils.game_print("Don't know how to %s %s" % (word, name))
-        return
+        return None
 
     ingredients = []
 
@@ -103,7 +103,7 @@ def craft(name, word, player):
         ingredient = _find_item(i.name, player_items)
         if ingredient is None:
             _need_items(name, word, items)
-            return
+            return None
 
         ingredients.append(ingredient)
 
@@ -113,3 +113,4 @@ def craft(name, word, player):
     item.add_to_player_inventory(player)
     utils.save_sound(audio.NEW_ITEM_SOUND)
     utils.game_print("Created %s." % item.name)
+    return item
