@@ -325,12 +325,17 @@ def _do_put(player, word, remaining):
         utils.save_sound(audio.FAILURE_SOUND)
         return False
 
+    real_names = []
     for item in items:
         if not dest_item.add_item(item):
+            if len(real_names) > 0:
+                break
+
             return False
 
-    real_names = [x.name for x in items]
-    utils.game_print("You %s the %s %s"
+        real_names.append(item.name)
+
+    utils.game_print("You %s the %s %s."
             % (word, utils.list_to_english(real_names), location_name))
     return True
 
@@ -408,14 +413,18 @@ def _do_take(player, word, remaining):
 
     names = []
     for item in items:
-        if item:
-            if not _take(player, item):
-                return False
+        if not item:
+            continue
 
-            names.append(item.name)
+        if not _take(player, item):
+            if len(names) > 0:
+                break
 
-    msg = utils.list_to_english(names)
-    utils.game_print('%s added to inventory' % msg)
+            return False
+
+        names.append(item.name)
+
+    utils.game_print('%s added to inventory.' % utils.list_to_english(names))
     return True
 
 def _drop(player, items):
@@ -481,7 +490,7 @@ def _do_speak(player, word, name):
     if not p:
         p = utils.find_item(player, name)
         if not p:
-            utils._wrap_print("Don't know how to %s %s" % (word, name))
+            utils._wrap_print("Don't know how to %s %s." % (word, name))
             utils.save_sound(audio.FAILURE_SOUND)
             return False
 
@@ -503,7 +512,7 @@ def _do_equip(player, word, item_name):
 
     item = utils.find_inventory_item(player, item_name)
     if not item:
-        utils._wrap_print("No %s in your inventory to %s"
+        utils._wrap_print("No %s in your inventory to %s."
             % (item_name, word))
         utils.save_sound(audio.FAILURE_SOUND)
         return False
@@ -546,7 +555,7 @@ def _do_loot(player, word, name):
     if not p:
         p = utils.find_item(player, name)
         if not p:
-            utils.game_print("Not sure how to %s %s" % (word, name))
+            utils.game_print("Not sure how to %s %s." % (word, name))
             utils.save_sound(audio.FAILURE_SOUND)
             return False
 
