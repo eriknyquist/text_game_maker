@@ -103,6 +103,8 @@ class GameEntity(object):
     :ivar list home: list that this Item instance lives inside; required for\
         the deleting/moving items within the game world
     :ivar bool is_container: defines whether this item can contain other items
+    :ivar bool is_flame_source: defines whether this item can be used as a \
+        flame source
     :ivar bool is_light_source: defines whether this item can be used as a \
         light source
     :ivar int capacity: number of items this item can contain (if container)
@@ -130,6 +132,8 @@ class GameEntity(object):
         self.home = None
         self.is_container = False
         self.is_light_source = False
+        self.is_flame_source = False
+        self.is_flame_source = False
         self.capacity = 0
         self.items = []
         self.size = 1

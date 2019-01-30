@@ -5,7 +5,7 @@ import text_game_maker
 from text_game_maker.audio import audio
 from text_game_maker.utils import utils
 from text_game_maker.messages import messages
-from text_game_maker.game_objects.items import Lighter
+from text_game_maker.game_objects.items import FlameSource
 
 EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
@@ -215,9 +215,9 @@ def _do_unlock(player, word, remaining):
     return True
 
 def _do_burn(player, word, item_name):
-    lighter = utils.find_inventory_item_class(player, Lighter)
-    if lighter is None:
-        utils._wrap_print("You can't %s anything without a lighter."
+    fire = utils.find_inventory_item_class(player, FlameSource)
+    if fire is None:
+        utils._wrap_print("You can't %s anything without a flame source."
             % word)
         return False
 
@@ -231,9 +231,14 @@ def _do_burn(player, word, item_name):
             "at a time around here.")
         return False
 
+    if fire.spent:
+        utils._wrap_print(fire.spent_use_message)
+        return False
+
     item = utils.find_any_item(player, item_name)
     if item:
         item.on_burn(player)
+        fire.decrement_fuel()
         return True
 
     if utils.is_location(player, item_name):

@@ -1,7 +1,7 @@
 import text_game_maker
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
-    Furniture
+    Furniture, Matches, Flashlight
 )
 
 from text_game_maker.crafting import crafting
@@ -74,9 +74,10 @@ def other_cell(builder):
     builder.set_description("in a small cell identical to your own cell.")
     builder.set_dark(True)
 
-    coins = Coins(location="on the floor", value=7)
     paperbag = PaperBag("a", "paper bag", location="on the bunk")
-    paperbag.add_item(coins)
+    matches = Matches()
+    coins = Coins(value=7)
+    paperbag.add_items([coins, matches])
 
     bunk = Furniture("a", "narrow bunk", location="in the corner",
         combustible=False)
@@ -90,6 +91,7 @@ def prison_office(builder):
     builder.set_first_visit_message("It looks like the office has been ransacked.")
     builder.set_dark(True)
 
+    flashlight = Flashlight(location="on the desk")
     coins = Coins(location="on the desk", value=32)
     desk = Furniture("a", "small wooden desk", location="against the wall",
         combustible=False)
@@ -105,4 +107,4 @@ def prison_office(builder):
 
     cabinet = LargeContainer("a", "filing cabinet", location="in the corner")
     cabinet.add_item(idcard)
-    builder.add_items([desk, chair, cabinet, coins])
+    builder.add_items([desk, chair, cabinet, coins, flashlight])

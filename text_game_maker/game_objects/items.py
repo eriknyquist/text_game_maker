@@ -138,18 +138,51 @@ class Item(GameEntity):
 
         return self.name
 
-class Lighter(Item):
-    def __init__(self, **kwargs):
-        super(Lighter, self).__init__("a", "lighter", **kwargs)
+class FuelConsumer(Item):
+    def __init__(self, *args, **kwargs):
+        super(FuelConsumer, self).__init__(*args, **kwargs)
+        self.fuel = 100.0
+        self.fuel_decrement = 1.0
+        self.spent = False
+        self.spent_name = "dead %s" % self.name
+        self.spent_use_message = "%s is dead." % self.name
+
+    def on_spent(self):
+        pass
+
+    def decrement_fuel(self):
+        if self.spent:
+            return
+
+        self.fuel -= self.fuel_decrement
+
+        if self.fuel <= 0.0:
+            self.spent = True
+            self.name = self.spent_name
+            self.on_spent()
+
+class LightSource(FuelConsumer):
+    """
+    Base class for any item that can act as a light source
+    """
+    def __init__(self, *args, **kwargs):
+        super(LightSource, self).__init__(*args, **kwargs)
         self.is_light_source = True
+        self.equip_msg = ("You take out the %s, illuminating everything "
+                                "around you." % self.name)
+        self.spent_equip_msg = ("You take out the %s, which does not work "
+            "anymore." % self.name)
+
+    def on_spent(self):
+        self.is_light_source = False
+        self.equip_msg = self.spent_equip_msg
 
     def on_equip(self, player):
         if player.can_see():
-            super(Lighter, self).on_equip(player)
+            super(LightSource, self).on_equip(player)
             return
 
-        utils.game_print("You take out the %s, illuminating everything around "
-            "you with a soft, pulsating orange glow." % self.name)
+        utils.game_print(self.equip_msg)
 
         txt = player.current.summary() + player.describe_current_tile_contents()
         if player.current.first_visit:
@@ -160,11 +193,37 @@ class Lighter(Item):
         utils.game_print(txt)
 
     def on_unequip(self, player):
-        if not player.can_see():
+        if (not player.can_see()) and (not self.spent):
             utils.game_print(player.darkness_message())
 
-    def on_burn(self, player):
-        utils.game_print("You can't burn the %s with itself."
+class FlameSource(LightSource):
+    def __init__(self, *args, **kwargs):
+        super(FlameSource, self).__init__(*args, **kwargs)
+        self.is_flame_source = True
+
+class Flashlight(LightSource):
+    def __init__(self, *args, **kwargs):
+        super(Flashlight, self).__init__("a", "flashlight", **kwargs)
+        self.fuel = 40.0
+        self.equip_msg = ("You take out the %s, and switch it on. It has "
+            "a wide beam, and casts a bright white light across everything in "
+            "front of you." % self.name)
+
+class Lighter(FlameSource):
+    def __init__(self, *args, **kwargs):
+        super(Lighter, self).__init__("a", "lighter", **kwargs)
+        self.fuel = 10.0
+        self.equip_msg = ("You take out the %s, illuminating everything "
+            "around you with a dancing yellow glow." % self.name)
+
+class Matches(FlameSource):
+    def __init__(self, *args, **kwargs):
+        super(Matches, self).__init__("a", "box of matches", **kwargs)
+        self.fuel = 10.0
+        self.spent_use_message = "%s is empty." % self.name
+        self.equip_msg = ("You strike a match, illuminating everything "
+            "around you with a soft orange glow.")
+        self.spent_equip_msg = ("You take out the %s, which is empty."
             % self.name)
 
 class Weapon(Item):

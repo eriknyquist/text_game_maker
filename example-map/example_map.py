@@ -26,6 +26,13 @@ def lighter_equip_hint(player, turns):
     utils._wrap_print("Hint: say things like 'use lighter' or 'equip lighter' "
         "to use the lighter as a light source")
 
+@serializable_callback
+def light_source_decay_callback(player, turns):
+    if player.equipped and player.equipped.is_light_source:
+        player.equipped.decrement_fuel()
+
+    player.schedule_task(light_source_decay_callback, 1)
+
 # Called when the game starts
 def on_game_run(player):
     # read name from player
@@ -36,6 +43,7 @@ def on_game_run(player):
 
     # captialize with name.title() and set as player name
     player.set_name(name.title())
+    player.schedule_task(light_source_decay_callback, 1)
     player.schedule_task(lighter_equip_hint, 10)
 
 class ExampleMapRunner(runner.MapRunner):
