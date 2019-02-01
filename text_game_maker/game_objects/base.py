@@ -4,6 +4,7 @@ import text_game_maker
 from text_game_maker.messages import messages
 from text_game_maker.utils import utils
 from text_game_maker.audio import audio
+from text_game_maker.materials.materials import Material
 
 TYPE_KEY = '_type_key'
 
@@ -107,6 +108,7 @@ class GameEntity(object):
         flame source
     :ivar bool is_light_source: defines whether this item can be used as a \
         light source
+    :ivar Material material: material this item is made of
     :ivar int capacity: number of items this item can contain (if container)
     :ivar list items: items contained inside this item (if container)
     :ivar int size: size of this item; containers cannot contain items with a\
@@ -133,7 +135,7 @@ class GameEntity(object):
         self.is_container = False
         self.is_light_source = False
         self.is_flame_source = False
-        self.is_flame_source = False
+        self.material = Material.WOOD
         self.capacity = 0
         self.items = []
         self.size = 1
