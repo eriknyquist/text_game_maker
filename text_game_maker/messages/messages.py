@@ -87,7 +87,7 @@ def sleep_message(sleepword):
         "You curl up on the ground and {0}. Several hours later, you awake.",
         "For some unknown reason, and despite being a fictional character who "
         "does not need sleep and who lives inside a game that does not require"
-        "you to sleep, you {0}.",
+        " you to sleep, you {0}.",
         "For what we're sure must be good reasons, you {0} instead of actually"
         " doing something.",
         "Sure, you go ahead and {0}. We'll just set up the next bit of the game"

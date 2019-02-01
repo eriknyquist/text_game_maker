@@ -4,7 +4,7 @@ import text_game_maker
 from text_game_maker.messages import messages
 from text_game_maker.utils import utils
 from text_game_maker.audio import audio
-from text_game_maker.materials.materials import Material
+from text_game_maker.materials.materials import Material, get_properties
 
 TYPE_KEY = '_type_key'
 
@@ -274,6 +274,24 @@ class GameEntity(object):
         location.append(self)
         self.delete()
         self.home = location
+
+    def on_smell(self, player):
+        """
+        Called when player smells this item
+
+        :param text_game_maker.player.player.Player player: player object
+        """
+        utils.game_print("%s smells %s."
+            % (self.name, get_properties(self.material).smell))
+
+    def on_taste(self, player):
+        """
+        Called when player tastes this item
+
+        :param text_game_maker.player.player.Player player: player object
+        """
+        utils.game_print("%s tastes %s."
+            % (self.name, get_properties(self.material).taste))
 
     def on_equip(self, player):
         """

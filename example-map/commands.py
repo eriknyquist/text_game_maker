@@ -11,6 +11,14 @@ EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
 ]
 
+SMELL_WORDS = [
+    'smell', 'sniff'
+]
+
+TASTE_WORDS = [
+    'taste', 'lick'
+]
+
 SUICIDE_WORDS = [
     "kill self", "kill myself", "suicide", "kill player", "die",
     "goodbye cruel world"
@@ -244,7 +252,66 @@ def _do_burn(player, word, item_name):
     if utils.is_location(player, item_name):
         utils._wrap_print(messages.burn_noncombustible_message(item_name))
     else:
+        if player.can_see():
+            utils._wrap_print(messages.no_item_message(item_name))
+        else:
+            utils._wrap_print(messages.dark_search_message())
+
+    return False
+
+def _do_smell(player, word, item_name):
+    if not item_name or item_name == "":
+        utils._wrap_print("What do you want to %s?" % word)
+        return False
+
+    fields = utils.english_to_list(item_name)
+    if len(fields) > 1:
+        utils._wrap_print("Slow down, big-nose. You can only %s one thing at a "
+            "time." % word)
+        return False
+
+    item = utils.find_any_item(player, item_name)
+    if item:
+        item.on_smell(player)
+        return True
+
+    if utils.is_location(player, item_name):
+        utils._wrap_print("%s doesn't smell like anything in particular."
+            % item_name)
+        return True
+
+    if player.can_see():
         utils._wrap_print(messages.no_item_message(item_name))
+    else:
+        utils._wrap_print(messages.dark_search_message())
+
+    return False
+
+def _do_taste(player, word, item_name):
+    if not item_name or item_name == "":
+        utils._wrap_print("What do you want to %s?" % word)
+        return False
+
+    fields = utils.english_to_list(item_name)
+    if len(fields) > 1:
+        utils._wrap_print("Slow down, greedy. You can only %s one thing at a "
+            "time." % word)
+        return False
+
+    item = utils.find_any_item(player, item_name)
+    if item:
+        item.on_taste(player)
+        return True
+
+    if utils.is_location(player, item_name):
+        utils._wrap_print("%s doesn't taste like anything in particular."
+            % item_name)
+        return True
+
+    if player.can_see():
+        utils._wrap_print(messages.no_item_message(item_name))
+    else:
+        utils._wrap_print(messages.dark_search_message())
 
     return False
 
@@ -658,6 +725,10 @@ def build_parser(parser):
             "(if any)", "%s <item>"],
 
         [EAT_WORDS, _do_eat, "eat something", "%s <item>"],
+
+        [SMELL_WORDS, _do_smell, "smell an item", "%s <item>"],
+
+        [TASTE_WORDS, _do_taste, "taste an item", "%s <item>"],
 
         [LOOT_WORDS, _do_loot, "attempt to loot a person by name",
             "%s <person>"],

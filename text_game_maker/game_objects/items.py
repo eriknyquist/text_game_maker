@@ -1,5 +1,5 @@
 from text_game_maker.game_objects.base import GameEntity
-from text_game_maker.materials.materials import Material
+from text_game_maker.materials.materials import Material, get_properties
 from text_game_maker.audio import audio
 from text_game_maker.crafting import crafting
 from text_game_maker.utils import utils
@@ -69,6 +69,24 @@ class Coins(Item):
             self.verb = "are"
             self.name += "s"
 
+    def on_taste(self, player):
+        tasteword = "taste"
+
+        if self.value == 1:
+            smellword += "s"
+
+        taste = get_properties(self.material).taste
+        utils.game_print("%s %s %s." % (self.name, tasteword, taste))
+
+    def on_smell(self, player):
+        smellword = "smell"
+
+        if self.value == 1:
+            smellword += "s"
+
+        smell = get_properties(self.material).smell
+        utils.game_print("%s %s %s." % (self.name, smellword, smell))
+
     def add_to_player_inventory(self, player):
         other_coins = utils.find_inventory_item_class(player, Coins)
         if not other_coins:
@@ -81,11 +99,11 @@ class Coins(Item):
 
 class Paper(Item):
     def __init__(self, prefix="", name="", **kwargs):
-        self.material = Material.PAPER
         self.paragraphs = []
         self.header = None
         self.footer = None
         super(Paper, self).__init__(prefix, name, **kwargs)
+        self.material = Material.PAPER
 
     def paragraphs_text(self):
         ret = []
