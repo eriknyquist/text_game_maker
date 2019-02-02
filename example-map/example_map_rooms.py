@@ -1,7 +1,7 @@
 import text_game_maker
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
-    Furniture, Matches, Flashlight
+    Furniture, Matches, Flashlight, Battery
 )
 
 from text_game_maker.crafting import crafting
@@ -74,10 +74,11 @@ def other_cell(builder):
     builder.set_description("in a small cell identical to your own cell.")
     builder.set_dark(True)
 
+    battery = Battery()
     paperbag = PaperBag("a", "paper bag", location="on the bunk")
     matches = Matches()
     coins = Coins(value=7)
-    paperbag.add_items([coins, matches])
+    paperbag.add_items([coins, matches, battery])
 
     bunk = Furniture("a", "narrow bunk", location="in the corner",
         combustible=False)

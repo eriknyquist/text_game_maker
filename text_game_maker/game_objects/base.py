@@ -135,6 +135,7 @@ class GameEntity(object):
         self.is_container = False
         self.is_light_source = False
         self.is_flame_source = False
+        self.is_electricity_source = False
         self.material = Material.WOOD
         self.capacity = 0
         self.items = []

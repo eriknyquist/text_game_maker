@@ -139,15 +139,31 @@ class Item(GameEntity):
 
 class FuelConsumer(Item):
     def __init__(self, *args, **kwargs):
-        super(FuelConsumer, self).__init__(*args, **kwargs)
-        self.fuel = 100.0
+        self.max_fuel = 100.0
         self.fuel_decrement = 1.0
+        super(FuelConsumer, self).__init__(*args, **kwargs)
+
+        self.fuel = self.max_fuel
         self.spent = False
+        self.original_name = None
         self.spent_name = "dead %s" % self.name
         self.spent_use_message = "%s is dead." % self.name
 
-    def on_spent(self):
+    def on_fuel_empty(self):
         pass
+
+    def on_refuel(self):
+        pass
+
+    def refuel(self, fuel=None):
+        if fuel is None:
+            fuel = self.max_fuel
+
+        self.fuel = min(self.max_fuel, fuel)
+        if (self.fuel > 0) and self.spent:
+            self.spent = False
+            self.name = self.original_name
+            self.on_refuel()
 
     def decrement_fuel(self):
         if self.spent:
@@ -157,8 +173,9 @@ class FuelConsumer(Item):
 
         if self.fuel <= 0.0:
             self.spent = True
+            self.original_name = self.name
             self.name = self.spent_name
-            self.on_spent()
+            self.on_fuel_empty()
 
 class LightSource(FuelConsumer):
     """
@@ -171,10 +188,17 @@ class LightSource(FuelConsumer):
                                 "around you." % self.name)
         self.spent_equip_msg = ("You take out the %s, which does not work "
             "anymore." % self.name)
+        self.original_equip_msg = self.equip_msg
 
-    def on_spent(self):
+    def on_fuel_empty(self):
         self.is_light_source = False
+        self.original_equip_msg = self.equip_msg
         self.equip_msg = self.spent_equip_msg
+
+    def on_refuel(self):
+        self.is_light_source = True
+        self.equip_msg = self.original_equip_msg
+        utils.game_print("%s is working again." % self.name)
 
     def on_equip(self, player):
         if player.can_see():
@@ -195,7 +219,34 @@ class LightSource(FuelConsumer):
         if (not player.can_see()) and (not self.spent):
             utils.game_print(player.darkness_message())
 
+class ElectricLightSource(LightSource):
+    """
+    Base class for an item that can be used as a light source, and can be
+    rejuvenated with batteries when dead
+    """
+    def __init__(self, *args, **kwargs):
+        super(ElectricLightSource, self).__init__(*args, **kwargs)
+        self.is_container = True
+        self.capacity = 1
+
+    def add_item(self, item):
+        if not item.is_electricity_source:
+            utils._wrap_print(messages.pointless_action_message(
+                "put the %s in the %s" % (item.name, self.name)))
+            return
+
+        if item.size > self.size:
+            utils._wrap_print(messages.container_too_small_message(item.name,
+                self.name))
+            return
+
+        self.refuel(item.fuel)
+        item.delete()
+
 class FlameSource(LightSource):
+    """
+    Base class for anything that can be used as a flame source
+    """
     def __init__(self, *args, **kwargs):
         super(FlameSource, self).__init__(*args, **kwargs)
         self.is_flame_source = True

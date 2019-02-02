@@ -6,11 +6,19 @@ from text_game_maker.utils import utils
 
 from text_game_maker.game_objects.generic import *
 
-class Flashlight(LightSource):
+class Battery(Item):
+    def __init__(self, *args, **kwargs):
+        super(Battery, self).__init__("a", "battery", **kwargs)
+        self.is_electricity_source = True
+        self.fuel = 100.0
+        self.size = ITEM_SIZE_SMALL
+
+class Flashlight(ElectricLightSource):
     def __init__(self, *args, **kwargs):
         super(Flashlight, self).__init__("a", "flashlight", **kwargs)
+        self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
-        self.fuel = 40.0
+        self.fuel = 50.0
         self.equip_msg = ("You take out the %s, and switch it on. It has "
             "a wide beam, and casts a bright white light across everything in "
             "front of you." % self.name)
@@ -18,16 +26,19 @@ class Flashlight(LightSource):
 class Lighter(FlameSource):
     def __init__(self, *args, **kwargs):
         super(Lighter, self).__init__("a", "lighter", **kwargs)
+        self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
-        self.fuel = 10.0
+        self.fuel = 20.0
         self.equip_msg = ("You take out the %s, illuminating everything "
             "around you with a dancing yellow glow." % self.name)
 
 class Matches(FlameSource):
     def __init__(self, *args, **kwargs):
         super(Matches, self).__init__("a", "box of matches", **kwargs)
+        self.size = ITEM_SIZE_SMALL
         self.material = Material.CARDBOARD
         self.fuel = 10.0
+        self.spent_name = "empty %s" % self.name
         self.spent_use_message = "%s is empty." % self.name
         self.equip_msg = ("You strike a match, illuminating everything "
             "around you with a soft orange glow.")

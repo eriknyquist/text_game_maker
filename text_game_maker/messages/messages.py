@@ -163,6 +163,15 @@ def strange_action_message(strange_action):
         "Uh... OK, sure, you {0}.",
     ], strange_action)
 
+def pointless_action_message(action):
+    return _randmsg([
+        "Why would you want to {0}?",
+        "There is no reason to {0}.",
+        "This would be pointless.",
+        "You would not gain anything from this.",
+        "This is not a useful thing to do."
+    ], action)
+
 def container_too_small_message(item_name, container_name):
     return _randmsg([
         "The {0} will not fit inside the {1}.",
