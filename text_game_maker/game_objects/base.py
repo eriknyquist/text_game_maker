@@ -141,6 +141,27 @@ class GameEntity(object):
         self.size = 1
         self.verb = "is"
 
+    def matches_name(self, name):
+        """
+        Tests if name matches this item's name. Will accept substrings of a
+        matching name, e.g. Item(name="metal key").matches_name("key") will
+        return True.
+
+        :param str name: name to compare against this item's name
+        :return: True if name matches this items name
+        :rtype: bool
+        """
+        target = self.name.lower()
+        name = name.lower()
+
+        if name.startswith('the '):
+            name = name[4:]
+
+        if target.startswith(name) or (name in target):
+            return True
+
+        return False
+
     def get_special_attrs(self):
         """
         Serialize any attributes that you want to handle specially here. Any

@@ -123,14 +123,6 @@ def set_last_command(cmd):
 def get_last_command():
     return info['last_command']
 
-def _fuzzy_name_compare(target, typed):
-    target = target.lower()
-    typed = typed.lower()
-    if target.startswith(typed) or (typed in target):
-        return True
-
-    return False
-
 def find_item(player, name, locations=None):
     """
     Find an item by name in the provided locations
@@ -145,15 +137,12 @@ def find_item(player, name, locations=None):
     if not player.can_see():
         return None
 
-    if name.startswith('the '):
-        name = name[4:]
-
     if locations is None:
         locations = player.current.items.values()
 
     for itemlist in locations:
         for item in itemlist:
-            if _fuzzy_name_compare(item.name, name):
+            if item.matches_name(name):
                 return item
 
     return None
@@ -280,11 +269,8 @@ def find_inventory_item(player, name):
     :return: found item. If no matching item is found, None is returned.
     :rtype: text_game_maker.game_objects.items.Item
     """
-    if name.startswith("the "):
-        name = name[:4]
-
     return _inventory_search(player,
-        lambda x: _fuzzy_name_compare(x.name, name))
+        lambda x: x.matches_name(name))
 
 def find_any_item(player, name):
     """
