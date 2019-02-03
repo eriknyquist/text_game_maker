@@ -410,13 +410,11 @@ def _do_look_inside(player, word, remaining):
         _no_item_message(player, remaining)
         return False
 
-    if item.is_container and item.items:
-        contains = utils.list_to_english(
-            [str(x) for x in item.items])
-    else:
-        contains = "nothing"
+    if not item.is_container:
+        utils.game_print("%s contains nothing." % item.name)
+        return True
 
-    utils.game_print("%s contains %s." % (item.name, contains))
+    print('\n' + utils.container_listing(item, bottom_border=True))
     return True
 
 def _take(player, item):

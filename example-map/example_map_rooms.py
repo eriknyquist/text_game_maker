@@ -74,11 +74,8 @@ def other_cell(builder):
     builder.set_description("in a small cell identical to your own cell.")
     builder.set_dark(True)
 
-    battery = Battery()
     paperbag = PaperBag("a", "paper bag", location="on the bunk")
-    matches = Matches()
-    coins = Coins(value=7)
-    paperbag.add_items([coins, matches, battery])
+    paperbag.add_items([Coins(value=7), Matches(), Battery()])
 
     bunk = Furniture("a", "narrow bunk", location="in the corner",
         combustible=False)
@@ -107,5 +104,5 @@ def prison_office(builder):
     )
 
     cabinet = LargeContainer("a", "filing cabinet", location="in the corner")
-    cabinet.add_item(idcard)
+    cabinet.add_items([idcard, Battery()])
     builder.add_items([desk, chair, cabinet, coins, flashlight])

@@ -337,30 +337,9 @@ def _player_health_listing(player, width):
 
     return '\n'.join([utils.centre_text(x, width) for x in ret])
 
-def _container_listing(container, item_fmt, width=50, bottom_border=False,
-        name=None):
-    if name is None:
-        name = container.name
-
-    banner_text = "%s (%d/%d)" % (name, len(container.items),
-        container.capacity)
-
-    ret = utils.line_banner(banner_text, width) + '\n'
-
-    if container.items:
-        ret += '\n'
-        for item in container.items:
-            ret += item_fmt.format(item.name, "", item.value) + '\n'
-
-    if bottom_border:
-        ret += '\n'
-        ret += ('-' * width)
-
-    return ret
-
 def _do_inventory_listing(player, word, setting):
     bannerwidth = 50
-    fmt = "      {0:33}{1:1}({2})"
+    fmt = utils.ITEM_LIST_FMT
 
     banner = utils.line_banner("status", bannerwidth)
     print('\n' + banner + '\n')
@@ -371,9 +350,9 @@ def _do_inventory_listing(player, word, setting):
         print("")
 
     if player.inventory:
-            print(_container_listing(player.inventory, fmt))
+            print(utils.container_listing(player.inventory, fmt))
 
-    print(_container_listing(player.pockets, fmt, name="pockets",
+    print(utils.container_listing(player.pockets, fmt, name="pockets",
             bottom_border=True))
 
     return True

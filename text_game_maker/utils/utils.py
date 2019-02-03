@@ -13,6 +13,8 @@ from prompt_toolkit import prompt as prompt_toolkit_prompt
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 
+ITEM_LIST_FMT = "      {0:33}{1:1}({2})"
+
 history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
 
@@ -653,6 +655,27 @@ def line_banner(text, width=None, bannerchar='-', spaces=1):
     name = (' ' * spaces) + text + (' ' * spaces)
     half = ('-' * ((width / 2) - (len(name) / 2)))
     return (half + name + half)[:width]
+
+def container_listing(container, item_fmt=ITEM_LIST_FMT, width=50,
+        bottom_border=False, name=None):
+    if name is None:
+        name = container.name
+
+    banner_text = "%s (%d/%d)" % (name, len(container.items),
+        container.capacity)
+
+    ret = line_banner(banner_text, width) + '\n'
+
+    if container.items:
+        ret += '\n'
+        for item in container.items:
+            ret += item_fmt.format(item.name, "", item.value) + '\n'
+
+    if bottom_border:
+        ret += '\n'
+        ret += ('-' * width)
+
+    return ret
 
 def del_from_lists(item, *lists):
     for l in lists:
