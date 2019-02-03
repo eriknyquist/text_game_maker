@@ -10,18 +10,37 @@ class Battery(Item):
     def __init__(self, *args, **kwargs):
         super(Battery, self).__init__("a", "battery", **kwargs)
         self.is_electricity_source = True
-        self.fuel = 100.0
+        self.max_fuel = 100.0
+        self.fuel = self.max_fuel
         self.size = ITEM_SIZE_SMALL
+        self.spent_name = "dead %s" % self.name
+        self.original_name = self.name
+
+    def set_fuel(self, value):
+        if (value == 0.0) and (self.fuel > 0.0):
+            self.name = self.spent_name
+        elif (value > 0.0) and (self.fuel == 0.0):
+            self.name = original_name
+
+        self.fuel = min(self.max_fuel, value)
 
 class Flashlight(ElectricLightSource):
     def __init__(self, *args, **kwargs):
         super(Flashlight, self).__init__("a", "flashlight", **kwargs)
         self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
-        self.fuel = 50.0
+        self.fuel = 0.0
+        self.illuminate_msg = ("casting a bright white light across everything "
+            "in front of you")
         self.equip_msg = ("You take out the %s, and switch it on. It has "
-            "a wide beam, and casts a bright white light across everything in "
-            "front of you." % self.name)
+            "a wide beam, %s." % (self.name, self.illuminate_msg))
+        self.make_spent()
+
+    def on_take(self, player):
+        if self.get_fuel() <= 0.0:
+            utils.game_print("%s needs a battery to work." % self.name)
+
+        return True
 
 class Lighter(FlameSource):
     def __init__(self, *args, **kwargs):

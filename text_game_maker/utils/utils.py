@@ -26,7 +26,8 @@ info = {
     'chardelay': 0.02,
     'last_command': 'look',
     'sequence_count': None,
-    'sound': None
+    'sound': None,
+    'instance': None,
 }
 
 wrapper = textwrap.TextWrapper()
@@ -66,6 +67,12 @@ def _rand_line(filename):
 
 def get_random_name():
     return '%s %s' % (_rand_line(_first_names), _rand_line(_middle_names))
+
+def get_builder_instance():
+    return info['instance']
+
+def set_builder_instance(ins):
+    info['instance'] = ins
 
 def get_full_import_name(classobj):
     module = classobj.__module__
@@ -123,7 +130,7 @@ def set_last_command(cmd):
 def get_last_command():
     return info['last_command']
 
-def find_item(player, name, locations=None):
+def find_item(player, name, locations=None, ignore_dark=False):
     """
     Find an item by name in the provided locations
 
@@ -134,7 +141,7 @@ def find_item(player, name, locations=None):
     :return: found item (None if no matching item is found)
     :rtype: text_game_maker.items.Item
     """
-    if not player.can_see():
+    if (not ignore_dark) and (not player.can_see()):
         return None
 
     if locations is None:

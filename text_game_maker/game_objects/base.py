@@ -104,6 +104,10 @@ class GameEntity(object):
     :ivar list home: list that this Item instance lives inside; required for\
         the deleting/moving items within the game world
     :ivar bool is_container: defines whether this item can contain other items
+    :ivar bool is_electricity_source: defines whether this item is an \
+        electricity source
+    :ivar bool requires_electricity: defines whether this item requires an \
+        electricity source to operate
     :ivar bool is_flame_source: defines whether this item can be used as a \
         flame source
     :ivar bool is_light_source: defines whether this item can be used as a \
@@ -136,6 +140,7 @@ class GameEntity(object):
         self.is_light_source = False
         self.is_flame_source = False
         self.is_electricity_source = False
+        self.requires_electricity = False
         self.material = Material.WOOD
         self.capacity = 0
         self.items = []

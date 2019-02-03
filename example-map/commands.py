@@ -154,7 +154,7 @@ def _do_eat(player, word, item_name):
     if not item:
         item = utils.find_person(player, item_name)
         if not item:
-            utils._wrap_print(messages.no_item_message(item_name))
+            _no_item_message(player, item_name)
             utils.save_sound(audio.FAILURE_SOUND)
             return False
 
@@ -180,6 +180,10 @@ def _do_read(player, word, item_name):
     if item:
         item.on_read(player)
         return True
+
+    if not player.can_see():
+        utils._wrap_print(messages.dark_search_message())
+        return False
 
     if utils.is_location(player, item_name):
         utils._wrap_print(messages.nonsensical_action_message(
@@ -239,7 +243,7 @@ def _do_burn(player, word, item_name):
             "at a time around here.")
         return False
 
-    if fire.spent:
+    if fire.get_fuel() <= 0.0:
         utils._wrap_print(fire.spent_use_message)
         return False
 
@@ -252,10 +256,7 @@ def _do_burn(player, word, item_name):
     if utils.is_location(player, item_name):
         utils._wrap_print(messages.burn_noncombustible_message(item_name))
     else:
-        if player.can_see():
-            utils._wrap_print(messages.no_item_message(item_name))
-        else:
-            utils._wrap_print(messages.dark_search_message())
+        _no_item_message(player, item_name)
 
     return False
 
@@ -280,10 +281,7 @@ def _do_smell(player, word, item_name):
             % item_name)
         return True
 
-    if player.can_see():
-        utils._wrap_print(messages.no_item_message(item_name))
-    else:
-        utils._wrap_print(messages.dark_search_message())
+    _no_item_message(player, item_name)
 
     return False
 
@@ -308,10 +306,7 @@ def _do_taste(player, word, item_name):
             % item_name)
         return True
 
-    if player.can_see():
-        utils._wrap_print(messages.no_item_message(item_name))
-    else:
-        utils._wrap_print(messages.dark_search_message())
+    _no_item_message(player, item_name)
 
     return False
 
@@ -355,8 +350,7 @@ def _do_put(player, word, remaining):
 
         dest_item = utils.find_any_item(player, dest_name)
         if not dest_item:
-            utils._wrap_print(messages.dontknow_message('%s %s'
-                % (word, remaining)))
+            _no_item_message(player, dest_name)
             return False
 
         if not dest_item.is_container:
@@ -381,14 +375,14 @@ def _do_put(player, word, remaining):
         for name in fields:
             item = utils.find_any_item(player, name)
             if not item:
-                utils._wrap_print(messages.no_item_message(name))
+                _no_item_message(player, name)
                 utils.save_sound(audio.FAILURE_SOUND)
                 return False
 
             items.append(item)
 
     if not items:
-        utils._wrap_print(messages.no_item_message(item_name))
+        _no_item_message(player, item_name)
         utils.save_sound(audio.FAILURE_SOUND)
         return False
 
@@ -413,7 +407,7 @@ def _do_look_inside(player, word, remaining):
 
     item = utils.find_any_item(player, remaining)
     if not item:
-        utils._wrap_print(messages.no_item_message(remaining))
+        _no_item_message(player, remaining)
         return False
 
     if item.is_container and item.items:
@@ -435,6 +429,7 @@ def _take(player, item):
 def _do_take(player, word, remaining):
     item_name = None
     locations = None
+    ignoredark = False
     items = []
 
     if not remaining or remaining == "":
@@ -448,9 +443,11 @@ def _do_take(player, word, remaining):
     else:
         dest_item = utils.find_any_item(player, dest_name)
         if not dest_item:
-            utils._wrap_print(messages.dontknow_message('%s %s'
-                % (word, remaining)))
+            _no_item_message(player, dest_name)
             return False
+
+        if player.has_item(dest_item):
+            ignoredark = True
 
         locations = [dest_item.items]
 
@@ -465,7 +462,7 @@ def _do_take(player, word, remaining):
             names = [item_name]
 
         for name in names:
-            item = utils.find_item(player, name, locations)
+            item = utils.find_item(player, name, locations, ignoredark)
             if not item:
                 _no_item_message(player, name)
                 utils.save_sound(audio.FAILURE_SOUND)

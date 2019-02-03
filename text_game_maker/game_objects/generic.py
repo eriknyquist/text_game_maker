@@ -155,6 +155,12 @@ class FuelConsumer(Item):
     def on_refuel(self):
         pass
 
+    def make_spent(self):
+        self.spent = True
+        self.original_name = self.name
+        self.name = self.spent_name
+        self.on_fuel_empty()
+
     def refuel(self, fuel=None):
         if fuel is None:
             fuel = self.max_fuel
@@ -165,17 +171,20 @@ class FuelConsumer(Item):
             self.name = self.original_name
             self.on_refuel()
 
+    def set_fuel(self, value):
+        self.fuel = value
+
+    def get_fuel(self):
+        return self.fuel
+
     def decrement_fuel(self):
         if self.spent:
             return
 
-        self.fuel -= self.fuel_decrement
+        self.set_fuel(self.get_fuel() - self.fuel_decrement)
 
-        if self.fuel <= 0.0:
-            self.spent = True
-            self.original_name = self.name
-            self.name = self.spent_name
-            self.on_fuel_empty()
+        if self.get_fuel() <= 0.0:
+            self.make_spent()
 
 class LightSource(FuelConsumer):
     """
@@ -184,11 +193,21 @@ class LightSource(FuelConsumer):
     def __init__(self, *args, **kwargs):
         super(LightSource, self).__init__(*args, **kwargs)
         self.is_light_source = True
-        self.equip_msg = ("You take out the %s, illuminating everything "
-                                "around you." % self.name)
-        self.spent_equip_msg = ("You take out the %s, which does not work "
-            "anymore." % self.name)
+        self.illuminate_msg = "illuminating everything around you"
+        self.equip_msg = ("You take out the %s, %s." % (self.name,
+            self.illuminate_msg))
+        self.spent_equip_msg = ("You take out the %s. The %s needs a new "
+            "battery to work." % (self.name, self.name))
         self.original_equip_msg = self.equip_msg
+
+    def _describe_partial(self, player):
+        txt = player.current.summary() + player.describe_current_tile_contents()
+        if player.current.first_visit:
+            player.current.first_visit = False
+            if player.current.first_visit_message:
+                txt += player.current.first_visit_message
+
+        return txt
 
     def on_fuel_empty(self):
         self.is_light_source = False
@@ -198,22 +217,21 @@ class LightSource(FuelConsumer):
     def on_refuel(self):
         self.is_light_source = True
         self.equip_msg = self.original_equip_msg
-        utils.game_print("%s is working again." % self.name)
+        utils.game_print("The %s lights up, %s." % (self.name,
+            self.illuminate_msg))
+
+        player = utils.get_builder_instance().player
+        utils.game_print(self._describe_partial(player))
 
     def on_equip(self, player):
-        if player.can_see():
+        if not player.current.dark:
             super(LightSource, self).on_equip(player)
             return
 
         utils.game_print(self.equip_msg)
 
-        txt = player.current.summary() + player.describe_current_tile_contents()
-        if player.current.first_visit:
-            player.current.first_visit = False
-            if player.current.first_visit_message:
-                txt += player.current.first_visit_message
-
-        utils.game_print(txt)
+        if self.get_fuel() > 0.0:
+            utils.game_print(self._describe_partial(player))
 
     def on_unequip(self, player):
         if (not player.can_see()) and (not self.spent):
@@ -226,8 +244,27 @@ class ElectricLightSource(LightSource):
     """
     def __init__(self, *args, **kwargs):
         super(ElectricLightSource, self).__init__(*args, **kwargs)
+        self.requires_electricity = True
         self.is_container = True
         self.capacity = 1
+
+    def get_fuel(self):
+        if not self.items:
+            return 0.0
+
+        if not self.items[0].is_electricity_source:
+            return 0.0
+
+        return self.items[0].fuel
+
+    def set_fuel(self, value):
+        if not self.items:
+            return
+
+        if not self.items[0].is_electricity_source:
+            return
+
+        self.items[0].set_fuel(value)
 
     def add_item(self, item):
         if not item.is_electricity_source:
@@ -240,8 +277,8 @@ class ElectricLightSource(LightSource):
                 self.name))
             return
 
-        self.refuel(item.fuel)
-        item.delete()
+        self.refuel()
+        item.move(self.items)
 
 class FlameSource(LightSource):
     """

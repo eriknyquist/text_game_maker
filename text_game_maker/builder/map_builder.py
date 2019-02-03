@@ -119,7 +119,21 @@ def _do_craft(player, word, item):
 
 def _get_next_unused_save_id(save_dir):
     default_num = 1
-    nums = [int(x.split('_')[2]) for x in os.listdir(save_dir)]
+    nums = []
+    for f in os.listdir(save_dir):
+        if not f.startswith('save_state_'):
+            continue
+
+        fields = f.split('_')
+        if len(fields) != 3:
+            continue
+
+        try:
+            num = int(fields[2])
+        except:
+            continue
+
+        nums.append(num)
 
     while default_num in nums:
         default_num += 1
@@ -384,7 +398,7 @@ class MapBuilder(object):
                 % self.__class__.__name__)
 
         info['instance'] = self
-
+        utils.set_builder_instance(self)
         self.reset_state_data = None
         self.on_game_run = None
         self.fsm = parser

@@ -118,9 +118,32 @@ class Player(GameEntity):
         lighter = Lighter()
         self.pockets.add_item(lighter)
 
+    def has_item(self, item):
+        if self.equipped and (self.equipped is item):
+            return True
+
+        if item.home is self.pockets.items:
+            return True
+
+        if self.inventory and (item.home is self.inventory.items):
+            return True
+
+        return False
+
     def can_see(self):
-        return ((not self.current.dark)
-            or (self.equipped and self.equipped.is_light_source))
+        if not self.current.dark:
+            return True
+
+        if not self.equipped:
+            return False
+
+        if not self.equipped.is_light_source:
+            return False
+
+        if self.equipped.get_fuel() <= 0.0:
+            return False
+
+        return True
 
     def inventory_space(self):
         used = len(self.pockets.items)
