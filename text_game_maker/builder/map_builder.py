@@ -182,7 +182,7 @@ def _do_save(player, word, setting):
         if not ret or ret.strip() == "":
             filename = os.path.join(save_dir, default_name)
         else:
-            filename = os.path.join(save_dir, ret)
+            filename = ret
 
     player.save_to_file(filename)
     utils.game_print("Game state saved in %s." % filename)

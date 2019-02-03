@@ -217,10 +217,17 @@ class LightSource(FuelConsumer):
     def on_refuel(self):
         self.is_light_source = True
         self.equip_msg = self.original_equip_msg
+
+        player = utils.get_builder_instance().player
+        if self is not player.equipped:
+            return
+
         utils.game_print("The %s lights up, %s." % (self.name,
             self.illuminate_msg))
 
-        player = utils.get_builder_instance().player
+        if not player.current.dark:
+            return
+
         utils.game_print(self._describe_partial(player))
 
     def on_equip(self, player):
@@ -270,15 +277,16 @@ class ElectricLightSource(LightSource):
         if not item.is_electricity_source:
             utils._wrap_print(messages.pointless_action_message(
                 "put the %s in the %s" % (item.name, self.name)))
-            return
+            return False
 
         if item.size > self.size:
             utils._wrap_print(messages.container_too_small_message(item.name,
                 self.name))
-            return
+            return False
 
         self.refuel()
         item.move(self.items)
+        return True
 
 class FlameSource(LightSource):
     """
