@@ -443,6 +443,34 @@ class MapBuilder(object):
 
         self.on_game_run = callback
 
+    def set_ground_material(self, material):
+        """
+        Set the material type of the ground on this tile
+        :param Material material: material type
+        """
+
+        self.current.material = material
+
+    def set_smell(self, text):
+        """
+        Set the text that will be printed when player types 'smell' or
+        equivalent on this tile
+
+        :param str text: text to be printed on smell command
+        """
+
+        self.current.smell_description = text
+
+    def set_ground_smell(self, text):
+        """
+        Set the text that will be printed when player types 'smell ground' or
+        equivalent on this tile
+
+        :param str text: text to be printed on smell ground command
+        """
+
+        self.current.ground_smell_description = text
+
     def set_dark(self, value):
         """
         Set whether this tile is dark or not. Dark tiles require player to equip

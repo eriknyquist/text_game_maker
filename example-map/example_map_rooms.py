@@ -27,6 +27,8 @@ def prison_starting_cell(builder):
         "name. Your name is <playername>."
     )
 
+    builder.set_smell("It smells like urine and sweat.")
+    builder.set_ground_smell("The ground smells like urine and concrete.")
     builder.set_dark(True)
     builder.set_first_visit_message_in_dark(True)
 

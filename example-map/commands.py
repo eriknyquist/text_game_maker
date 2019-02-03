@@ -15,6 +15,10 @@ SMELL_WORDS = [
     'smell', 'sniff'
 ]
 
+GROUND_WORDS = [
+    'ground', 'floor'
+]
+
 TASTE_WORDS = [
     'taste', 'lick'
 ]
@@ -262,8 +266,12 @@ def _do_burn(player, word, item_name):
 
 def _do_smell(player, word, item_name):
     if not item_name or item_name == "":
-        utils._wrap_print("What do you want to %s?" % word)
-        return False
+        player.current.on_smell()
+        return True
+
+    if item_name in GROUND_WORDS:
+        player.current.on_smell_ground()
+        return True
 
     fields = utils.english_to_list(item_name)
     if len(fields) > 1:
@@ -282,7 +290,6 @@ def _do_smell(player, word, item_name):
         return True
 
     _no_item_message(player, item_name)
-
     return False
 
 def _do_taste(player, word, item_name):

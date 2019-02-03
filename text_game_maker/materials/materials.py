@@ -3,6 +3,7 @@ _property_table = {}
 class Material(object):
     METAL = "metal"
     STONE = "stone"
+    CONCRETE = "concrete"
     DIRT = "dirt"
     WOOD = "wood"
     LEATHER = "leather"

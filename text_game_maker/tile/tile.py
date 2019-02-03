@@ -1,5 +1,6 @@
 import text_game_maker
 from text_game_maker.utils import utils
+from text_game_maker.materials.materials import get_properties
 from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
 
 _tiles = {}
@@ -177,7 +178,37 @@ class Tile(GameEntity):
         # People on this tile
         self.people = {}
 
+        self.smell_description = None
+        self.ground_smell_description = None
+        self.material = None
+
         self.tile_id = _register_tile(self)
+
+    def on_smell(self):
+        """
+        Called when player types 'smell' or equivalent on this tile
+        """
+        if self.smell_description:
+            utils.game_print(self.smell_description)
+            return
+
+        utils.game_print("It doesn't smell like anything in particular here.")
+
+    def on_smell_ground(self):
+        """
+        Called when player types 'smell ground' or equivalent on this tile
+        """
+        if self.ground_smell_description:
+            utils.game_print(self.ground_smell_description)
+            return
+
+        if self.material:
+            utils.game_print("The ground smells %s."
+                % get_properties(self.material).smell)
+            return
+
+        utils.game_print("The ground doesn't smell like anything in "
+            "particular.")
 
     def set_tile_id(self, tile_id):
         """
