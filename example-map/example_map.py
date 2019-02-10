@@ -37,7 +37,7 @@ def light_source_decay_callback(player, turns):
 def on_game_run(player):
     # read name from player
     default_name = utils.get_random_name()
-    name = utils.read_line_raw("What is your name? [default: %s]: " % default_name)
+    name = utils.read_line_raw("What is your name?", default=default_name)
     if name.strip() == "":
         name = default_name
 

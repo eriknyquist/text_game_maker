@@ -709,9 +709,9 @@ def read_line_raw(msg, cancel_word=None, default=None):
         default_desc = " [default: %s]" % default
 
     if cancel_word:
-        cancel_desc = " (or '%s') " % cancel_word
+        cancel_desc = ", or '%s'" % cancel_word
 
-    prompt = "%s%s%s" % (msg, cancel_desc, default_desc)
+    prompt = "%s%s%s " % (msg, cancel_desc, default_desc)
     print('')
 
     if sequence:
@@ -762,7 +762,7 @@ def ask_yes_no(msg, cancel_word="cancel"):
 
     return 0
 
-def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
+def ask_multiple_choice(choices, msg=None, cancel_word="cancel", default=None):
     """
     Ask the user a multiple-choice question, and return their selection
 
@@ -771,7 +771,11 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
     :rtype: int
     """
 
+    default_str = None
     prompt = "Enter a number"
+    if default is not None:
+        default_str = str(default)
+
     lines = ['    %d. %s' % (i + 1, choices[i]) for i in range(len(choices))]
 
     if msg:
@@ -780,8 +784,8 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
     print('\n' + '\n'.join(lines))
 
     while True:
-        ret = read_line(prompt, cancel_word)
-        if ret is None:
+        ret = read_line(prompt, cancel_word, default_str)
+        if (ret is None) or (ret == ""):
             return -1
 
         try:

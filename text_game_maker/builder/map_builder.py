@@ -197,7 +197,7 @@ def _do_load(player, word, setting):
         files.append("None of these (let me enter a path to a save file)")
 
         index = utils.ask_multiple_choice(files,
-            "Which save file would you like to load?")
+            "Which save file would you like to load?", default=len(files))
 
         if index < 0:
             return False
@@ -722,7 +722,7 @@ class MapBuilder(object):
 
         while True:
             print("\n------------ MAIN MENU ------------\n")
-            choice = utils.ask_multiple_choice(menu_choices)
+            choice = utils.ask_multiple_choice(menu_choices, default=1)
 
             if choice < 0:
                 sys.exit()
