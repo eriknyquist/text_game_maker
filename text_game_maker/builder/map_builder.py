@@ -423,6 +423,13 @@ class MapBuilder(object):
             if not ret:
                 return
 
+        while True:
+            txt = utils.pop_waiting_print()
+            if not txt:
+                break
+
+            print(txt)
+
         utils.set_last_command(action)
         player.scheduler_tick()
 

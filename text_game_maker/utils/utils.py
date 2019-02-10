@@ -19,6 +19,7 @@ history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
 
 sequence = []
+saved_prints = []
 
 serializable_classes = {
 }
@@ -466,8 +467,13 @@ def _remove_leading_whitespace(string):
 def _wrap_text(text):
     return wrapper.fill(text.replace('\n', ' ').replace('\r', ''))
 
-def _wrap_print(text):
-    print('\n' + _wrap_text(replace_format_tokens(text)))
+def _wrap_print(text, wait=False):
+    msg = '\n' + _wrap_text(replace_format_tokens(text))
+    if wait:
+        saved_prints.append(msg)
+        return
+
+    print(msg)
 
 def _unrecognised(val):
     _wrap_print('Unrecognised command "%s"' % val)
@@ -791,7 +797,13 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel"):
 
         return number - 1
 
-def game_print(msg):
+def pop_waiting_print():
+    if not saved_prints:
+        return None
+
+    return saved_prints.pop(0)
+
+def game_print(msg, wait=False):
     """
     Print one character at a time if player has set 'print slow', otherwise
     print normally
@@ -801,6 +813,10 @@ def game_print(msg):
     """
 
     msg = '\n' + _wrap_text(replace_format_tokens(msg))
+    if wait:
+        saved_prints.append(msg)
+        return
+
     if not info['slow_printing']:
         print(msg)
         return

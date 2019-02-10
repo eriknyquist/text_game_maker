@@ -223,12 +223,12 @@ class LightSource(FuelConsumer):
             return
 
         utils.game_print("The %s lights up, %s." % (self.name,
-            self.illuminate_msg))
+            self.illuminate_msg), wait=True)
 
         if not player.current.dark:
             return
 
-        utils.game_print(self._describe_partial(player))
+        utils.game_print(self._describe_partial(player), wait=True)
 
     def on_equip(self, player):
         if not player.current.dark:
