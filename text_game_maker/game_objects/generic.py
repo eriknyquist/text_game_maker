@@ -196,8 +196,8 @@ class LightSource(FuelConsumer):
         self.illuminate_msg = "illuminating everything around you"
         self.equip_msg = ("You take out the %s, %s." % (self.name,
             self.illuminate_msg))
-        self.spent_equip_msg = ("You take out the %s. The %s needs a new "
-            "battery to work." % (self.name, self.name))
+        self.spent_equip_msg = ("You take out the %s. The %s does not work "
+            "anymore." % (self.name, self.name))
         self.original_equip_msg = self.equip_msg
 
     def _describe_partial(self, player):
@@ -254,6 +254,8 @@ class ElectricLightSource(LightSource):
         self.requires_electricity = True
         self.is_container = True
         self.capacity = 1
+        self.spent_equip_msg = ("You take out the %s. The %s needs a new "
+            "battery to work." % (self.name, self.name))
 
     def get_fuel(self):
         if not self.items:
