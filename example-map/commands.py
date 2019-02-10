@@ -76,7 +76,7 @@ INSPECT_WORDS = [
 ]
 
 LOOK_WORDS = [
-    'look', 'peep', 'peek', 'show', 'viddy'
+    'look around', 'look', 'peep', 'peek', 'show', 'viddy'
 ]
 
 look_under_adjs = [
