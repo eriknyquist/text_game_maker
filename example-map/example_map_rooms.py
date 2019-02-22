@@ -1,10 +1,8 @@
-import text_game_maker
+from text_game_maker.game_objects.person import Person
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
     Furniture, Matches, Flashlight, Battery
 )
-
-from text_game_maker.crafting import crafting
 
 # Tile IDs.
 # WARNING: changing these names will break any previously created save files
@@ -65,6 +63,32 @@ def prison_hallway_1(builder):
     builder.set_description("in the prison hallway")
     builder.set_first_visit_message("It is not quite so dark in here, and you "
         "can see clearly. There doesn't seem to be anyone around.")
+
+    oldman = Person("an", "old man", location="squatting in the corner")
+    oldman.add_response(
+        ["hey.*|yo.?|hello.*|hi.?|greetings.*|howdy"],
+        ["Hello.", "Nice to meet you.", "Howdy."]
+    )
+
+    oldman.add_response(
+        ["how('?s it (going|hanging)| are you| do you do| are things).*", "what'?s up\??.*"],
+        ["Pretty good. You?", "Very well, thank you. And you?", "I'm good. What about you?"]
+    )
+
+    oldman.add_response(
+        ["((i'?m|i am) )?((pretty|very) )?(good|awesome|great|ok|alright).*"],
+        ["That's nice to hear.", "Good, I'm glad.", "Good.", "That's good."]
+    )
+
+    oldman.add_response(
+        ["((i'?m|i am) )?(not (so )?(good|great)|bad|terrible|awful).*"],
+        ["Oh, that's a shame.", "Oh, dear.", "Sorry to hear that.", "That's not good."]
+    )
+
+    oldman.add_default_responses("How interesting.", "Oh, really?", "Indeed.",
+        "Fascinating, yes.", "Oh, yes? Interesting.", "Mmhmm.")
+
+    builder.add_item(oldman)
 
     # Add a door to the east. The door will be locked and will require a
     # lockpick to unlock.

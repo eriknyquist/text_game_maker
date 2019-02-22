@@ -1,5 +1,5 @@
 @echo off
-set packages=pygame cx_Freeze prompt_toolkit tones
+set packages=pygame cx_Freeze prompt_toolkit tones regex
 set pythondir=C:\Python27
 set python-pip=%pythondir%\Scripts\pip.exe
 set python-interpreter=%pythondir%\python.exe

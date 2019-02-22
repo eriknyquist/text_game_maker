@@ -1,47 +1,77 @@
 import sys
-import copy
+import random
 
 import text_game_maker
-from text_game_maker.game_objects.base import GameEntity
-from text_game_maker.utils import utils
+from text_game_maker.game_objects.generic import Item
+from text_game_maker.utils import utils, redict
 
-class Person(GameEntity):
+class Person(Item):
     """
     Represents a person that the player can interact with
     """
 
-    def __init__(self, name, location, items=[], alive=True):
+    def __init__(self, prefix="", name="", **kwargs):
         """
         Initialises a Person instance
 
         :param str name: name of Person, e.g. "John"
         :param str description: location description of Person, e.g.\
             "squatting in the corner"
-        :param bool alive: Initial living state of person .If True, person will\
-            be alive. If false, person will be dead
         :param list items: List of Items held by this person
         """
 
-        super(Person, self).__init__()
+        super(Person, self).__init__(**kwargs)
 
-        self.inanimate = False
         self.edible = True
-        self.energy = 100
-
+        self.inanimate = False
+        self.alive = True
+        self.prefix = prefix
         self.name = name
-        self.prep = name
+        self.prep = 'the ' + self.name
 
-        self.location = location
-        self.alive = alive
+        self.speak_count = 0
+        self.script = None
+        self.script_pos = 0
+        self.task_id = 0
+        self.responses = redict.ReDict()
+        self.default_responses = []
 
-        for item in items:
-            self.add_item(item)
+    def get_special_attrs(self):
+        ret = {}
+        ret['responses'] = self.responses.dump_to_dict()
+        return ret
+
+    def set_special_attrs(self, attrs):
+        self.responses.load_from_dict(attrs['responses'])
+        del attrs['responses']
+        return attrs
 
     def on_look(self, player):
         return "It's %s."  % self.name
 
-    def __str__(self):
-        return self.name
+    def add_default_responses(self, *responses):
+        self.default_responses.extend(responses)
+
+    def add_response(self, patterns, responses):
+        self.responses['|'.join(patterns)] = responses
+
+    def add_responses(self, *responses):
+        for patterns, responses in responses:
+            self.add_response(patterns, responses)
+
+    def get_response(self, text):
+        try:
+            responses = self.responses[text]
+        except KeyError:
+            if not self.default_responses:
+                return "I don't understand what you're talking about"
+
+            return random.choice(self.default_responses)
+
+        if not responses:
+            return text
+
+        return random.choice(responses)
 
     def die(self, player, msg=None):
         """
@@ -74,3 +104,18 @@ class Person(GameEntity):
         """
 
         utils.game_print('%s says:  "%s"' % (self.name, msg))
+
+    def set_script(self, lines):
+        self.script = lines
+
+    def on_speak(self, player):
+        speech = ' '
+        prompt = 'talking to %s (say nothing to exit): >' % self.name
+
+        while speech != '':
+            speech = utils.read_line_raw(prompt).strip()
+            if speech == '':
+                break
+
+            response = self.get_response(speech)
+            self.say(response)

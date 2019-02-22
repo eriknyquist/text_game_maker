@@ -52,9 +52,9 @@ def help_text():
 
     return None
 
-def _find_item(name, items):
-    for item in items:
-        if item.name == name:
+def _find_item(item, items):
+    for i in items:
+        if (i.name == item.name) and isinstance(i, item.__class__):
             return item
 
     return None
@@ -100,7 +100,7 @@ def craft(name, word, player):
         player_items.extend(player.inventory.items)
 
     for i in items:
-        ingredient = _find_item(i.name, player_items)
+        ingredient = _find_item(i, player_items)
         if ingredient is None:
             _need_items(name, word, items)
             return None

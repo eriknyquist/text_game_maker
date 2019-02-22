@@ -564,13 +564,7 @@ def _do_speak(player, word, name):
             return False
 
     utils.game_print('You speak to %s.' % p.prep)
-    if p.alive:
-        response = p.on_speak(player)
-        if response:
-            p.say(response)
-    else:
-        utils.game_print('%s says nothing.' % p.prep)
-
+    p.on_speak(player)
     return True
 
 def _do_equip(player, word, item_name):

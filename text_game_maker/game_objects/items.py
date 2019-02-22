@@ -179,10 +179,10 @@ class Blueprint(Item):
         self.ingredients = ingredients
         self.item = item
 
-    def add_to_player_inventory(self, player):
+    def on_take(self, player):
         return True
 
-    def on_take(self, player):
+    def add_to_player_inventory(self, player):
         crafting.add(self.ingredients, self.item)
         utils._wrap_print("You have learned how to make %s." % self.item)
         utils.save_sound(audio.NEW_ITEM_SOUND)
@@ -227,3 +227,7 @@ class LargeBag(InventoryBag):
     def __init__(self, *args, **kwargs):
         super(LargeBag, self).__init__(*args, **kwargs)
         self.capacity = 20
+
+class Drawing(Item):
+    def __init__(self, *args, **kwargs):
+        super(Drawing, self).__init__(*args, **kwargs)
