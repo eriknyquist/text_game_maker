@@ -1,4 +1,6 @@
 from text_game_maker.game_objects.person import Person
+from text_game_maker.utils.responses import STANDARD_GREETINGS
+
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
     Furniture, Matches, Flashlight, Battery
@@ -65,26 +67,7 @@ def prison_hallway_1(builder):
         "can see clearly. There doesn't seem to be anyone around.")
 
     oldman = Person("an", "old man", location="squatting in the corner")
-    oldman.add_response(
-        ["hey.*|yo.?|hello.*|hi.?|greetings.*|howdy"],
-        ["Hello.", "Nice to meet you.", "Howdy."]
-    )
-
-    oldman.add_response(
-        ["how('?s it (going|hanging)| are you| do you do| are things).*", "what'?s up\??.*"],
-        ["Pretty good. You?", "Very well, thank you. And you?", "I'm good. What about you?"]
-    )
-
-    oldman.add_response(
-        ["((i'?m|i am) )?((pretty|very) )?(good|awesome|great|ok|alright).*"],
-        ["That's nice to hear.", "Good, I'm glad.", "Good.", "That's good."]
-    )
-
-    oldman.add_response(
-        ["((i'?m|i am) )?(not (so )?(good|great)|bad|terrible|awful).*"],
-        ["Oh, that's a shame.", "Oh, dear.", "Sorry to hear that.", "That's not good."]
-    )
-
+    oldman.add_responses(*STANDARD_GREETINGS)
     oldman.add_default_responses("How interesting.", "Oh, really?", "Indeed.",
         "Fascinating, yes.", "Oh, yes? Interesting.", "Mmhmm.")
 
