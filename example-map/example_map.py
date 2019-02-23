@@ -1,4 +1,3 @@
-import commands
 import example_map_rooms as rooms
 
 import text_game_maker
@@ -47,9 +46,6 @@ def on_game_run(player):
     player.schedule_task(lighter_equip_hint, 10)
 
 class ExampleMapRunner(runner.MapRunner):
-    def build_parser(self, parser):
-        return commands.build_parser(parser)
-
     def build_map(self, builder):
         # Build starting cell
         rooms.prison_starting_cell(builder)

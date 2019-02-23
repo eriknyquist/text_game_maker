@@ -695,7 +695,7 @@ def _do_sleep(player, word, remaining):
     utils.game_print(messages.sleep_message(word))
     return True
 
-def build_parser(parser):
+def add_commands(parser):
     commands = [
         [EQUIP_WORDS, _do_equip, "equip an item from your inventory",
             "%s <item>"],

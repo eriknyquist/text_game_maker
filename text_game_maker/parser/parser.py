@@ -1,6 +1,7 @@
 import json
 import text_game_maker
 from text_game_maker.builder import map_builder
+from text_game_maker.parser import commands
 
 PRINT_SPEED_WORDS = ['print speed']
 
@@ -201,6 +202,8 @@ class CommandParser(SimpleTextFSM):
 
         for arglist in default_commands:
             self.add_command(*arglist)
+
+        commands.add_commands(self)
 
     def add_command(self, word_set, callback, help_text=None, fmt=None):
         cmd = Command(word_set, callback, help_text, fmt)
