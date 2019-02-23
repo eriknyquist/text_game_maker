@@ -38,11 +38,37 @@ class Person(Item):
 
     def get_special_attrs(self):
         ret = {}
-        ret['responses'] = self.responses.dump_to_dict()
+        responses = self.responses.dump_to_dict()
+
+        for pattern in responses.keys():
+            newvalue = []
+            for value in responses[pattern]:
+                if callable(value):
+                    newvalue.append(utils.serialize_callback(value))
+                else:
+                    newvalue.append(value)
+
+            responses[pattern] = newvalue
+
+        ret['responses'] = responses
         return ret
 
     def set_special_attrs(self, attrs):
-        self.responses.load_from_dict(attrs['responses'])
+        responses = attrs['responses']
+
+        for pattern in responses.keys():
+            newvalue = []
+            for val in responses[pattern]:
+                try:
+                    callback = utils.deserialize_callback(val)
+                except RuntimeError:
+                    newvalue.append(val)
+                else:
+                    newvalue.append(callback)
+
+            responses[pattern] = newvalue
+
+        self.responses.load_from_dict(responses)
         del attrs['responses']
         return attrs
 
@@ -50,12 +76,42 @@ class Person(Item):
         return "It's %s."  % self.name
 
     def add_default_responses(self, *responses):
+        """
+        Set responses to reply with when the player types something does not
+        match any of the added patterns when speaking to this person
+
+        :param responses: one or more responses to pick randomly from. \
+            Responses may be either a string of text to speak, or a callback \
+            of the form ``callback(person, player)``, where ``person`` is the \
+            Person object the player is speaking to, and ``player`` is the \
+            Player object
+        """
         self.default_responses.extend(responses)
 
     def add_response(self, patterns, responses):
+        """
+        Set responses to reply with when player types a specific pattern
+        when talking to this person
+
+        :param list patterns: list of regular expressions that will be used to \
+            check player input
+        :param list responses: list of responses to pick randomly from if the \
+            player says something that matches one of the patterns in \
+            ``patterns``. Responses may be either a string of text to speak, \
+            or a callback of the form ``callback(person, player)``, where \
+            ``person`` is the Person object the player is speaking to, and \
+            ``player`` is the Player object
+        """
         self.responses['|'.join(patterns)] = responses
 
     def add_responses(self, *responses):
+        """
+        Set multiple pattern/response pairs at once
+
+        :param responses: one or more response pairs, where each pair is a \
+            tuple containing arguments for a single ``add_response`` call, \
+            e.g. ``add_responses((['cat.*'], ['meow']), (['dog.*], ['woof']))``
+        """
         for patterns, responses in responses:
             self.add_response(patterns, responses)
 
@@ -118,4 +174,7 @@ class Person(Item):
                 break
 
             response = self.get_response(speech)
-            self.say(response)
+            if callable(response):
+                response(self, player)
+            else:
+                self.say(response)

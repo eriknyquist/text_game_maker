@@ -21,8 +21,8 @@ session = PromptSession(history=history, enable_history_search=True)
 sequence = []
 saved_prints = []
 
-serializable_classes = {
-}
+_serializable_classes = {}
+_serializable_callbacks = {}
 
 info = {
     'slow_printing': False,
@@ -85,7 +85,7 @@ def get_full_import_name(classobj):
         return module + '.' + classobj.__name__
 
 def register_serializable_class(classobj, name):
-    serializable_classes[name] = classobj
+    _serializable_classes[name] = classobj
 
 class SubclassTrackerMetaClass(type):
     def __init__(cls, name, bases, clsdict):
@@ -98,10 +98,52 @@ class SubclassTrackerMetaClass(type):
         super(SubclassTrackerMetaClass, cls).__init__(name, bases, clsdict)
 
 def get_serializable_class(name):
-    if name not in serializable_classes:
+    if name not in _serializable_classes:
         return None
 
-    return serializable_classes[name]
+    return _serializable_classes[name]
+
+def add_serializable_callback(callback):
+    """
+    Add a callback object to registry of callbacks that can be securely
+    referenced in a save file. An ID will be assigned to represent this
+    callback in save files. When loading a save file, whatever object you
+    pass here will be used when the same ID is seen.
+
+    :param callback: callback object to register
+    """
+    _serializable_callbacks[get_full_import_name(callback)] = callback
+
+def serializable_callback(callback):
+    """
+    Decorator version of add_serializable_callback. Example:
+
+    ::
+
+        from text_game_maker.player.player import serializable_callback
+
+        @serializable_callback
+        def my_callback_function():
+            pass
+    """
+    add_serializable_callback(callback)
+    return callback
+
+def serialize_callback(callback):
+    cb_name = get_full_import_name(callback)
+
+    if cb_name not in _serializable_callbacks:
+        raise RuntimeError("Not allowed to serialize callback '%s'. See"
+            " text_game_maker.utils.utils.add_serializable_callback"
+            % cb_name)
+
+    return cb_name
+
+def deserialize_callback(callback_name):
+    if callback_name not in _serializable_callbacks:
+        raise RuntimeError("Cannot deserialize callback '%s'" % callback_name)
+
+    return _serializable_callbacks[callback_name]
 
 def import_module_attribute(fullname):
     fields = fullname.split(".")
