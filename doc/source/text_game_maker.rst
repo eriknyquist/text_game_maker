@@ -15,6 +15,7 @@ Subpackages
     text_game_maker.builder
     text_game_maker.crafting
     text_game_maker.game_objects
+    text_game_maker.materials
     text_game_maker.messages
     text_game_maker.parser
     text_game_maker.player

@@ -14,6 +14,11 @@ Submodules
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: text_game_maker.game_objects.generic
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. automodule:: text_game_maker.game_objects.items
     :members:
     :undoc-members:
