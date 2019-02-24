@@ -20,8 +20,8 @@ def lighter_equip_hint(player, turns):
             or (not player.current.east.locked)):
         return
 
-    utils._wrap_print("Hint: say things like 'look in pockets', 'pockets',"
-        " 'inventory', or just 'i' to show your inventory")
+    utils._wrap_print("Hint: say things like 'pockets', 'inventory', or just "
+        "'i' to show your inventory")
     utils._wrap_print("Hint: say things like 'use lighter' or 'equip lighter' "
         "to use the lighter as a light source")
 
