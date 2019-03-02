@@ -36,6 +36,10 @@ class Person(Item):
         self.responses = redict.ReDict()
         self.default_responses = []
 
+        self.context = None
+        self.context_index = 0
+        self.contexts = []
+
     def get_special_attrs(self):
         ret = {}
         responses = self.responses.dump_to_dict()
@@ -104,6 +108,15 @@ class Person(Item):
         """
         self.responses['|'.join(patterns)] = responses
 
+    def add_context(self, *pattern_response_pairs):
+        context = []
+        for patterns, responses in pattern_response_pairs:
+            responsedict = redict.ReDict()
+            responsedict['|'.join(patterns)] = responses
+            context.append(responsedict)
+
+        self.contexts.append(context)
+
     def add_responses(self, *responses):
         """
         Set multiple pattern/response pairs at once
@@ -115,19 +128,62 @@ class Person(Item):
         for patterns, responses in responses:
             self.add_response(patterns, responses)
 
-    def get_response(self, text):
-        try:
-            responses = self.responses[text]
-        except KeyError:
-            if not self.default_responses:
-                return "I don't understand what you're talking about"
-
+    def _get_default_response(self):
+        if self.default_responses:
             return random.choice(self.default_responses)
 
-        if not responses:
-            return text
+        return "I don't understand what you're talking about"
+
+    def _check_get_response(self, responsedict, text):
+        try:
+            responses = responsedict[text]
+        except KeyError:
+            return None
 
         return random.choice(responses)
+
+    def _attempt_context_entry(self, text):
+        for context in self.contexts:
+            responsedict = context[0]
+            response = self._check_get_response(responsedict, text)
+            if response:
+                self.context = context
+                self.context_index = 1
+                return response
+
+        return None
+
+    def get_response(self, text):
+        response = None
+
+        # If currently in a context, try to get a response from the context
+        if self.context:
+            for responsedict in self.context:
+                response = self._check_get_response(responsedict, text)
+                if response:
+                    break
+
+        # If no contextual response is available, try to get a response from
+        # the dict of contextless responses
+        if not response:
+            response = self._check_get_response(self.responses, text)
+            if response:
+                # If we are currently in a context but only able to get a
+                # matching response from the contextless dict, set the current
+                # context to None
+                if self.context:
+                    self.context = None
+            else:
+                # No contextless responses available, attempt context entry
+                response = self._attempt_context_entry(text)
+                if not response:
+                    response = self._get_default_response()
+
+
+        if not response:
+            return text
+
+        return response
 
     def die(self, player, msg=None):
         """

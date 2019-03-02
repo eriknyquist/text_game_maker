@@ -82,6 +82,14 @@ class ReDict(dict):
         m = self._do_match(text)
         return self.patterns[m.lastgroup][1]
 
+    def __contains__(self, text):
+        try:
+            _ = self.__getitem__(text)
+        except KeyError:
+            return False
+
+        return True
+
     def pop(self, text):
         m = self._do_match(text)
         ret = self.patterns[m.lastgroup][1]
@@ -116,13 +124,6 @@ class ReDict(dict):
             new[pattern] = value
 
         return new
-
-    def has_key(self, key):
-        for pattern, _ in self.iteritems():
-            if pattern == key:
-                return True
-
-        return False
 
     def update(self, other):
         for pattern, value in other.iteritems():
