@@ -55,6 +55,8 @@ class ReDict(dict):
         for pattern in data:
             self.__setitem__(pattern, data[pattern])
 
+        return self
+
     def _do_match(self, text):
         if self.compiled is None:
             self.compile()

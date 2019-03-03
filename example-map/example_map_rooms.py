@@ -1,4 +1,4 @@
-from text_game_maker.game_objects.person import Person
+from text_game_maker.game_objects.person import Person, DiscussionContext
 from text_game_maker.utils.responses import STANDARD_GREETINGS
 
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
@@ -67,27 +67,47 @@ def prison_hallway_1(builder):
         "can see clearly. There doesn't seem to be anyone around.")
 
     oldman = Person("an", "old man", location="squatting in the corner")
-    oldman.add_context(*STANDARD_GREETINGS)
     oldman.add_default_responses("How interesting.", "Oh, really?", "Indeed.",
         "Fascinating, yes.", "Oh, yes? Interesting.", "Mmhmm.")
 
-    oldman.add_response(
-        [".*(what( is|'?s)? (wrong|happening|going on)).*"],
+    oldman.add_response_phrases(
+        ([".*(what( is|'?s)? (wrong|happening|going on)).*"],
             ["Huh. You just woke up or somethin? Raiders rolled in, gutted the "
             "place. If I were you, I'd take the freebie and get out of here "
-            "before the replacements show up. Probably on their way right now."]
+            "before the replacements show up. Probably on their way right "
+            "now."]),
+        (["(.* )?where.* i .*go.*"], ["Anywhere besides here.", "Away from "
+            "the prison, obviously"])
     )
 
-    oldman.add_context(
+    greeting_context = DiscussionContext(STANDARD_GREETINGS)
+    raiders_context = DiscussionContext()
+    raiders_context.add_entry_phrases(
         (["(.* )?(what|who)?.*raiders?.*"], ["Raiders. Bandits. Outlaws. You know?",
-            "How can you not know what raiders are?"]),
-        (["(.* )?why.*(they|raiders?).*"], ["Hell, how should I know?"]),
-        (["(.* )?where.* (go|went).*"], ["Well, I don't know "
-            "specifically where they went, but everybody knows the raiders "
-            "all live down in the lake."]),
-        (["(.* )?in(side)?( (the|a) lake).*"], ["That's right, in the lake.",
-            "Inside the lake, yes.", "That's what I said, inside the lake"])
+            "How can you not know what raiders are?"])
     )
+
+    raiders_context.add_response_phrases(
+        (["(.* )?why.*(they|raiders?).*"], ["Hell, how should I know?"]),
+        (["(.* )?(tell|talk) (me)?.*about.*(them|raiders?).*"],
+            ["They're bad news. Avoid them. That's all you need to know."])
+    )
+
+    replacements_context = DiscussionContext()
+    replacements_context.add_entry_phrases(
+        (["(.* )?(what|who)?.*replacements?.*"], ["Yeah, replacements to like, "
+            "run the prison.", "Replacement prison guards."])
+    )
+
+    replacements_context.add_response_phrases(
+        (["(.* )?when.*(they|replacements?).*"], ["I don't know, but I wouldn't "
+            "recommend waiting around to find out. You'll end up back in one "
+            "of those cells."])
+    )
+
+    oldman.add_context(greeting_context)
+    oldman.add_context(raiders_context)
+    oldman.add_context(replacements_context)
 
     builder.add_item(oldman)
 

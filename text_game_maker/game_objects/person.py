@@ -2,8 +2,173 @@ import sys
 import random
 
 import text_game_maker
-from text_game_maker.game_objects.generic import Item
-from text_game_maker.utils import utils, redict
+from text_game_maker.game_objects.generic import Item, GameEntity
+from text_game_maker.utils import utils
+from text_game_maker.utils.redict import ReDict
+
+def _check_get_response(responsedict, text):
+    try:
+        responses = responsedict[text]
+    except KeyError:
+        return None
+
+    return random.choice(responses)
+
+def _serialize_redict(d):
+    ret = d.dump_to_dict()
+
+    for pattern in ret.keys():
+        newvalue = []
+        for value in ret[pattern]:
+            if callable(value):
+                newvalue.append(utils.serialize_callback(value))
+            else:
+                newvalue.append(value)
+
+        ret[pattern] = newvalue
+
+    return ret
+
+def _deserialize_redict(d):
+    for pattern in d.keys():
+        newvalue = []
+        for val in d[pattern]:
+            try:
+                callback = utils.deserialize_callback(val)
+            except RuntimeError:
+                newvalue.append(val)
+            else:
+                newvalue.append(callback)
+
+        d[pattern] = newvalue
+
+    return ReDict().load_from_dict(d)
+
+class DiscussionContext(GameEntity):
+    def __init__(self, lists=None):
+        self.entry = ReDict()
+        self.responses = ReDict()
+        self.chains = []
+        self.chain = None
+        self.chain_index = 0
+
+        if lists:
+            self._build_from_lists(lists)
+
+    def get_special_attrs(self):
+        ret = {}
+        ret['entry'] = self.entry.dump_to_dict()
+        ret['responses'] = self.responses.dump_to_dict()
+        ret['chain'] = None
+        ret['chains'] = []
+
+        for i in range(len(self.chains)):
+            chain = self.chains[i]
+            ret['chains'].append([_serialize_redict(d) for d in chain])
+
+            if self.chain and chain is self.chain:
+                ret['chain'] = i
+
+        return ret
+
+    def set_special_attrs(self, attrs):
+        self.entry.clear()
+        self.responses.clear()
+        self.chains = []
+        self.chain = None
+
+        self.entry.load_from_dict(attrs['entry'])
+        self.responses.load_from_dict(attrs['responses'])
+
+        for chain in attrs['chains']:
+            self.chains.append([_deserialize_redict(d) for d in chain])
+
+        if attrs['chain']:
+            self.chain = self.chains[attrs['chain']]
+
+        del attrs['entry']
+        del attrs['responses']
+        del attrs['chains']
+        del attrs['chain']
+
+    def _build_from_lists(self, lists):
+        target_length = 3
+        length = len(lists)
+
+        if length < target_length:
+            lists.extend([None] * (target_length - length))
+        elif length > target_length:
+            raise ValueError("Cannot build %s from a list with %d elements "
+                "(expecting %d)" % (length, target_length))
+
+        entry, responses, chains = lists
+        if entry:
+            self.add_entry_phrases(*entry)
+
+        if responses:
+            self.add_response_phrases(*responses)
+
+        if chains:
+            self.add_chained_phrases(*chains)
+
+    def add_chained_phrases(self, *pattern_response_pairs):
+        chain = []
+        for patterns, responses in pattern_response_pairs:
+            responsedict = ReDict()
+            responsedict['|'.join(patterns)] = responses
+            chain.append(responsedict)
+
+        self.chains.append(chain)
+
+    def add_entry_phrases(self, *pattern_response_pairs):
+        for patterns, responses in pattern_response_pairs:
+            self.entry['|'.join(patterns)] = responses
+
+    def add_response_phrases(self, *pattern_response_pairs):
+        for patterns, responses in pattern_response_pairs:
+            self.responses['|'.join(patterns)] = responses
+
+    def _search_chains(self, text):
+        for chain in self.chains:
+            if (len(chain) > 0):
+                resp = _check_get_response(chain[0], text)
+                if resp:
+                    return chain, resp
+
+        return None, None
+
+    def _get_chained_response(self, text):
+        if not self.chain:
+            chain, response = self._search_chains(text)
+            if chain:
+                self.chain = chain
+                self.chain_index = 1
+                return response
+
+            return None
+
+        responsedict = self.chain[self.chain_index]
+        resp = _check_get_response(responsedict, text)
+
+        if resp:
+            if self.chain_index < (len(self.chain) - 1):
+                self.chain_index += 1
+        elif self.chain_index > 0:
+            responsedict = self.chain[self.chain_index - 1]
+            resp = _check_get_response(responsedict, text)
+
+        return resp
+
+    def get_response(self, text):
+        resp = self._get_chained_response(text)
+        if resp:
+            return resp
+
+        resp = _check_get_response(self.responses, text)
+        if resp:
+            return resp
+
+        return _check_get_response(self.entry, text)
 
 class Person(Item):
     """
@@ -33,47 +198,44 @@ class Person(Item):
         self.script = None
         self.script_pos = 0
         self.task_id = 0
-        self.responses = redict.ReDict()
+        self.responses = ReDict()
         self.default_responses = []
 
         self.context = None
-        self.context_index = 0
         self.contexts = []
 
     def get_special_attrs(self):
         ret = {}
-        responses = self.responses.dump_to_dict()
+        ret['responses'] = _serialize_redict(self.responses)
+        ret['context'] = None
 
-        for pattern in responses.keys():
-            newvalue = []
-            for value in responses[pattern]:
-                if callable(value):
-                    newvalue.append(utils.serialize_callback(value))
-                else:
-                    newvalue.append(value)
+        serialized_contexts = []
+        for i in range(len(self.contexts)):
+            context = self.contexts[i]
+            serialized_contexts.append(context.get_special_attrs())
 
-            responses[pattern] = newvalue
+            if self.context and (context is self.context):
+                ret['context'] = i
 
-        ret['responses'] = responses
+        ret['contexts'] = serialized_contexts
         return ret
 
     def set_special_attrs(self, attrs):
-        responses = attrs['responses']
+        self.responses = _deserialize_redict(attrs['responses'])
+        self.contexts = []
+        self.context = None
 
-        for pattern in responses.keys():
-            newvalue = []
-            for val in responses[pattern]:
-                try:
-                    callback = utils.deserialize_callback(val)
-                except RuntimeError:
-                    newvalue.append(val)
-                else:
-                    newvalue.append(callback)
+        for contextdata in attrs['contexts']:
+            context = DiscussionContext()
+            context.set_special_attrs(contextdata)
+            self.contexts.append(context)
 
-            responses[pattern] = newvalue
+        if attrs['context']:
+            self.context = self.contexts[attrs['context']]
 
-        self.responses.load_from_dict(responses)
         del attrs['responses']
+        del attrs['contexts']
+        del attrs['context']
         return attrs
 
     def on_look(self, player):
@@ -92,7 +254,7 @@ class Person(Item):
         """
         self.default_responses.extend(responses)
 
-    def add_response(self, patterns, responses):
+    def add_response_phrase(self, patterns, responses):
         """
         Set responses to reply with when player types a specific pattern
         when talking to this person
@@ -108,16 +270,10 @@ class Person(Item):
         """
         self.responses['|'.join(patterns)] = responses
 
-    def add_context(self, *pattern_response_pairs):
-        context = []
-        for patterns, responses in pattern_response_pairs:
-            responsedict = redict.ReDict()
-            responsedict['|'.join(patterns)] = responses
-            context.append(responsedict)
-
+    def add_context(self, context):
         self.contexts.append(context)
 
-    def add_responses(self, *responses):
+    def add_response_phrases(self, *pattern_response_pairs):
         """
         Set multiple pattern/response pairs at once
 
@@ -125,8 +281,8 @@ class Person(Item):
             tuple containing arguments for a single ``add_response`` call, \
             e.g. ``add_responses((['cat.*'], ['meow']), (['dog.*], ['woof']))``
         """
-        for patterns, responses in responses:
-            self.add_response(patterns, responses)
+        for patterns, responses in pattern_response_pairs:
+            self.add_response_phrase(patterns, responses)
 
     def _get_default_response(self):
         if self.default_responses:
@@ -134,21 +290,11 @@ class Person(Item):
 
         return "I don't understand what you're talking about"
 
-    def _check_get_response(self, responsedict, text):
-        try:
-            responses = responsedict[text]
-        except KeyError:
-            return None
-
-        return random.choice(responses)
-
     def _attempt_context_entry(self, text):
         for context in self.contexts:
-            responsedict = context[0]
-            response = self._check_get_response(responsedict, text)
+            response = _check_get_response(context.entry, text)
             if response:
                 self.context = context
-                self.context_index = 1
                 return response
 
         return None
@@ -158,15 +304,12 @@ class Person(Item):
 
         # If currently in a context, try to get a response from the context
         if self.context:
-            for responsedict in self.context:
-                response = self._check_get_response(responsedict, text)
-                if response:
-                    break
+            response = self.context.get_response(text)
 
         # If no contextual response is available, try to get a response from
         # the dict of contextless responses
         if not response:
-            response = self._check_get_response(self.responses, text)
+            response = _check_get_response(self.responses, text)
             if response:
                 # If we are currently in a context but only able to get a
                 # matching response from the contextless dict, set the current
@@ -178,7 +321,6 @@ class Person(Item):
                 response = self._attempt_context_entry(text)
                 if not response:
                     response = self._get_default_response()
-
 
         if not response:
             return text
