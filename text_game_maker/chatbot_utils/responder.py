@@ -167,7 +167,7 @@ class Context(object):
         """
         Add context that can only be entered when already in this context
 
-        :param chatbot_utils.responder.Context context: context instance to add
+        :param text_game_maker.chatbot_utils.responder.Context context: context instance to add
         """
         if not isinstance(context, Context):
             raise ValueError("add_context argument must be a Context instance")
@@ -179,7 +179,7 @@ class Context(object):
         """
         Add one or more context instances to this context
 
-        :param chatbot_utils.responder.Context contexts: context instances to add
+        :param text_game_maker.chatbot_utils.responder.Context contexts: context instances to add
         """
         for context in contexts:
             self.add_context(context)
@@ -317,7 +317,7 @@ class Responder(object):
         """
         Add context instance to this responder
 
-        :param chatbot_utils.responder.Context context: context instance to add
+        :param text_game_maker.chatbot_utils.responder.Context context: context instance to add
         """
         if not isinstance(context, Context):
             raise ValueError("add_context argument must be a Context instance")
@@ -329,7 +329,7 @@ class Responder(object):
         """
         Add one or more context instances to this responder
 
-        :param chatbot_utils.responder.Context contexts: context instances to add
+        :param text_game_maker.chatbot_utils.responder.Context contexts: context instances to add
         """
         for context in contexts:
             self.add_context(context)
