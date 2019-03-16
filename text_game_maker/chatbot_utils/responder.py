@@ -1,4 +1,4 @@
-from chatbot_utils.redict import ReDict
+from text_game_maker.chatbot_utils.redict import ReDict
 
 class NoResponse(object):
     pass
