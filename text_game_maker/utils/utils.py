@@ -34,7 +34,8 @@ info = {
     'sequence_count': None,
     'sound': None,
     'instance': None,
-    'printfunc': _default_printfunc
+    'printfunc': _default_printfunc,
+    'inputfunc': session.prompt
 }
 
 wrapper = textwrap.TextWrapper()
@@ -72,7 +73,29 @@ def _rand_line(filename):
         name = fh.readline().strip().lower()
         return name[:1].upper() + name[1:]
 
-def set_printfunc(self, func):
+def set_inputfunc(func):
+    """
+    Set function to be used for blocking on input from the user. The default
+    if unset is to use a prompt session from prompt-toolkit reading from stdin
+    of the process where text_game_maker is running. The provided function is
+    responsible for blocking until user input is available, and must return the
+    user input as a string
+
+    :param func: function to use for reading user input
+    """
+    info['inputfunc'] = func
+
+def inputfunc(prompt):
+    """
+    Block until user input is available
+
+    :param str prompt: string to prompt user for input
+    :return: user input
+    :rtype: str
+    """
+    return info['inputfunc'](prompt)
+
+def set_printfunc(func):
     """
     Set function to be used for displaying game output. The default if unset is
     to use standard python "print".
@@ -81,15 +104,14 @@ def set_printfunc(self, func):
     """
     info['printfunc'] = func
 
-def printfunc(*args, **kwargs):
+def printfunc(text):
     """
     Display game output
 
-    :param args: arguments for print function
-    :param kwargs: keyword arguments for print function
+    :param str text: text to display
     :return: value returned by print function
     """
-    return info['printfunc'](*args, **kwargs)
+    return info['printfunc'](text)
 
 def get_random_name():
     """
@@ -790,7 +812,7 @@ def read_line_raw(msg, cancel_word=None, default=None):
         user_input = pop_command()
         printfunc(prompt + user_input)
     else:
-        user_input = session.prompt(prompt)
+        user_input = inputfunc(prompt)
 
     if default and user_input == '':
         return default
