@@ -24,6 +24,9 @@ saved_prints = []
 _serializable_classes = {}
 _serializable_callbacks = {}
 
+def _default_printfunc(text):
+    print(text)
+
 info = {
     'slow_printing': False,
     'chardelay': 0.02,
@@ -31,6 +34,7 @@ info = {
     'sequence_count': None,
     'sound': None,
     'instance': None,
+    'printfunc': _default_printfunc
 }
 
 wrapper = textwrap.TextWrapper()
@@ -68,7 +72,33 @@ def _rand_line(filename):
         name = fh.readline().strip().lower()
         return name[:1].upper() + name[1:]
 
+def set_printfunc(self, func):
+    """
+    Set function to be used for displaying game output. The default if unset is
+    to use standard python "print".
+
+    :param func: function to pass game output text to be displayed
+    """
+    info['printfunc'] = func
+
+def printfunc(*args, **kwargs):
+    """
+    Display game output
+
+    :param args: arguments for print function
+    :param kwargs: keyword arguments for print function
+    :return: value returned by print function
+    """
+    return info['printfunc'](*args, **kwargs)
+
 def get_random_name():
+    """
+    Get a random first and second name from old US census data, as a string
+    e.g. "John Smith"
+
+    :return: random name
+    :rtype: str
+    """
     return '%s %s' % (_rand_line(_first_names), _rand_line(_middle_names))
 
 def get_builder_instance():
@@ -515,7 +545,7 @@ def _wrap_print(text, wait=False):
         saved_prints.append(msg)
         return
 
-    print(msg)
+    printfunc(msg)
 
 def _unrecognised(val):
     _wrap_print('Unrecognised command "%s"' % val)
@@ -754,11 +784,11 @@ def read_line_raw(msg, cancel_word=None, default=None):
         cancel_desc = ", or '%s'" % cancel_word
 
     prompt = "%s%s%s " % (msg, cancel_desc, default_desc)
-    print('')
+    printfunc('')
 
     if sequence:
         user_input = pop_command()
-        print(prompt + user_input)
+        printfunc(prompt + user_input)
     else:
         user_input = session.prompt(prompt)
 
@@ -821,9 +851,9 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel", default=None):
     lines = ['    %d. %s' % (i + 1, choices[i]) for i in range(len(choices))]
 
     if msg:
-        print('\n' + msg + '\n')
+        printfunc('\n' + msg + '\n')
 
-    print('\n' + '\n'.join(lines))
+    printfunc('\n' + '\n'.join(lines))
 
     while True:
         ret = read_line(prompt, cancel_word, default_str)
@@ -864,7 +894,7 @@ def game_print(msg, wait=False):
         return
 
     if not info['slow_printing']:
-        print(msg)
+        printfunc(msg)
         return
 
     for i in range(len(msg)):
@@ -872,7 +902,7 @@ def game_print(msg, wait=False):
         sys.stdout.flush()
         time.sleep(info['chardelay'])
 
-    print('')
+    printfunc('')
 
 def get_basic_controls():
     """
@@ -902,7 +932,7 @@ def _parser_suggestions(fsm, text, i):
     _unrecognised(text)
 
     if i > 0:
-        print ('\nDid you mean...\n\n%s'
+        printfunc('\nDid you mean...\n\n%s'
             % ('\n'.join(['  %s' % w for w in fsm.get_children()])))
 
 def run_fsm(fsm, action):

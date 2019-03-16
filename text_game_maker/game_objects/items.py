@@ -169,7 +169,7 @@ class Paper(Item):
         if self.footer:
             msg = "%s\n\n%s" % (msg, self.footer_text())
 
-        print('\n' + msg)
+        utils.printfunc('\n' + msg)
 
 class Blueprint(Item):
     def __init__(self, ingredients=[], item=None, **kwargs):

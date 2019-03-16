@@ -45,7 +45,7 @@ def _do_quit(player, word, name):
         sys.exit()
 
 def _do_show_command_list(player, word, setting):
-    print(utils.get_full_controls(player.fsm))
+    utils.printfunc(utils.get_full_controls(player.fsm))
 
 def _do_help(player, word, setting):
     text = None
@@ -61,7 +61,7 @@ def _do_help(player, word, setting):
             utils._wrap_print("No help available for '%s'." % setting)
             return
 
-        print(text.rstrip('\n'))
+        utils.printfunc(text.rstrip('\n'))
 
 def _move_direction(player, word, direction):
     if 'north'.startswith(direction):
@@ -342,19 +342,19 @@ def _do_inventory_listing(player, word, setting):
     fmt = utils.ITEM_LIST_FMT
 
     banner = utils.line_banner("status", bannerwidth)
-    print('\n' + banner + '\n')
-    print(_player_health_listing(player, bannerwidth) + '\n')
+    ret = ('\n' + banner + '\n\n')
+    ret += (_player_health_listing(player, bannerwidth) + '\n\n')
     if player.equipped:
-        print((fmt).format(player.equipped.name + " (equipped)", "",
+        ret += ((fmt + "\n\n").format(player.equipped.name + " (equipped)", "",
             player.equipped.value))
-        print("")
 
     if player.inventory:
-            print(utils.container_listing(player.inventory, fmt))
+            ret += utils.container_listing(player.inventory, fmt) + "\n"
 
-    print(utils.container_listing(player.pockets, fmt, name="pockets",
-            bottom_border=True))
+    ret += (utils.container_listing(player.pockets, fmt, name="pockets",
+            bottom_border=True) + "\n")
 
+    utils.printfunc(ret)
     return True
 
 def get_instance():
@@ -408,7 +408,7 @@ class MapBuilder(object):
     def _parse_command(self, player, action):
         if action == '':
             action = utils.get_last_command()
-            print('\n' + action)
+            utils.printfunc('\n' + action)
 
         if self._is_shorthand_direction(action):
             if not _do_move(player, 'go', action):
@@ -428,7 +428,7 @@ class MapBuilder(object):
             if not txt:
                 break
 
-            print(txt)
+            utils.printfunc(txt)
 
         utils.set_last_command(action)
         player.scheduler_tick()
@@ -697,7 +697,7 @@ class MapBuilder(object):
         cmd = utils.pop_command()
 
         while not cmd is None:
-            print("\n> %s" % cmd)
+            utils.printfunc("\n> %s" % cmd)
             self._parse_command(player, cmd)
             cmd = utils.pop_command()
 
@@ -721,7 +721,7 @@ class MapBuilder(object):
         menu_choices = ["New game", "Load game", "Controls"]
 
         while True:
-            print("\n------------ MAIN MENU ------------\n")
+            utils.printfunc("\n------------ MAIN MENU ------------\n")
             choice = utils.ask_multiple_choice(menu_choices, default=1)
 
             if choice < 0:
@@ -739,7 +739,7 @@ class MapBuilder(object):
                     break
 
             elif choice == 2:
-                print(utils.get_full_controls())
+                utils.printfunc(utils.get_full_controls())
 
         self.reset_state_data = self.player.save_to_string()
 

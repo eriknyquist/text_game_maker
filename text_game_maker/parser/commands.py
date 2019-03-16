@@ -421,7 +421,7 @@ def _do_look_inside(player, word, remaining):
         utils.game_print("%s contains nothing." % item.name)
         return True
 
-    print('\n' + utils.container_listing(item, bottom_border=True))
+    utils.printfunc('\n' + utils.container_listing(item, bottom_border=True))
     return True
 
 def _take(player, item):
@@ -752,4 +752,3 @@ def add_commands(parser):
         parser.add_command(*arglist)
 
     return parser
-
