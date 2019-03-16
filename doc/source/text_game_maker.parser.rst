@@ -9,6 +9,11 @@ text\_game\_maker.parser package
 Submodules
 ----------
 
+.. automodule:: text_game_maker.parser.commands
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. automodule:: text_game_maker.parser.parser
     :members:
     :undoc-members:

@@ -1,4 +1,4 @@
-from text_game_maker.game_objects.person import Person, DiscussionContext
+from text_game_maker.game_objects.person import Person, Context
 from text_game_maker.utils.responses import STANDARD_GREETINGS
 
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
@@ -70,7 +70,7 @@ def prison_hallway_1(builder):
     oldman.add_default_responses("How interesting.", "Oh, really?", "Indeed.",
         "Fascinating, yes.", "Oh, yes? Interesting.", "Mmhmm.")
 
-    oldman.add_response_phrases(
+    oldman.add_responses(
         ([".*(what( is|'?s)? (wrong|happening|going on)).*"],
             ["Huh. You just woke up or somethin? Raiders rolled in, gutted the "
             "place. If I were you, I'd take the freebie and get out of here "
@@ -80,26 +80,26 @@ def prison_hallway_1(builder):
             "the prison, obviously"])
     )
 
-    greeting_context = DiscussionContext(STANDARD_GREETINGS)
-    raiders_context = DiscussionContext()
+    greeting_context = Context(STANDARD_GREETINGS)
+    raiders_context = Context()
     raiders_context.add_entry_phrases(
         (["(.* )?(what|who)?.*raiders?.*"], ["Raiders. Bandits. Outlaws. You know?",
             "How can you not know what raiders are?"])
     )
 
-    raiders_context.add_response_phrases(
+    raiders_context.add_responses(
         (["(.* )?why.*(they|raiders?).*"], ["Hell, how should I know?"]),
         (["(.* )?(tell|talk) (me)?.*about.*(them|raiders?).*"],
             ["They're bad news. Avoid them. That's all you need to know."])
     )
 
-    replacements_context = DiscussionContext()
+    replacements_context = Context()
     replacements_context.add_entry_phrases(
         (["(.* )?(what|who)?.*replacements?.*"], ["Yeah, replacements to like, "
             "run the prison.", "Replacement prison guards."])
     )
 
-    replacements_context.add_response_phrases(
+    replacements_context.add_responses(
         (["(.* )?when.*(they|replacements?).*"], ["I don't know, but I wouldn't "
             "recommend waiting around to find out. You'll end up back in one "
             "of those cells."])

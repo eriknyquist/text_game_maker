@@ -84,24 +84,24 @@ class GameEntity(object):
 
     :ivar bool inanimate: defines whether this item is an inanimate object
     :ivar bool combustible: defines whether this item can be destroyed by fire
-    :ivar bool scenery: defines whether this item is scenery; an immovable prop\
-        in the scene that should be mentioned before smaller interactive items\
-        when describing a room, e.g. furniture, architectural features of the\
-        room
+    :ivar bool scenery: defines whether this item is scenery; an immovable \
+        prop in the scene that should be mentioned before smaller interactive \
+        items when describing a room, e.g. furniture, architectural features \
+        of the room
     :ivar bool edible: defines whether this item is edible
     :ivar bool alive: defines whether this item is currently alive
-    :ivar int energy: defines how much energy player gains by consuming this\
+    :ivar int energy: defines how much energy player gains by consuming this \
         item
-    :ivar int damage: defines how much health player loses if damaged by this\
+    :ivar int damage: defines how much health player loses if damaged by this \
         item
 
-    :ivar int value: defines how much money player will make by selling this\
+    :ivar int value: defines how much money player will make by selling this \
         item
-    :ivar str name: name that this item will be referred to as in the game\
+    :ivar str name: name that this item will be referred to as in the game \
         (e.g. "metal key")
-    :ivar str prefix: preceding word required when mentioning item, e.g. "a"\
+    :ivar str prefix: preceding word required when mentioning item, e.g. "a" \
         for "a metal key", and "an" for "an apple"
-    :ivar list home: list that this Item instance lives inside; required for\
+    :ivar list home: list that this Item instance lives inside; required for \
         the deleting/moving items within the game world
     :ivar bool is_container: defines whether this item can contain other items
     :ivar bool is_electricity_source: defines whether this item is an \
@@ -115,9 +115,9 @@ class GameEntity(object):
     :ivar Material material: material this item is made of
     :ivar int capacity: number of items this item can contain (if container)
     :ivar list items: items contained inside this item (if container)
-    :ivar int size: size of this item; containers cannot contain items with a\
+    :ivar int size: size of this item; containers cannot contain items with a \
         larger size than themselves
-    :ivar str verb: singluar verb e.g. "the key is on the floor", or plural\
+    :ivar str verb: singluar verb e.g. "the key is on the floor", or plural \
         e.g. "the coins are on the floor"
     """
 

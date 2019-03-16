@@ -9,7 +9,7 @@ text\_game\_maker.utils package
 Submodules
 ----------
 
-.. automodule:: text_game_maker.utils.redict
+.. automodule:: text_game_maker.utils.responses
     :members:
     :undoc-members:
     :show-inheritance:
