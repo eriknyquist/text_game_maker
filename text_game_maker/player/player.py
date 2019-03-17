@@ -297,7 +297,8 @@ class Player(GameEntity):
         utils.save_sound(audio.SUCCESS_SOUND)
 
         if not self.can_see():
-            if not (dest is self.previous_tile()):
+            previous = self.previous_tile()
+            if (not previous) or not (dest is previous):
                 utils._wrap_print(messages.dark_stumble_message())
                 return
 
