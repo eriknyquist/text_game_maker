@@ -7,6 +7,9 @@ from slackclient import SlackClient
 from text_game_maker.utils.runner import run_map_from_filename
 from text_game_maker.utils import utils
 
+class config(object):
+    channel = ""
+
 # constants
 TOKEN_ENV_VAR = 'SLACK_BOT_TOKEN'
 RTM_READ_DELAY = 0.2
@@ -60,13 +63,12 @@ def main():
 
     botname = slack_client.api_call("auth.test")["user_id"]
     print("%s connected" % botname)
-    channel = 'bottest'
 
     def printfunc(text):
         output_text = "```%s```" % text if text != "" else text
         slack_client.api_call(
             "chat.postMessage",
-            channel=channel,
+            channel=config.channel,
             text=output_text
         )
 
@@ -77,9 +79,9 @@ def main():
 
         # rtm_read doesn't block, need to block ourselves by sleeping
         while not command:
-            command, channel = parse_bot_commands(slack_client.rtm_read(), botname)
+            command, config.channel = parse_bot_commands(slack_client.rtm_read(), botname)
             # Empty string is used to indicate default values, need to catch that
-            if not command and channel:
+            if not command and config.channel:
                 return ""
 
             time.sleep(RTM_READ_DELAY)
