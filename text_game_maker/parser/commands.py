@@ -11,6 +11,10 @@ SELF_WORDS = [
     'self', 'me', 'myself'
 ]
 
+RESET_WORDS = [
+    'reset', 'restart', 'start'
+]
+
 EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
 ]
@@ -654,6 +658,9 @@ def _do_suicide(player, word, remaining):
     utils.game_print(messages.suicide_message())
     player.death()
 
+def _do_reset(player, word, remaining):
+    player.reset_game = True
+
 def _do_inspect(player, word, item):
     if item == '':
         _do_look(player, word, item)
@@ -724,6 +731,8 @@ def add_commands(parser):
         [READ_WORDS, _do_read, "read an item", "%s <item>"],
 
         [SUICIDE_WORDS, _do_suicide, "commit suicide", "%s"],
+
+        [RESET_WORDS, _do_reset, "reset game to the beginning", "%s"],
 
         [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
 
