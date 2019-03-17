@@ -324,6 +324,18 @@ class Player(GameEntity):
         self.decrement_energy(MOVE_ENERGY_COST)
         return dest
 
+    def read_player_name_and_set(self):
+        """
+        Helper function to read a name from the user and set as the player's name
+        """
+        default_name = utils.get_random_name()
+        name = utils.read_line_raw("What is your name?", default=default_name)
+        if name.strip() == "":
+            name = default_name
+
+        # captialize with name.title() and set as player name
+        self.set_name(name.title())
+
     def set_name(self, name):
         """
         Set player name

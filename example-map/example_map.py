@@ -35,13 +35,7 @@ def light_source_decay_callback(player, turns):
 # Called when the game starts
 def on_game_run(player):
     # read name from player
-    default_name = utils.get_random_name()
-    name = utils.read_line_raw("What is your name?", default=default_name)
-    if name.strip() == "":
-        name = default_name
-
-    # captialize with name.title() and set as player name
-    player.set_name(name.title())
+    player.read_player_name_and_set()
     player.schedule_task(light_source_decay_callback, 1)
     player.schedule_task(lighter_equip_hint, 10)
 

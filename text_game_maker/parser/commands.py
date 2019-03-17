@@ -11,6 +11,11 @@ SELF_WORDS = [
     'self', 'me', 'myself'
 ]
 
+SET_NAME_WORDS = [
+    "change name", "change my name", "change player name", "set name",
+    "set my name", "set player name"
+]
+
 RESET_WORDS = [
     'reset', 'restart', 'start'
 ]
@@ -274,6 +279,9 @@ def _do_burn(player, word, item_name):
         _no_item_message(player, item_name)
 
     return False
+
+def _do_set_name(player, word, remaining):
+    player.read_player_name_and_set()
 
 def _do_smell(player, word, item_name):
     if not item_name or item_name == "":
@@ -736,6 +744,8 @@ def add_commands(parser):
         [SUICIDE_WORDS, _do_suicide, "commit suicide", "%s"],
 
         [RESET_WORDS, _do_reset, "reset game to the beginning", "%s"],
+
+        [SET_NAME_WORDS, _do_set_name, "change player's name", "%s"],
 
         [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
 
