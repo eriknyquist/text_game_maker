@@ -15,6 +15,28 @@ logger.setLevel(logging.INFO)
 
 class config(object):
     channel = None
+    channel_info = None
+    user_info = None
+    channel_name = None
+    user_name = None
+
+    @classmethod
+    def set_channel_name(cls):
+        if (cls.channel_info and ('channel' in cls.channel_info)
+                and ('name' in cls.channel_info['channel'])):
+            cls.channel_name = cls.channel_info['channel']['name']
+            return
+
+        cls.channel_name = 'unknown'
+
+    @classmethod
+    def set_user_name(cls):
+        if (cls.user_info and ('user' in cls.user_info)
+                and ('name' in cls.user_info['user'])):
+            cls.user_name = cls.user_info['user']['name']
+            return
+
+        cls.user_name = 'unknown'
 
 # URL of image to use for bot icon in chats
 ICON_IMAGE_URL = 'https://cdn3.iconfinder.com/data/icons/line/36/robot_head-512.png'
@@ -75,14 +97,22 @@ def main():
         return
 
     botname = slack_client.api_call("auth.test")["user_id"]
-    logger.info("bot %s connected" % botname)
+    config.user_info = slack_client.api_call("users.info",
+            user=botname)
+    config.set_user_name()
+
+    logger.info("%s connected" % config.user_name)
 
     def printfunc(text):
         if not config.channel:
             return
 
-        output_text = "```%s```" % text if text != "" else text
-        logger.info("sending message to channel %s" % config.channel)
+        if text != "":
+            output_text = "```%s```" % text
+        else:
+            output_text = text
+
+        logger.info("sending message to channel '%s'" % config.channel_name)
         logger.debug('"%s"' % text)
 
         slack_client.api_call(
@@ -102,11 +132,16 @@ def main():
             command, config.channel = parse_bot_commands(slack_client.rtm_read(), botname)
             # Empty string is used to indicate default values, need to catch that
             if not command and config.channel:
-                return ""
+                command = ""
+                break
 
             time.sleep(RTM_READ_DELAY_SECS)
 
-        logger.info("received input from channel %s" % config.channel)
+        config.channel_info = slack_client.api_call("channels.info",
+                channel=config.channel)
+        config.set_channel_name()
+
+        logger.info("received input from channel '%s'" % config.channel_name)
         logger.debug('"%s"' % command)
         return command
 
