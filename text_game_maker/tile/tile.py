@@ -180,6 +180,7 @@ class Tile(GameEntity):
 
         self.smell_description = None
         self.ground_smell_description = None
+        self.ground_taste_description = None
         self.material = None
 
         self.tile_id = _register_tile(self)
@@ -208,6 +209,22 @@ class Tile(GameEntity):
             return
 
         utils.game_print("The ground doesn't smell like anything in "
+            "particular.")
+
+    def on_taste_ground(self):
+        """
+        Called when player types 'taste ground' or equivalent on this tile
+        """
+        if self.ground_taste_description:
+            utils.game_print(self.ground_taste_description)
+            return
+
+        if self.material:
+            utils.game_print("The ground tastes %s."
+                % get_properties(self.material).taste)
+            return
+
+        utils.game_print("The ground doesn't taste like anything in "
             "particular.")
 
     def set_tile_id(self, tile_id):

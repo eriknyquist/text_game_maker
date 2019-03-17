@@ -7,6 +7,10 @@ from text_game_maker.utils import utils
 from text_game_maker.messages import messages
 from text_game_maker.game_objects.items import FlameSource
 
+SELF_WORDS = [
+    'self', 'me', 'myself'
+]
+
 EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
 ]
@@ -273,6 +277,10 @@ def _do_smell(player, word, item_name):
         player.current.on_smell_ground()
         return True
 
+    if item_name in SELF_WORDS:
+        player.on_smell()
+        return True
+
     fields = utils.english_to_list(item_name)
     if len(fields) > 1:
         utils._wrap_print("Slow down, big-nose. You can only %s one thing at a "
@@ -296,6 +304,14 @@ def _do_taste(player, word, item_name):
     if not item_name or item_name == "":
         utils._wrap_print("What do you want to %s?" % word)
         return False
+
+    if item_name in GROUND_WORDS:
+        player.current.on_taste_ground()
+        return True
+
+    if item_name in SELF_WORDS:
+        player.on_taste()
+        return True
 
     fields = utils.english_to_list(item_name)
     if len(fields) > 1:

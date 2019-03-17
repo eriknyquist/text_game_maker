@@ -10,6 +10,7 @@ from text_game_maker.crafting import crafting
 from text_game_maker.utils import utils
 from text_game_maker.tile import tile
 from text_game_maker.messages import messages
+from text_game_maker.materials.materials import Material, get_properties
 
 CRAFTABLES_KEY = '_craftables_data'
 TILES_KEY = '_tile_list'
@@ -59,6 +60,10 @@ class Player(GameEntity):
 
         super(Player, self).__init__()
 
+        self.material = Material.SKIN
+        self.smell_description = None
+        self.taste_description = None
+
         self.fsm = None
         self.turns = 0
         self.max_health = 100
@@ -90,6 +95,26 @@ class Player(GameEntity):
         lighter = Lighter()
         self.pockets.add_item(lighter)
 
+    def on_smell(self):
+        """
+        Called when player smells themselves
+        """
+        if self.smell_description:
+            utils.game_print(smell_description)
+            return
+
+        utils.game_print("You smell %s." % get_properties(self.material).smell)
+        
+    def on_taste(self):
+        """
+        Called when player tastes themselves
+        """
+        if self.taste_description:
+            utils.game_print(taste_description)
+            return
+
+        utils.game_print("You taste %s." % get_properties(self.material).taste)
+        
     def has_item(self, item):
         if self.equipped and (self.equipped is item):
             return True
