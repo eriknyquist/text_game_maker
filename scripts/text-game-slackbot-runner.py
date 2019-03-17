@@ -2,13 +2,19 @@ import sys
 import os
 import time
 import re
+import logging
+
 from slackclient import SlackClient
 
 from text_game_maker.utils.runner import run_map_from_filename
 from text_game_maker.utils import utils
 
+logging.basicConfig()
+logger = logging.getLogger(os.path.splitext(os.path.basename(__file__))[0])
+logger.setLevel(logging.INFO)
+
 class config(object):
-    channel = ""
+    channel = None
 
 # URL of image to use for bot icon in chats
 ICON_IMAGE_URL = 'https://cdn3.iconfinder.com/data/icons/line/36/robot_head-512.png'
@@ -60,19 +66,25 @@ def parse_direct_mention(message_text):
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: %s <map runner file>" % sys.argv[0])
+        logger.error("Usage: %s <map runner file>" % sys.argv[0])
         return 1
 
     slack_client = create_slack_client()
     if not slack_client.rtm_connect(with_team_state=False):
-        print("Can't connect to slack")
+        logger.error("Can't connect to slack")
         return
 
     botname = slack_client.api_call("auth.test")["user_id"]
-    print("%s connected" % botname)
+    logger.info("bot %s connected" % botname)
 
     def printfunc(text):
+        if not config.channel:
+            return
+
         output_text = "```%s```" % text if text != "" else text
+        logger.info("sending message to channel %s" % config.channel)
+        logger.debug('"%s"' % text)
+
         slack_client.api_call(
             "chat.postMessage",
             channel=config.channel,
@@ -94,6 +106,8 @@ def main():
 
             time.sleep(RTM_READ_DELAY_SECS)
 
+        logger.info("received input from channel %s" % config.channel)
+        logger.debug('"%s"' % command)
         return command
 
     utils.set_printfunc(printfunc)
@@ -102,9 +116,9 @@ def main():
     try:
         run_map_from_filename(sys.argv[1])
     except KeyboardInterrupt:
-        print('Bye!')
-    else:
-        sys.exit(ret)
+        pass
+
+    logger.info('quitting')
 
 if __name__ == "__main__":
     main()
