@@ -221,6 +221,9 @@ def _do_unlock(player, word, remaining):
         return False
 
     door = None
+    if door_name.startswith("the "):
+        door_name = door_name[4:]
+
     for tile in player.current.iterate_directions():
         if tile and tile.is_door() and (door_name in tile.short_name):
             door = tile
