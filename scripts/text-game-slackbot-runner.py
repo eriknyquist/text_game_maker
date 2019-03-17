@@ -10,9 +10,16 @@ from text_game_maker.utils import utils
 class config(object):
     channel = ""
 
-# constants
+# URL of image to use for bot icon in chats
+ICON_IMAGE_URL = 'https://cdn3.iconfinder.com/data/icons/line/36/robot_head-512.png'
+
+# Environment variable containing slack API token for bot user
 TOKEN_ENV_VAR = 'SLACK_BOT_TOKEN'
-RTM_READ_DELAY = 0.2
+
+# Time to wait in between polling slack for input
+RTM_READ_DELAY_SECS = 0.2
+
+# Regex to identify mentions in a received message
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
 def create_slack_client():
@@ -69,7 +76,8 @@ def main():
         slack_client.api_call(
             "chat.postMessage",
             channel=config.channel,
-            text=output_text
+            text=output_text,
+            icon_url=ICON_IMAGE_URL
         )
 
     def inputfunc(prompt):
@@ -84,7 +92,7 @@ def main():
             if not command and config.channel:
                 return ""
 
-            time.sleep(RTM_READ_DELAY)
+            time.sleep(RTM_READ_DELAY_SECS)
 
         return command
 
