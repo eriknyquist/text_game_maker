@@ -55,7 +55,7 @@ def help_text():
 def _find_item(item, items):
     for i in items:
         if (i.name == item.name) and isinstance(i, item.__class__):
-            return item
+            return i
 
     return None
 
