@@ -51,17 +51,18 @@ def _do_help(player, word, setting):
     text = None
 
     if not setting or setting == "":
+        _do_show_command_list(player, word, setting)
+        return
+
+    i, cmd = utils.run_fsm(player.fsm, setting)
+    if cmd:
+        text = cmd.help_text()
+
+    if text is None:
         utils._wrap_print("No help available for '%s'." % setting)
-    else:
-        i, cmd = utils.run_fsm(player.fsm, setting)
-        if cmd:
-            text = cmd.help_text()
+        return
 
-        if text is None:
-            utils._wrap_print("No help available for '%s'." % setting)
-            return
-
-        utils.printfunc(text.rstrip('\n'))
+    utils.printfunc(text.rstrip('\n'))
 
 def _move_direction(player, word, direction):
     if 'north'.startswith(direction):
