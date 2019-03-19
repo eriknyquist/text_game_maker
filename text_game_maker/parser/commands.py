@@ -787,6 +787,9 @@ def add_commands(parser):
     ]
 
     for arglist in commands:
+        if utils.is_disabled_command(*arglist[0]):
+            continue
+
         parser.add_command(*arglist)
 
     return parser

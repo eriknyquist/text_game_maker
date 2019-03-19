@@ -47,6 +47,43 @@ _location = os.path.dirname(__file__)
 _first_names = os.path.join(_location, "first-names.txt")
 _middle_names = os.path.join(_location, "middle-names.txt")
 
+disabled_commands = []
+
+def is_disabled_command(*commands):
+    """
+    Checks if any of the provided words map to a disabled command
+
+    :param commands: one or more strings containing words mapping to parser commands
+    """
+
+    if len(disabled_commands) == 0:
+        return False
+
+    for command in commands:
+        if command in disabled_commands:
+            return True
+
+    return False
+
+def disable_command(command):
+    """
+    Disable a parser command. Useful for situations where you want to disable
+    certain capabilities, e.g. loading/saving game states
+
+    :param str command: word that makes to parser command to disable
+    """
+    disabled_commands.append(command)
+
+def disable_commands(*commands):
+    """
+    Disable multiple commands at once. Equivalent to multiple 'disable_command'
+    calls
+
+    :param commands: one or more words mapping to parser commands to disable
+    """
+    for command in commands:
+        disable_command(command)
+
 def _fpeek(fh):
     ret = fh.read(1)
     fh.seek(-1, 1)

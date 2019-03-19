@@ -1,5 +1,5 @@
 import json
-import text_game_maker
+from text_game_maker.utils import utils
 from text_game_maker.builder import map_builder
 from text_game_maker.parser import commands
 
@@ -201,6 +201,9 @@ class CommandParser(SimpleTextFSM):
         ]
 
         for arglist in default_commands:
+            if utils.is_disabled_command(*arglist[0]):
+                continue
+
             self.add_command(*arglist)
 
         commands.add_commands(self)
@@ -209,4 +212,3 @@ class CommandParser(SimpleTextFSM):
         cmd = Command(word_set, callback, help_text, fmt)
         for word in word_set:
             self.add_token(word, cmd)
-

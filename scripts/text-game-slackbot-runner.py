@@ -148,6 +148,8 @@ def main():
     utils.set_printfunc(printfunc)
     utils.set_inputfunc(inputfunc)
 
+    utils.disable_commands("load", "save", "audio")
+
     try:
         run_map_from_filename(sys.argv[1])
     except KeyboardInterrupt:
