@@ -1,11 +1,11 @@
 import sys
 import random
 
-import text_game_maker
 from text_game_maker.game_objects.generic import Item, GameEntity
 from text_game_maker.utils import utils
 from text_game_maker.chatbot_utils.redict import ReDict
 from text_game_maker.chatbot_utils import responder
+from text_game_maker.messages import messages
 
 def _serialize_redict(d):
     ret = d.dump_to_dict()
@@ -268,8 +268,13 @@ class Person(Item):
 
         utils.game_print('%s says:  "%s"' % (self.name, msg))
 
-    def set_script(self, lines):
-        self.script = lines
+    def on_eat(self, player, word):
+        if self.alive:
+            utils.game_print(messages.eat_living_person_message(self.prep))
+            player.injure(10)
+            return
+
+        super(Person, self).on_eat(player, word)
 
     def on_speak(self, player):
         speech = ' '

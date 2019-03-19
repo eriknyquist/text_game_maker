@@ -51,9 +51,6 @@ class Item(GameEntity):
         :param text_game_maker.player.player.Player player: player object
         :param str word: command word used by player
         """
-        if self.alive:
-            msg = "%s is still alive. You cannot eat living things." % self.name
-
         if self.size > ITEM_SIZE_SMALL:
             utils.game_print(messages.nonsensical_action_message('%s %s'
                 % (word, self.name)))

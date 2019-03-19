@@ -95,6 +95,18 @@ class Player(GameEntity):
         lighter = Lighter()
         self.pockets.add_item(lighter)
 
+    def injure(self, health_points=1):
+        msg = "You have lost %d health point" % health_points
+        if health_points > 1:
+            msg += "s"
+
+        if self.health <= health_points:
+            msg += ". You are dead"
+            self.death()
+
+        self.decrement_health(health_points)
+        utils.game_print(msg)
+
     def on_smell(self):
         """
         Called when player smells themselves

@@ -4,6 +4,21 @@ def _randmsg(choices, *args):
     choice = random.choice(choices)
     return choice.format(*args)
 
+def eat_living_person_message(name):
+    return _randmsg([
+        "{0} doesn't appreciate your advances, and bites back.",
+        "You have a chew on {0}. {0} finds this unpleasant and kicks you in the"
+            " groin.",
+        "You try to eat {0}, but {0} is a bit big and moves around a lot. "
+            "Eventually, {0} is no longer entertained and sucker-punches you.",
+        "You attempt to eat {0}, but {0} does not want to co-operate and "
+            "responds rather violently.",
+        "Foolishly, you try to take bite out of {0}, regretting it immediately "
+            "as {0} kicks you hard in the shins.",
+        "You try to eat {0}. This was dumb. {0} attacks you, landing several "
+            "punches on your face."
+    ], name)
+
 def dark_stumble_message():
     return _randmsg([
         "You stumble about blindly in the darkness, going nowhere.",
