@@ -453,6 +453,7 @@ class LockedDoor(Tile):
         super(LockedDoor, self).__init__(name, "")
         self.name = '%s %s' % (prefix, name)
         self.short_name = name
+        self.prep = "the " + self.short_name
         self.prefix = prefix
         self.locked = True
         self.source_tile = src_tile
@@ -472,12 +473,21 @@ class LockedDoor(Tile):
     def is_door(self):
         return True
 
-    def on_unlock(self, player, item):
-        if item.name == "lockpick":
+    def on_open(self, player):
+        pick = utils.find_inventory_item(player, "lockpick")
+        if pick:
             self.unlock()
-        else:
-            utils._wrap_print("%s cannot be unlocked with %s"
-                % (self.short_name, item.prep))
+            return
+
+        # TODO: add logic for unlocking with keys
+        utils._wrap_print("You need a key or a lockpick to unlock %s"
+            % self.prep)
+
+    def matches_name(self, name):
+        if name.startswith("the"):
+            name = name[4:]
+
+        return name in self.short_name
 
     def unlock(self):
         if not self.locked:

@@ -41,7 +41,7 @@ SUICIDE_WORDS = [
     "goodbye cruel world"
 ]
 
-UNLOCK_WORDS = ['unlock']
+OPEN_WORDS = ['open']
 
 EVERYTHING_WORDS = [
     'everything', 'all'
@@ -211,39 +211,30 @@ def _do_read(player, word, item_name):
     utils.save_sound(audio.FAILURE_SOUND)
     return False
 
-def _do_unlock(player, word, remaining):
+def _look_for_door(player, item_name):
+    for tile in player.current.iterate_directions():
+        if tile and tile.is_door() and tile.matches_name(item_name):
+            return tile
+
+    return None
+
+def _do_open(player, word, item_name):
     if not player.can_see():
         utils._wrap_print(messages.dark_search_message())
         return False
 
-    if not remaining or remaining == "":
+    if not item_name or item_name == "":
         utils._wrap_print("What do you want to %s?" % word)
-        return False
-
-    door_name, item_name = _split_word(remaining, 'with')
-    if door_name is None:
-        utils._wrap_print("What do you want to %s %s with?" % (word, remaining))
-        return False
-
-    door = None
-    if door_name.startswith("the "):
-        door_name = door_name[4:]
-
-    for tile in player.current.iterate_directions():
-        if tile and tile.is_door() and (door_name in tile.short_name):
-            door = tile
-            break
-
-    if door is None:
-        utils._wrap_print(messages.no_item_message(door_name))
         return False
 
     item = utils.find_any_item(player, item_name)
     if not item:
-        utils._wrap_print(messages.no_item_message(item_name))
-        return False
+        item = _look_for_door(player, item_name)
+        if not item:
+            utils._wrap_print(messages.no_item_message(item_name))
+            return False
 
-    door.on_unlock(player, item)
+    item.on_open(player)
     return True
 
 def _do_burn(player, word, item_name):
@@ -737,8 +728,7 @@ def add_commands(parser):
         [EQUIP_WORDS, _do_equip, "equip an item from your inventory",
             "%s <item>"],
 
-        [UNLOCK_WORDS, _do_unlock, "unlock a door with a key or lockpick",
-            "%s <door> with <item>"],
+        [OPEN_WORDS, _do_open, "open a container or door", "%s <item>"],
 
         [BURN_WORDS, _do_burn, "burn an item", "%s <item>"],
 

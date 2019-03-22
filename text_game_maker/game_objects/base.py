@@ -322,6 +322,19 @@ class GameEntity(object):
         utils.game_print("%s tastes %s."
             % (self.name, get_properties(self.material).taste))
 
+    def on_open(self, player):
+        """
+        Called when player opens this item
+
+        :param text_game_maker.player.player.Player player: player object
+        """
+        if not self.is_container:
+            utils.game_print("%s cannot be opened." % self.prep)
+            return
+
+        utils.game_print("You open %s and look inside." % self.prep)
+        utils.printfunc("\n" + utils.container_listing(self, bottom_border=True))
+
     def on_equip(self, player):
         """
         Called when player equips this item from inventory
