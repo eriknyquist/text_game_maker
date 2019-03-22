@@ -516,12 +516,14 @@ def _do_take(player, word, remaining):
         if not item:
             continue
 
-        if not _take(player, item):
+        added_item = _take(player, item)
+        if not added_item:
             if len(names) > 0:
                 break
 
             return False
 
+        added_item.prep = "your " + item.name
         names.append(item.name)
 
     utils.game_print('%s added to inventory.' % utils.list_to_english(names))
@@ -536,7 +538,8 @@ def _drop(player, items):
             player.equipped = None
 
         item.location = "on the ground"
-        player.current.add_item(item)
+        dropped = player.current.add_item(item)
+        dropped.prep = "the " + dropped.name
 
     utils.game_print("Dropped %s."
         % utils.list_to_english([x.name for x in items]))

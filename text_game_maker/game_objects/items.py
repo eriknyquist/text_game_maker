@@ -126,7 +126,7 @@ class Coins(Item):
         other_coins.value += self.value
         other_coins._set_name()
         self.delete()
-        return True
+        return other_coins
 
 class Paper(Item):
     def __init__(self, prefix="", name="", **kwargs):
@@ -188,7 +188,7 @@ class Blueprint(Item):
         utils._wrap_print("You have learned how to make %s." % self.item)
         utils.save_sound(audio.NEW_ITEM_SOUND)
         self.delete()
-        return True
+        return self
 
 class Furniture(Item):
     def __init__(self, prefix="", name="", **kwargs):

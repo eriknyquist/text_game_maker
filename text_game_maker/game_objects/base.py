@@ -247,8 +247,9 @@ class GameEntity(object):
         Put an item inside this item
 
         :param text_game_maker.game_objects.base.GameEntity item: item to add
+        :return: the item that was added
         """
-        item.move(self.items)
+        return item.move(self.items)
 
     def add_items(self, items):
         """
@@ -267,8 +268,7 @@ class GameEntity(object):
         If False, execution of the current command will stop immediately.
 
         :param text_game_maker.player.player.Player player: player object
-        :return: True if command execution should continue
-        :rtype: bool
+        :return: the object that was added
         """
 
         if len(player.pockets.items) < player.pockets.capacity:
@@ -276,12 +276,12 @@ class GameEntity(object):
         elif not player.inventory:
             utils._wrap_print("No bag to hold items")
             utils.save_sound(audio.FAILURE_SOUND)
-            return False
+            return None
         elif len(player.inventory.items) < player.inventory.capacity:
             return player.inventory.add_item(self)
 
         utils._wrap_print("No space to hold the %s." % self.name)
-        return False
+        return None
 
     def delete(self):
         """
@@ -297,10 +297,12 @@ class GameEntity(object):
         Move this item to a different location list
 
         :param list location: location list to move item to
+        :return: item that was moved
         """
         location.append(self)
         self.delete()
         self.home = location
+        return location[-1]
 
     def on_smell(self, player):
         """

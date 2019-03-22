@@ -1,7 +1,10 @@
 import sys
 import random
 
-from text_game_maker.game_objects.generic import Item, GameEntity
+from text_game_maker.game_objects.generic import (Item, GameEntity,
+    ITEM_SIZE_LARGE
+)
+
 from text_game_maker.utils import utils
 from text_game_maker.chatbot_utils.redict import ReDict
 from text_game_maker.chatbot_utils import responder
@@ -166,6 +169,7 @@ class Person(Item):
         self.prefix = prefix
         self.name = name
         self.prep = 'the ' + self.name
+        self.size = ITEM_SIZE_LARGE
 
         self.speak_count = 0
         self.script = None

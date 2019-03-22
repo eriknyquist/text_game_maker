@@ -276,16 +276,15 @@ class ElectricLightSource(LightSource):
         if not item.is_electricity_source:
             utils._wrap_print(messages.pointless_action_message(
                 "put the %s in the %s" % (item.name, self.name)))
-            return False
+            return None
 
         if item.size > self.size:
             utils._wrap_print(messages.container_too_small_message(item.prep,
                 self.prep))
-            return False
+            return None
 
         self.refuel()
-        item.move(self.items)
-        return True
+        return item.move(self.items)
 
 class FlameSource(LightSource):
     """
@@ -308,19 +307,20 @@ class Container(Item):
         if item is self:
             utils.game_print("How can you put the %s inside itself?"
                 % (item.name))
-            return False
+            return None
 
         if len(self.items) >= self.capacity:
             utils._wrap_print("The %s is full" % self.name)
-            return False
+            return None
 
         if self.size < item.size:
             utils.game_print(messages.container_too_small_message(
                 item.prep, self.prep))
-            return False
+            return None
 
-        item.move(self.items)
-        return True
+        import pdb
+        pdb.set_trace()
+        return item.move(self.items)
 
 class LargeContainer(Container):
     def __init__(self, *args, **kwargs):
@@ -359,5 +359,4 @@ class InventoryBag(Container):
 
         utils.save_sound(audio.NEW_ITEM_SOUND)
         utils.game_print("You now have a %s." % self.name)
-        return True
-
+        return player.inventory

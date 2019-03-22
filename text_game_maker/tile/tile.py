@@ -408,11 +408,12 @@ class Tile(GameEntity):
         Add item to this tile
 
         :param GameEntity item: item to add
+        :return: the added item
         """
         if item.location not in self.items:
             self.items[item.location] = []
 
-        item.move(self.items[item.location])
+        return item.move(self.items[item.location])
 
     def add_person(self, person):
         """
