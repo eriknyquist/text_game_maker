@@ -318,8 +318,6 @@ class Container(Item):
                 item.prep, self.prep))
             return None
 
-        import pdb
-        pdb.set_trace()
         return item.move(self.items)
 
 class LargeContainer(Container):

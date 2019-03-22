@@ -71,19 +71,21 @@ def prison_hallway_1(builder):
         "Fascinating, yes.", "Oh, yes? Interesting.", "Mmhmm.")
 
     oldman.add_responses(
-        ([".*(what( is|'?s)? (wrong|happening|going on)).*"],
+        (["(.* )?(what( is|'?s)? (wrong|happening|going on)).*"],
             ["Huh. You just woke up or somethin? Raiders rolled in, gutted the "
             "place. If I were you, I'd take the freebie and get out of here "
             "before the replacements show up. Probably on their way right "
             "now."]),
         (["(.* )?where.* i .*go.*"], ["Anywhere besides here.", "Away from "
-            "the prison, obviously"])
+            "the prison, obviously"]),
+        (["(.* )?(where (are we|is this)|what is this place).*"], ["A prison. "
+            "You couldn't figure that out by yourself?"]),
     )
 
     greeting_context = Context(STANDARD_GREETINGS)
     raiders_context = Context()
     raiders_context.add_entry_phrases(
-        (["(.* )?(what|who)?.*raiders?.*"], ["Raiders. Bandits. Outlaws. You know?",
+        (["(.* )?(what|who).*raiders?.*"], ["Raiders. Bandits. Outlaws. You know?",
             "How can you not know what raiders are?"])
     )
 
