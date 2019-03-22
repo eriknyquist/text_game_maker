@@ -189,13 +189,12 @@ def pointless_action_message(action):
 
 def container_too_small_message(item_name, container_name):
     return _randmsg([
-        "The {0} will not fit inside the {1}.",
-        "Try as you might, you cannot make the {0} fit inside the {1}.",
-        "The {0} is too large to fit inside the {1}.",
+        "{0} will not fit inside {1}.",
+        "Try as you might, you cannot make {0} fit inside {1}.",
+        "{0} is too large to fit inside {1}.",
         "Exhausted after many attempts, you reluctantly consider the "
-        "possibility that the {0} will not fit inside the {1}.",
-        "The {0}, alas, will never fit inside the {1}.",
-        "Despite your most earnest efforts, the {0} remains mostly not inside "
-        "the {1}.",
-        "Fitting the {0} inside the {1} is impossible."
+        "possibility that {0} will not fit inside {1}.",
+        "{0}, alas, will never fit inside {1}.",
+        "Despite your most earnest efforts, {0} remains mostly not inside {1}.",
+        "Fitting {0} inside {1} is impossible."
     ], item_name, container_name)

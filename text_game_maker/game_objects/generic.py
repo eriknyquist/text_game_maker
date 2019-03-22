@@ -279,8 +279,8 @@ class ElectricLightSource(LightSource):
             return False
 
         if item.size > self.size:
-            utils._wrap_print(messages.container_too_small_message(item.name,
-                self.name))
+            utils._wrap_print(messages.container_too_small_message(item.prep,
+                self.prep))
             return False
 
         self.refuel()
@@ -316,7 +316,7 @@ class Container(Item):
 
         if self.size < item.size:
             utils.game_print(messages.container_too_small_message(
-                item.name, self.name))
+                item.prep, self.prep))
             return False
 
         item.move(self.items)

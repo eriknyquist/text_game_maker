@@ -356,7 +356,7 @@ def _put(item, dest_item, location_name, location):
 
     if item.size >= dest_item.size:
         utils.game_print(messages.container_too_small_message(
-                item.name, dest_item.name))
+                item.prep, dest_item.prep))
         return False
 
     item.move(location)

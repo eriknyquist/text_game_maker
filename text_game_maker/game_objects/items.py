@@ -91,6 +91,7 @@ class Coins(Item):
         super(Coins, self).__init__(None, "", **kwargs)
         self.material = Material.METAL
         self.combustible = False
+        self.prep = "the coins"
         self._set_name()
 
     def _set_name(self):

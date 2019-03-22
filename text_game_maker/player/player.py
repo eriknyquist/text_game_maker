@@ -92,6 +92,8 @@ class Player(GameEntity):
 
         self.pockets = SmallBag("", "your pockets")
         self.pockets.capacity = 2
+        self.pockets.prep = "your pockets"
+
         lighter = Lighter()
         self.pockets.add_item(lighter)
 
