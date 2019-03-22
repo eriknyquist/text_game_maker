@@ -153,6 +153,14 @@ class Tile(GameEntity):
 
         self.description = ""
         self.name = name
+        self.original_name = self.name
+
+        self.name_from_dir = {
+            "north": None,
+            "south": None,
+            "east": None,
+            "west": None
+        }
 
         if description:
             self.description = utils._remove_leading_whitespace(description)
@@ -486,7 +494,7 @@ class LockedDoor(Tile):
         self.unlock()
         if pick.uses <= 1:
             utils.game_print("%s has seen its last use, and breaks into pieces "
-                "in your hand")
+                "in your hand" % pick.prep)
             pick.delete()
         else:
             pick.uses -= 1

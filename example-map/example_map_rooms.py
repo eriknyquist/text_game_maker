@@ -67,6 +67,7 @@ def prison_hallway_1(builder):
     builder.set_first_visit_message("It is not quite so dark in here, and you "
         "can see clearly. There doesn't seem to be anyone around.")
 
+    builder.set_name_from_east("the prison entrance")
     oldman = Person("an", "old man", location="squatting in the corner")
     oldman.add_default_responses("How interesting.", "Oh, really?", "Indeed.",
         "Fascinating, yes.", "Oh, yes? Interesting.", "Mmhmm.")

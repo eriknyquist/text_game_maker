@@ -110,6 +110,7 @@ def craft(name, word, player):
     for i in ingredients:
         i.delete()
 
+    item.prep = "your " + item.name
     item.add_to_player_inventory(player)
     utils.save_sound(audio.NEW_ITEM_SOUND)
     utils.game_print("Created %s." % item.name)

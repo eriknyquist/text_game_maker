@@ -489,6 +489,46 @@ class MapBuilder(object):
 
         self.current.dark = value
 
+    def set_name_from_north(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile north from this tile
+
+        :param str desc: description text
+        """
+
+        self.current.name_from_dir["north"] = name
+
+    def set_name_from_south(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile south from this tile
+
+        :param str desc: description text
+        """
+
+        self.current.name_from_dir["south"] = name
+
+    def set_name_from_east(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile east from this tile
+
+        :param str desc: description text
+        """
+
+        self.current.name_from_dir["east"] = name
+
+    def set_name_from_west(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile west from this tile
+
+        :param str desc: description text
+        """
+
+        self.current.name_from_dir["west"] = name
+
     def set_name(self, name):
         """
         Add short description for current tile
@@ -498,6 +538,7 @@ class MapBuilder(object):
         """
 
         self.current.name = name
+        self.current.original_name = name
 
     def set_first_visit_message(self, message):
         """

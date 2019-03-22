@@ -307,6 +307,17 @@ class Player(GameEntity):
         utils.save_sound(audio.DEATH_SOUND)
         self.reset_game = True
 
+    def set_alternate_names(self, tile):
+        for adj in tile.iterate_directions():
+            direction = adj.direction_to(tile)
+            if not direction:
+                continue
+
+            alt_name = adj.name_from_dir[direction]
+            if alt_name:
+                adj.original_name = adj.name
+                adj.name = alt_name
+
     def _move(self, dest, word, name):
         utils.save_sound(audio.SUCCESS_SOUND)
 
@@ -332,6 +343,9 @@ class Player(GameEntity):
 
         self.move_history.append(self.current.tile_id)
         self.current = dest
+        self.current.name = self.current.original_name
+
+        self.set_alternate_names(self.current)
         move_message = "You %s %s" % (word, name)
         utils.game_print(move_message + ".")
         utils.game_print(self.describe_current_tile())
