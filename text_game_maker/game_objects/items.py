@@ -229,6 +229,21 @@ class LargeBag(InventoryBag):
         super(LargeBag, self).__init__(*args, **kwargs)
         self.capacity = 20
 
+class Lockpick(Item):
+    def __init__(self, *args, **kwargs):
+        super(Lockpick, self).__init__("a", "lockpick", **kwargs)
+        self.uses = 2
+
+class StrongLockpick(Lockpick):
+    def __init__(self, *args, **kwargs):
+        super(StrongLockpick, self).__init__(*args, **kwargs)
+        self.uses = 5
+
+class AdvancedLockpick(Lockpick):
+    def __init__(self, *args, **kwargs):
+        super(AdvancedLockpick, self).__init__(*args, **kwargs)
+        self.uses = 25
+
 class Drawing(Item):
     def __init__(self, *args, **kwargs):
         super(Drawing, self).__init__(*args, **kwargs)

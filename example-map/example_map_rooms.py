@@ -3,7 +3,7 @@ from text_game_maker.utils.responses import STANDARD_GREETINGS
 
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
-    Furniture, Matches, Flashlight, Battery
+    Furniture, Matches, Flashlight, Battery, Lockpick
 )
 
 # Tile IDs.
@@ -14,6 +14,7 @@ startingcell_id = "cell_01"
 othercell_id = "cell_02"
 prisonoffice_id = "prison_office"
 darkhallway_id = "prison_hallway"
+alleyway_id = "prison_alleyway"
 
 def prison_starting_cell(builder):
     # Start building the map; create the first tile/room
@@ -35,7 +36,7 @@ def prison_starting_cell(builder):
     # Create all the items in the room
     paperclip = Item("a", "paperclip", location="on the floor", combustible=False)
     string = Item("a", "piece of string", location="on the floor")
-    lockpick = Item("a", "lockpick")
+    lockpick = Lockpick()
 
     # furniture is special, you can't take it like other items
     bunk = Furniture("a", "narrow bunk", location="in the corner",
@@ -155,3 +156,12 @@ def prison_office(builder):
     cabinet = LargeContainer("a", "filing cabinet", location="in the corner")
     cabinet.add_items([idcard, Battery()])
     builder.add_items([desk, chair, cabinet, coins, flashlight])
+
+def prison_alleyway(builder):
+    builder.set_tile_id(alleyway_id)
+    builder.set_name("a dimly lit alleyway")
+    builder.set_description("in a dimly lit alley outside the prison")
+    builder.set_first_visit_message("it is raining lightly, and in the "
+        "distance you can hear sirens")
+
+    builder.set_smell("It smells like wet concrete and rotting food")

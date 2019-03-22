@@ -2,6 +2,7 @@ import text_game_maker
 from text_game_maker.utils import utils
 from text_game_maker.materials.materials import get_properties
 from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
+from text_game_maker.game_objects.items import Lockpick
 
 _tiles = {}
 
@@ -474,14 +475,21 @@ class LockedDoor(Tile):
         return True
 
     def on_open(self, player):
-        pick = utils.find_inventory_item(player, "lockpick")
-        if pick:
-            self.unlock()
+        pick = utils.find_inventory_item_class(player, Lockpick)
+        if not pick:
+            utils._wrap_print("You need a key or a lockpick to unlock %s"
+                % self.prep)
             return
 
         # TODO: add logic for unlocking with keys
-        utils._wrap_print("You need a key or a lockpick to unlock %s"
-            % self.prep)
+
+        self.unlock()
+        if pick.uses <= 1:
+            utils.game_print("%s has seen its last use, and breaks into pieces "
+                "in your hand")
+            pick.delete()
+        else:
+            pick.uses -= 1
 
     def matches_name(self, name):
         if name.startswith("the"):

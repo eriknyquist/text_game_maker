@@ -56,6 +56,9 @@ class ExampleMapRunner(runner.MapRunner):
         builder.move_north()
         builder.move_north()
         rooms.prison_office(builder)
+        builder.move_south()
+        builder.move_east()
+        rooms.prison_alleyway(builder)
 
         # Set the input prompt
         builder.set_input_prompt(" > ")
