@@ -257,8 +257,7 @@ def draw_map_of_nearby_tiles(player):
     for i in range(len(compassdata)):
         if len(compassdata[i]) < mapwidth:
             delta = mapwidth - len(compassdata[i])
-            compassdata[i] += " " * (delta - 1)
-            compassdata[i] += "|"
+            compassdata[i] = "|" + compassdata[i] + (" " * (delta - 2)) + "|"
 
     mapdata = "\n".join(compassdata) + "\n"
     for row in linemap:
@@ -267,9 +266,10 @@ def draw_map_of_nearby_tiles(player):
             for j in range(len(row)):
                 linedata += row[j][i]
 
-            mapdata += linedata[:-1] + "|" + "\n"
 
-    header = "-" * mapwidth
+            mapdata += "|" + linedata[1:-1] + "|" + "\n"
+
+    header = "+" + ("-" * (mapwidth - 2)) + "+"
     return "\n" + header + "\n" + mapdata + header + "\n"
 
 def is_disabled_command(*commands):
