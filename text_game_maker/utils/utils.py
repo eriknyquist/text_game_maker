@@ -15,11 +15,9 @@ from prompt_toolkit.history import InMemoryHistory
 
 ITEM_LIST_FMT = "      {0:33}{1:1}({2})"
 
-COMPASS ="""
-  N
+COMPASS ="""  N
 W-|-E
-  S
-"""
+  S"""
 
 history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
@@ -255,21 +253,24 @@ def draw_map_of_nearby_tiles(player):
             linemap[y][x] = _boxify(lines, tilewidth, tileheight,
                     top, bottom, left, right)
 
-    printfunc("\n" + line_banner("map", width=mapwidth))
-    printfunc(COMPASS)
+    compassdata = COMPASS.split("\n")
+    for i in range(len(compassdata)):
+        if len(compassdata[i]) < mapwidth:
+            delta = mapwidth - len(compassdata[i])
+            compassdata[i] += " " * (delta - 1)
+            compassdata[i] += "|"
 
-    mapdata = ""
+    mapdata = "\n".join(compassdata) + "\n"
     for row in linemap:
         for i in range(len(row[0])):
             linedata = ""
             for j in range(len(row)):
                 linedata += row[j][i]
 
-            linedata = linedata.rstrip(" ")
-            if linedata != "":
-                mapdata += linedata + "\n"
+            mapdata += linedata[:-1] + "|" + "\n"
 
-    return mapdata
+    header = "-" * mapwidth
+    return "\n" + header + "\n" + mapdata + header + "\n"
 
 def is_disabled_command(*commands):
     """
