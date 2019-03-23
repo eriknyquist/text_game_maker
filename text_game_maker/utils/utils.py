@@ -15,6 +15,12 @@ from prompt_toolkit.history import InMemoryHistory
 
 ITEM_LIST_FMT = "      {0:33}{1:1}({2})"
 
+COMPASS ="""
+  N
+W-|-E
+  S
+"""
+
 history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
 
@@ -48,6 +54,222 @@ _first_names = os.path.join(_location, "first-names.txt")
 _middle_names = os.path.join(_location, "middle-names.txt")
 
 disabled_commands = []
+
+def _is_connected_tile(player, tile, adj_tile):
+    """
+    Used by map drawing routine. Checks if 'adj_tile' is connected to and can
+    be seen from 'tile'
+
+    :param text_game_maker.player.player.Player player: player object
+    :param text_game_maker.tile.tile.Tile tile: first tile
+    :param text_game_maker.tile.tile.Tile adj_tile: second tile
+    :return: True if adj_tile is connected to tile
+    :rtype: bool
+    """
+    direction = tile and adj_tile and tile.direction_to(adj_tile)
+    return direction and (not adj_tile.is_door())
+
+def _check_borders(player, tilemap, x, y, size):
+    """
+    Check if a tile should be drawn with top/bottom/left/right borders.
+    We don't draw walls between tiles that the player can freely move between.
+
+    :param text_game_maker.player.player.Player player: player object
+    :param tilemap: map of tile data representing tiles around player
+    :param int x: x position in tilemap
+    :param int y: y position in tilemap
+    :param int size: tilemap size (width and height)
+    :return: tuple of the form (top, bottom, left, right) where each value \
+        is a boolean representing whether that side requires a border
+    """
+    tile = tilemap[y][x]
+    top, bottom, left, right = True, True, True, True
+    if (y > 0) and _is_connected_tile(player, tile, tilemap[y - 1][x]):
+        top = False
+
+    if (y < (size - 1)) and _is_connected_tile(player, tile, tilemap[y + 1][x]):
+        bottom = False
+
+    if (x > 0) and _is_connected_tile(player, tile, tilemap[y][x - 1]):
+        left = False
+
+    if (x < (size - 1)) and _is_connected_tile(player, tile, tilemap[y][x + 1]):
+        right = False
+
+    return top, bottom, left, right
+
+def _boxify(lines, width, height, top, bottom, left, right):
+    """
+    Takes the data needed for drawing a single tile on the map, pads it
+    out with empty lines where needed to fill the tile, and adds any required
+    borders
+
+    :param [str] lines: list of strings where each string is one line of the \
+        current tile
+    :param int width: width of tile (in ASCII characters)
+    :param int height: height of tile (in lines)
+    :param bool top: defines whether this tile needs a top border
+    :param bool bottom: defines whether this tile needs a bottom border
+    :param bool left: defines whether this tile needs a left border
+    :param bool right: defines whether this tile needs a right border
+    :return: padded and bordered string data for map tile
+    :rtype: [str]
+    """
+    usable_height = height - (int(top) + int(bottom))
+    usable_width = width - (int(left) + int(right))
+
+    if len(lines) > usable_height:
+        lines = lines[:usable_height]
+    elif len(lines) < usable_height:
+        delta = usable_height - len(lines)
+        emptyline = ' ' * usable_width
+        header = ([emptyline] * (delta / 2))
+        footer = ([emptyline] * (delta - (delta / 2)))
+        lines = header + lines + footer
+
+    for i in range(len(lines)):
+        if len(lines[i]) > usable_width:
+            lines[i] = lines[i][:usable_width]
+
+        if len(lines[i]) < usable_width:
+            lines[i] += " " * (usable_width - len(lines[i]))
+
+        if left:
+            lines[i] = "|" + lines[i]
+        if right:
+            lines[i] = lines[i] + "|"
+
+    borderline = ("+" + ("-" * (width - 2)) + "+")
+    if bottom:
+        lines.append(borderline)
+    if top:
+        lines.insert(0, borderline)
+
+    return lines
+
+def _get_local_tile_map(player, crawltiles=2, mapsize=5):
+    """
+    Builds a 2D list of tiles, representing an x/y grid of tiles sorrounding
+    the players current position.
+
+    :param text_game_maker.player.player.Player player: player object
+    :param int crawltiles: maximum distance to show from player's current tile \
+        (in tiles)
+    :param int mapsize: map height and width in tiles
+    :return: 2D list representing x/y grind of tiles around player
+    """
+    tilemap = []
+    for _ in range(mapsize):
+        tilemap.append([None] * mapsize)
+
+    pos = (0, 0)
+    tilestack = [(player.current, None, None)]
+    seen = []
+
+    movetable = {
+        "north": lambda: (pos[0], pos[1] - 1),
+        "south": lambda: (pos[0], pos[1] + 1),
+        "east":  lambda: (pos[0] + 1, pos[1]),
+        "west":  lambda: (pos[0] - 1, pos[1]),
+    }
+
+    while tilestack:
+        tile, newpos, movedir = tilestack.pop(0)
+        if newpos:
+            pos = newpos
+
+        if tile in seen:
+            continue
+
+        seen.append(tile)
+
+        if movedir:
+            x, y = movetable[movedir]()
+            if (x < (-crawltiles)) or (x > crawltiles):
+                continue
+
+            if (y < (-crawltiles)) or (y > crawltiles):
+                continue
+
+            pos = (x, y)
+
+        tilemap[pos[1] + crawltiles][pos[0] + crawltiles] = tile
+
+        for direction in movetable:
+            adj = getattr(tile, direction)
+            if not adj:
+                continue
+
+            tilestack.append((adj, pos, direction))
+
+    return tilemap
+
+def draw_map_of_nearby_tiles(player):
+    """
+    Draw a ASCII representation of tile surrounding the player's current
+    position
+
+    :param text_game_maker.player.player.Player player: player object
+    :return: created map
+    :rtype: str
+    """
+    mapwidth = 50  # print width of map
+    labelwidth = 8 # max. width of label inside map tile
+    tilewidth = 10 # max. width of each tile displayed in map
+    tileheight = 7 # max. height of each tile displayed in map
+
+    # Number of adjacent tiles to crawl over in each direction
+    crawl_tiles = 2
+
+    # width and height of map area in tiles
+    mapsize = mapwidth / tilewidth
+
+    tilemap = _get_local_tile_map(player, crawl_tiles, mapsize)
+    linemap = []
+    empty = [(' ' * tilewidth)] * tileheight
+
+    for _ in range(mapsize):
+        linemap.append([None] * mapsize)
+
+    for y in range(mapsize):
+        for x in range(mapsize):
+            tile = tilemap[y][x]
+            if not tile:
+                linemap[y][x] = empty
+                continue
+
+            top, bottom, left, right = _check_borders(player,
+                    tilemap, x, y, mapsize)
+
+            use_borders = True
+            if tile.is_door():
+                text = "?"
+                top, bottom, left, right = False, False, False, False
+            elif tile is player.current:
+                text = "You"
+            else:
+                text = tile.name
+
+            wr = _wrap_text(text, width=labelwidth).split('\n')
+            lines = [centre_text(t, line_width=labelwidth) for t in wr]
+            linemap[y][x] = _boxify(lines, tilewidth, tileheight,
+                    top, bottom, left, right)
+
+    printfunc("\n" + line_banner("map", width=mapwidth))
+    printfunc(COMPASS)
+
+    mapdata = ""
+    for row in linemap:
+        for i in range(len(row[0])):
+            linedata = ""
+            for j in range(len(row)):
+                linedata += row[j][i]
+
+            linedata = linedata.rstrip(" ")
+            if linedata != "":
+                mapdata += linedata + "\n"
+
+    return mapdata
 
 def is_disabled_command(*commands):
     """
@@ -595,8 +817,19 @@ def _remove_leading_whitespace(string):
     trimmed = [s.strip() for s in string.splitlines()]
     return '\n'.join(trimmed)
 
-def _wrap_text(text):
-    return wrapper.fill(text.replace('\n', ' ').replace('\r', ''))
+def _wrap_text(text, width=None):
+    oldwidth = None
+
+    if width:
+        oldwidth = wrapper.width
+        wrapper.width = width
+
+    ret = wrapper.fill(text.replace('\n', ' ').replace('\r', ''))
+
+    if oldwidth:
+        wrapper.width = oldwidth
+
+    return ret
 
 def _wrap_print(text, wait=False):
     msg = '\n' + _wrap_text(replace_format_tokens(text))

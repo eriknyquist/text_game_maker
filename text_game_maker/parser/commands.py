@@ -7,6 +7,10 @@ from text_game_maker.utils import utils
 from text_game_maker.messages import messages
 from text_game_maker.game_objects.items import FlameSource
 
+MAP_WORDS = [
+    'map', 'show map', 'display map', 'world map'
+]
+
 SELF_WORDS = [
     'self', 'me', 'myself'
 ]
@@ -429,6 +433,9 @@ def _do_put(player, word, remaining):
             % (word, utils.list_to_english(real_names), location_name))
     return True
 
+def _do_show_map(player, word, remaining):
+    utils.printfunc(utils.draw_map_of_nearby_tiles(player))
+
 def _do_look_inside(player, word, remaining):
     if not remaining or remaining == "":
         utils._wrap_print("What do you want to %s?" % word)
@@ -727,6 +734,8 @@ def add_commands(parser):
     commands = [
         [EQUIP_WORDS, _do_equip, "equip an item from your inventory",
             "%s <item>"],
+
+        [MAP_WORDS, _do_show_map, "show a map of your current area", "%s"],
 
         [OPEN_WORDS, _do_open, "open a container or door", "%s <item>"],
 
