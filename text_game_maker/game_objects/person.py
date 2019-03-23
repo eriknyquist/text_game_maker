@@ -116,6 +116,11 @@ class Responder(GameEntity, responder.Responder):
         ret = {}
         ret['responses'] = _serialize_redict(self.responses)
         ret['context'] = None
+        ret['no_default_response'] = False
+
+        if self.default_response == responder.NoResponse:
+            ret['no_default_response'] = True
+            ret['default_response'] = None
 
         serialized_contexts = []
         for i in range(len(self.contexts)):
@@ -132,6 +137,12 @@ class Responder(GameEntity, responder.Responder):
         self.responses = _deserialize_redict(attrs['responses'])
         self.contexts = []
         self.context = None
+
+        if attrs['no_default_response']:
+            self.default_response = responder.NoResponse
+            del attrs['default_response']
+
+        del attrs['no_default_response']
 
         for contextdata in attrs['contexts']:
             context = Context()
@@ -290,7 +301,9 @@ class Person(Item):
                 break
 
             response, _ = self.get_response(speech)
-            if callable(response):
+            if response == responder.NoResponse:
+                self.say("my man")
+            elif callable(response):
                 response(self, player)
             else:
                 self.say(response)
