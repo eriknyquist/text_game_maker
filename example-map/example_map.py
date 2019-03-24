@@ -63,8 +63,7 @@ class ExampleMapRunner(runner.MapRunner):
 
         # Build prison office
         builder.move_east()
-        builder.move_north()
-        builder.move_north()
+        builder.move_north(2)
         rooms.prison_office(builder)
 
         # Build alleyway

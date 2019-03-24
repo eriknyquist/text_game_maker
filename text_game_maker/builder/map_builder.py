@@ -662,49 +662,73 @@ class MapBuilder(object):
         self.current = new_tile
         setattr(self.current, reverse_direction(direction), old)
 
-    def move_west(self, name=None, description=None, tileclass=Tile):
+    def move_west(self, num=1, name=None, description=None, tileclass=Tile):
         """
-        Create a new tile to the west of the current tile, and set the new
-        tile as the current tile
+        Move west by one or more tiles. On each move, if a tile does not already
+        exist at the current position, a new tile will be created and set as the
+        current tile to build on. If a tile already exists at the current
+        position, it will be set to the current tile and no new tile will be
+        created.
 
         :param str name: short description of tile
         :param str description: long description of tile
+        :param tileclass: class object to create tile from
+        :param int num: distance ot move in tiles
         """
 
-        self.__do_move('west', name, description, tileclass)
+        for _ in range(num):
+            self.__do_move('west', name, description, tileclass)
 
-    def move_east(self, name=None, description=None, tileclass=Tile):
+    def move_east(self, num=1, name=None, description=None, tileclass=Tile):
         """
-        Create a new tile to the east of the current tile, and set the new
-        tile as the current tile
+        Move east by one or more tiles. On each move, if a tile does not already
+        exist at the current position, a new tile will be created and set as the
+        current tile to build on. If a tile already exists at the current
+        position, it will be set to the current tile and no new tile will be
+        created.
 
         :param str name: short description of tile
         :param str description: long description of tile
+        :param tileclass: class object to create tile from
+        :param int num: distance ot move in tiles
         """
 
-        self.__do_move('east', name, description, tileclass)
+        for _ in range(num):
+            self.__do_move('east', name, description, tileclass)
 
-    def move_north(self, name=None, description=None, tileclass=Tile):
+    def move_north(self, num=1, name=None, description=None, tileclass=Tile):
         """
-        Create a new tile to the north of the current tile, and set the new
-        tile as the current tile
+        Move north by one or more tiles. On each move, if a tile does not
+        already exist at the current position, a new tile will be created and
+        set as the current tile to build on. If a tile already exists at the
+        current position, it will be set to the current tile and no new tile
+        will be created.
 
         :param str name: short description of tile
         :param str description: long description of tile
+        :param tileclass: class object to create tile from
+        :param int num: distance ot move in tiles
         """
 
-        self.__do_move('north', name, description, tileclass)
+        for _ in range(num):
+            self.__do_move('north', name, description, tileclass)
 
-    def move_south(self, name=None, description=None, tileclass=Tile):
+    def move_south(self, num=1, name=None, description=None, tileclass=Tile):
         """
-        Create a new tile to the south of the current tile, and set the new
-        tile as the current tile
+        Move south by one or more tiles. On each move, if a tile does not
+        already exist at the current position, a new tile will be created and
+        set as the current tile to build on. If a tile already exists at the
+        current position, it will be set to the current tile and no new tile
+        will be created.
 
         :param str name: short description of tile
         :param str description: long description of tile
+        :param tileclass: class object to create tile from
+        :param int num: distance ot move in tiles
         """
 
-        self.__do_move('south', name, description, tileclass)
+        for _ in range(num):
+            self.__do_move('south', name, description, tileclass)
 
     def _get_command_delimiter(self, action):
         for i in COMMAND_DELIMITERS:
