@@ -487,6 +487,31 @@ def set_last_command(cmd):
 def get_last_command():
     return info['last_command']
 
+def find_item_class(player, classobj, locations=None, ignore_dark=False):
+    """
+    Find the first item that is an instance of a specific class in the provided
+    locations
+
+    :param text_game_maker.player.player.Player player: player object
+    :param str name: name of item to find
+    :param [[text_game_maker.game_objects.items.Item]] locations: location\
+        lists to search
+    :return: found item (None if no matching item is found)
+    :rtype: text_game_maker.items.Item
+    """
+    if (not ignore_dark) and (not player.can_see()):
+        return None
+
+    if locations is None:
+        locations = player.current.items.values()
+
+    for itemlist in locations:
+        for item in itemlist:
+            if isinstance(item, classobj):
+                return item
+
+    return None
+
 def find_item(player, name, locations=None, ignore_dark=False):
     """
     Find an item by name in the provided locations
@@ -1146,7 +1171,7 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel", default=None):
     if msg:
         printfunc('\n' + msg + '\n')
 
-    printfunc('\n' + '\n'.join(lines))
+    printfunc('\n'.join(lines))
 
     while True:
         ret = read_line(prompt, cancel_word, default_str)
@@ -1171,6 +1196,14 @@ def pop_waiting_print():
         return None
 
     return saved_prints.pop(0)
+
+def flush_waiting_prints():
+    while True:
+        waiting = pop_waiting_print()
+        if waiting is None:
+            return
+
+        printfunc(waiting)
 
 def game_print(msg, wait=False):
     """

@@ -1,6 +1,7 @@
 import sys
 import random
 
+from text_game_maker.game_objects.items import Coins
 from text_game_maker.game_objects.generic import (Item, GameEntity,
     ITEM_SIZE_LARGE
 )
@@ -181,15 +182,37 @@ class Person(Item):
         self.name = name
         self.prep = 'the ' + self.name
         self.size = ITEM_SIZE_LARGE
-
+        self.introduction = None
+        self.shopping_list = {}
         self.speak_count = 0
         self.script = None
         self.script_pos = 0
         self.task_id = 0
         self.responses = Responder()
 
+    def add_coins(self, player, value=1):
+        coins = utils.find_item_class(player, Coins, [self.items])
+        if not coins:
+            coins = Coins(value=value)
+            self.add_item(coins)
+            return
+
+        coins.value += value
+
     def on_look(self, player):
         return "It's %s."  % self.name
+
+    def add_shopping_list(self, *item_value_pairs):
+        """
+        Add the names of items this person is willing to buy from the player if
+        the player asks, and the price person is willing to pay for them
+
+        :param item_value_pairs: one or more tuples of the form \
+            ``(item_name, value)``, where ``item_name`` is the item name as a \
+            string, and ``value`` is an integer representing the price in coins
+        """
+        for name, value in item_value_pairs:
+            self.shopping_list[name] = value
 
     def add_default_responses(self, *responses):
         """
@@ -204,7 +227,7 @@ class Person(Item):
         """
         self.responses.add_default_response(responses)
 
-    def add_response(self, patterns, responses):
+    def add_response(self, patterns, response):
         """
         Set responses to reply with when player types a specific pattern
         when talking to this person
@@ -273,6 +296,15 @@ class Person(Item):
 
         utils.game_print(msg)
 
+    def set_introduction(self, msg):
+        """
+        Set some text for the person to say unprompted, immediately, when the
+        player initates a conversation
+
+        :param str msg: text to speak
+        """
+        self.introduction = msg
+
     def say(self, msg):
         """
         Speak to the player
@@ -295,7 +327,10 @@ class Person(Item):
         speech = ' '
         prompt = 'talking to %s (say nothing to exit): >' % self.name
 
-        while speech != '':
+        if self.introduction:
+            self.say(self.introduction)
+
+        while speech != '': 
             speech = utils.read_line_raw(prompt).strip()
             if speech == '':
                 break
@@ -307,3 +342,5 @@ class Person(Item):
                 response(self, player)
             else:
                 self.say(response)
+
+            utils.flush_waiting_prints()

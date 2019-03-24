@@ -48,6 +48,7 @@ class Lighter(FlameSource):
         self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
         self.fuel = 20.0
+        self.value = 3
         self.equip_msg = ("You take out the %s, illuminating everything "
             "around you with a dancing yellow glow." % self.name)
 
@@ -94,6 +95,15 @@ class Coins(Item):
         self.prep = "the coins"
         self._set_name()
 
+    def increment(self, value=1):
+        self.value += value
+        self._set_name()
+
+    def decrement(self, value=1):
+        if self.value > 0:
+            self.value -= value
+            self._set_name()
+
     def _set_name(self):
         self.name = "%s coin" % self.value
         if self.value > 1:
@@ -123,8 +133,7 @@ class Coins(Item):
         if not other_coins:
             return super(Coins, self).add_to_player_inventory(player)
 
-        other_coins.value += self.value
-        other_coins._set_name()
+        other_coins.increment(self.value)
         self.delete()
         return other_coins
 
@@ -185,7 +194,8 @@ class Blueprint(Item):
 
     def add_to_player_inventory(self, player):
         crafting.add(self.ingredients, self.item)
-        utils._wrap_print("You have learned how to make %s." % self.item)
+        utils._wrap_print("You have learned how to make %s."
+            % self.item, wait=True)
         utils.save_sound(audio.NEW_ITEM_SOUND)
         self.delete()
         return self
@@ -217,32 +227,38 @@ class PaperBag(Container):
 class SmallBag(InventoryBag):
     def __init__(self, *args, **kwargs):
         super(SmallBag, self).__init__(*args, **kwargs)
+        value  = 10
         self.capacity = 5
 
 class Bag(InventoryBag):
     def __init__(self, *args, **kwargs):
         super(Bag, self).__init__(*args, **kwargs)
+        value = 25
         self.capacity = 10
 
 class LargeBag(InventoryBag):
     def __init__(self, *args, **kwargs):
         super(LargeBag, self).__init__(*args, **kwargs)
+        value = 35
         self.capacity = 20
 
 class Lockpick(Item):
     def __init__(self, *args, **kwargs):
         super(Lockpick, self).__init__("a", "lockpick", **kwargs)
+        self.value = 1
         self.uses = 2
 
-class StrongLockpick(Lockpick):
+class StrongLockpick(Item):
     def __init__(self, *args, **kwargs):
-        super(StrongLockpick, self).__init__(*args, **kwargs)
+        super(StrongLockpick, self).__init__("a", "strong lockpick", **kwargs)
+        self.value = 5
         self.uses = 5
 
-class AdvancedLockpick(Lockpick):
+class AdvancedLockpick(Item):
     def __init__(self, *args, **kwargs):
-        super(AdvancedLockpick, self).__init__(*args, **kwargs)
-        self.uses = 25
+        super(AdvancedLockpick, self).__init__("an", "advanced lockpick", **kwargs)
+        self.value = 35
+        self.uses = 50
 
 class Drawing(Item):
     def __init__(self, *args, **kwargs):

@@ -134,6 +134,9 @@ class Item(GameEntity):
 
         return self.name
 
+    def __repr__(self):
+        return self.__str__()
+
 class FuelConsumer(Item):
     def __init__(self, *args, **kwargs):
         self.max_fuel = 100.0

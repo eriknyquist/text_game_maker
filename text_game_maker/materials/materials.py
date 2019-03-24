@@ -5,6 +5,7 @@ class Material(object):
     STONE = "stone"
     CONCRETE = "concrete"
     DIRT = "dirt"
+    MUD = "mud"
     WOOD = "wood"
     LEATHER = "leather"
     SKIN = "skin"
@@ -54,6 +55,7 @@ def get_properties(material):
 add_material(Material.METAL)
 add_material(Material.STONE)
 add_material(Material.DIRT)
+add_material(Material.MUD)
 add_material(Material.WOOD)
 add_material(Material.LEATHER)
 add_material(Material.SKIN, taste="salty", smell="like sweat")

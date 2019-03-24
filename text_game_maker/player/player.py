@@ -4,7 +4,7 @@ import json
 import text_game_maker
 
 from text_game_maker.audio import audio
-from text_game_maker.game_objects.items import SmallBag, Lighter
+from text_game_maker.game_objects.items import SmallBag, Lighter, Coins
 from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.crafting import crafting
 from text_game_maker.utils import utils
@@ -97,7 +97,114 @@ class Player(GameEntity):
         lighter = Lighter()
         self.pockets.add_item(lighter)
 
+    def add_coins(self, value=1):
+        Coins(value=value).add_to_player_inventory(self)
+
+    def remove_coins(self, value=1):
+        coins = utils.find_inventory_item_class(self, Coins)
+        if not coins:
+            return
+
+        coins.decrement(value)
+
+    def sell_item_to(self, person):
+        """
+        Show player a listing of this person's shopping list, and allow player
+        to sell something to person if the player has it
+
+        :param text_game_maker.game_objects.person.Person person: person object
+        """
+        if not person.shopping_list:
+            utils.game_print("%s is not interested in buying anything.")
+            return
+
+        names = person.shopping_list.keys()
+        choices = ['%s (%d coins)' % (x, person.shopping_list[x]) for x in names]
+        item = None
+        coins = None
+
+        while not item:
+            ret = utils.ask_multiple_choice(choices,
+                    "Can you sell any of these items?")
+            if ret < 0:
+                utils.game_print("Cancelled.")
+                return
+
+            name = names[ret]
+            price = person.shopping_list[name]
+
+            item = utils.find_inventory_item(self, name)
+            if not item:
+                utils.game_print("You don't have %s to sell." % name)
+                continue
+
+            ret = utils.ask_yes_no("Do you want to sell %s for %d coins?"
+                    % (item.prep, price))
+            if ret != 1:
+                utils.game_print("Cancelled.")
+                continue
+
+        self.add_coins(price)
+        person.add_item(item)
+        utils.game_print("You sell %s for %d coins." % (item.prep, price))
+
+    def buy_item_from(self, person):
+        """
+        Show player a listing of items this person has and allow them to select
+        one to purchase (if they have enough coins)
+
+        :param text_game_maker.game_objects.person.Person person: person object
+        """
+        if not person.items:
+            utils.game_print("%s has nothing to sell." % person.name)
+            return
+
+        coins = None
+        while not coins:
+            coins = utils.find_inventory_item_class(self, Coins)
+            if coins:
+                numcoins = coins.value
+            else:
+                numcoins = 0
+
+            items = [x for x in person.items if not isinstance(x, Coins)]
+            utils.game_print("You have %d coins." % numcoins)
+            names = ["%s (%d coins)" % (x.name, x.value) for x in items]
+            ret = utils.ask_multiple_choice(names, "Which item do you want to buy?")
+            if ret < 0:
+                utils.game_print("Cancelled.")
+                return
+
+            item = items[ret]
+
+            if not coins:
+                utils.game_print("You don't have any coins to buy %s" % item.prep)
+                continue
+
+            if coins.value < item.value:
+                utils.game_print("You don't have enough coins to buy %s"
+                    % item.prep)
+                continue
+
+            ret = utils.ask_yes_no("Do you want to buy %s for %d coins?"
+                % (item.prep, item.value))
+
+            if ret != 1:
+                utils.game_print("Cancelled.")
+                return
+
+        coins.decrement(item.value)
+        person.add_coins(self, item.value)
+        item.add_to_player_inventory(self)
+        utils.game_print("You bought %s." % item.prep)
+
     def injure(self, health_points=1):
+        """
+        Injure player by removing a specific number of health points. Player
+        will die if resulting health is less than or equal to 0.
+
+        param int health_points: number of health points to remove from player
+        """
         msg = "You have lost %d health point" % health_points
         if health_points > 1:
             msg += "s"
@@ -118,7 +225,7 @@ class Player(GameEntity):
             return
 
         utils.game_print("You smell %s." % get_properties(self.material).smell)
-        
+
     def on_taste(self):
         """
         Called when player tastes themselves
@@ -128,7 +235,7 @@ class Player(GameEntity):
             return
 
         utils.game_print("You taste %s." % get_properties(self.material).taste)
-        
+
     def has_item(self, item):
         if self.equipped and (self.equipped is item):
             return True
@@ -490,7 +597,7 @@ class Player(GameEntity):
         self._loot_message(word, person.name, print_items)
 
     def describe_current_tile_contents(self, capitalize=True):
-        ret =""
+        ret = ""
         scene = self.current.describe_scene()
         if scene:
             ret += scene
@@ -503,7 +610,7 @@ class Player(GameEntity):
         if people:
             ret += people
 
-        if capitalize:
+        if capitalize and len(ret) > 0:
             ret = utils.capitalize(ret)
 
         return ret
