@@ -145,6 +145,7 @@ class Player(GameEntity):
                 continue
 
         self.add_coins(price)
+        item.value = price * 2
         person.add_item(item)
         utils.game_print("You sell %s for %d coins." % (item.prep, price))
 
