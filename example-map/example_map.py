@@ -44,21 +44,37 @@ class ExampleMapRunner(runner.MapRunner):
         # Build starting cell
         rooms.prison_starting_cell(builder)
 
-        # Build prison hallway
+        # Build prison entrance
         builder.move_east()
-        rooms.prison_hallway_1(builder)
+        rooms.prison_entrance_hall(builder)
+
+        # Build prison_hallway
+        builder.move_south()
+        rooms.prison_hallway(builder)
 
         # Build other cell
         builder.move_south()
         rooms.other_cell(builder)
 
+        # Build prison yard
+        builder.move_north()
+        builder.move_west()
+        rooms.prison_yard(builder)
+
         # Build prison office
+        builder.move_east()
         builder.move_north()
         builder.move_north()
         rooms.prison_office(builder)
+
+        # Build alleyway
         builder.move_south()
         builder.move_east()
         rooms.prison_alleyway(builder)
+
+        # Build pawn shop
+        builder.move_east()
+        rooms.pawn_shop(builder)
 
         # Set the input prompt
         builder.set_input_prompt(" > ")
