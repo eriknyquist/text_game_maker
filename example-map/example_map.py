@@ -30,6 +30,11 @@ def light_source_decay_callback(player, turns):
     if player.equipped and player.equipped.is_light_source:
         player.equipped.decrement_fuel()
 
+        if not player.current.dark:
+            utils.game_print("Your {0} is equipped, unequip by saying "
+                "'unequip {0}' or 'stop using {0}' to avoid wasting "
+                "batteries or fuel".format(player.equipped.name))
+
     player.schedule_task(light_source_decay_callback, 1)
 
 # Called when the game starts

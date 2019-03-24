@@ -9,6 +9,7 @@ from text_game_maker.game_objects.generic import *
 class Battery(Item):
     def __init__(self, *args, **kwargs):
         super(Battery, self).__init__("a", "battery", **kwargs)
+        self.value = 5
         self.is_electricity_source = True
         self.max_fuel = 100.0
         self.fuel = self.max_fuel
@@ -47,7 +48,7 @@ class Lighter(FlameSource):
         super(Lighter, self).__init__("a", "lighter", **kwargs)
         self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
-        self.fuel = 20.0
+        self.fuel = 25.0
         self.value = 3
         self.equip_msg = ("You take out the %s, illuminating everything "
             "around you with a dancing yellow glow." % self.name)

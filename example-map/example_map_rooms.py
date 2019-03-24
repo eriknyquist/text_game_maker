@@ -211,11 +211,10 @@ def pawn_shop(builder):
     fork = Item("a", "fork", value=4)
     paperclip = Item("a", "paperclip", value=2)
     string = Item("a", "piece of string", value=1)
-    lighter = Lighter()
     blueprint = Blueprint([fork, string], StrongLockpick(), value=25)
 
     cashier = Person("a", "cashier", location="behind the counter")
-    cashier.add_items([fork, blueprint, lighter, paperclip, string])
+    cashier.add_items([fork, blueprint, Lighter(), Battery(), paperclip, string])
 
     cashier.set_introduction("Are you buying or selling?")
 
