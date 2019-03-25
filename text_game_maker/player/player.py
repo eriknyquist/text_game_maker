@@ -123,7 +123,7 @@ class Player(GameEntity):
         item = None
         coins = None
 
-        while not item:
+        while True:
             ret = utils.ask_multiple_choice(choices,
                     "Can you sell any of these items?")
             if ret < 0:
@@ -144,10 +144,10 @@ class Player(GameEntity):
                 utils.game_print("Cancelled.")
                 continue
 
-        self.add_coins(price)
-        item.value = price * 2
-        person.add_item(item)
-        utils.game_print("You sell %s for %d coins." % (item.prep, price))
+            self.add_coins(price)
+            item.value = price * 2
+            person.add_item(item)
+            utils.game_print("You sell %s for %d coins." % (item.prep, price))
 
     def buy_item_from(self, person):
         """
@@ -160,8 +160,7 @@ class Player(GameEntity):
             utils.game_print("%s has nothing to sell." % person.name)
             return
 
-        coins = None
-        while not coins:
+        while True:
             coins = utils.find_inventory_item_class(self, Coins)
             if coins:
                 numcoins = coins.value
@@ -194,10 +193,10 @@ class Player(GameEntity):
                 utils.game_print("Cancelled.")
                 return
 
-        coins.decrement(item.value)
-        person.add_coins(self, item.value)
-        item.add_to_player_inventory(self)
-        utils.game_print("You bought %s." % item.prep)
+            coins.decrement(item.value)
+            person.add_coins(self, item.value)
+            item.add_to_player_inventory(self)
+            utils.game_print("You bought %s." % item.prep)
 
     def injure(self, health_points=1):
         """

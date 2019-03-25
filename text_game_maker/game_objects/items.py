@@ -81,11 +81,10 @@ class Food(Item):
     Class to represent a food item
     """
 
-    def __init__(self, prefix="", name="", **kwargs):
-        super(Food, self).__init__(prefix, name, location, value)
+    def __init__(self, *args, **kwargs):
+        super(Food, self).__init__(*args, **kwargs)
         self.material = Material.MEAT
         self.edbile = True
-        self.energy = energy
 
 class Coins(Item):
     def __init__(self, **kwargs):

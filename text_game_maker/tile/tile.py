@@ -524,3 +524,34 @@ class LockedDoor(Tile):
         if self.locked:
             utils._wrap_print("%s is locked." % self.short_name)
             return False
+
+class LockedDoorWithKeypad(LockedDoor):
+    def __init__(self, unlock_code, **kwargs):
+        super(LockedDoorWithKeypad, self).__init__(**kwargs)
+        self.unlock_code = unlock_code
+
+    def on_open(self, player):
+        while True:
+            code = utils.read_line_raw("Enter keypad code to unlock the door",
+                cancel_word="cancel")
+            if (code == None) or (code.strip() == ""):
+                utils.game_print("Cancelled.")
+                return
+
+            try:
+                intcode = int(code)
+            except:
+                utils.game_print("Keypad code not acccepted.")
+                continue
+
+            if intcode != self.unlock_code:
+                utils.game_print("Keypad code not acccepted.")
+                continue
+
+            break
+
+        utils.game_print("Keypad code accepted!")
+        self.unlock()
+
+    def on_enter(self, player, src):
+        self.on_open(player)

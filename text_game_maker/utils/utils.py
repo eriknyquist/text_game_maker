@@ -269,8 +269,9 @@ def draw_map_of_nearby_tiles(player):
 
             mapdata += "|" + linedata[1:-1] + "|" + "\n"
 
+    mapdata = "\n".join(mapdata.rstrip().split("\n")[:-1])
     header = "+" + ("-" * (mapwidth - 2)) + "+"
-    return "\n" + header + "\n" + mapdata + header + "\n"
+    return "\n" + header + "\n" + mapdata + "\n" + header + "\n"
 
 def is_disabled_command(*commands):
     """
@@ -979,7 +980,7 @@ def english_to_list(text):
     :rtype: list
     """
 
-    return multisplit(text, ",", "and")
+    return multisplit(text, ",", " and ")
 
 def list_to_english(strlist, conj='and'):
     """

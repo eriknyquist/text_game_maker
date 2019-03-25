@@ -46,39 +46,55 @@ def on_game_run(player):
 
 class ExampleMapRunner(runner.MapRunner):
     def build_map(self, builder):
-        # Build starting cell
         rooms.prison_starting_cell(builder)
 
-        # Build prison entrance
         builder.move_east()
         rooms.prison_entrance_hall(builder)
 
-        # Build prison_hallway
         builder.move_south()
         rooms.prison_hallway(builder)
 
-        # Build other cell
         builder.move_south()
         rooms.other_cell(builder)
 
-        # Build prison yard
         builder.move_north()
         builder.move_west()
         rooms.prison_yard(builder)
 
-        # Build prison office
         builder.move_east()
         builder.move_north(2)
         rooms.prison_office(builder)
 
-        # Build alleyway
         builder.move_south()
         builder.move_east()
         rooms.prison_alleyway(builder)
 
-        # Build pawn shop
+        builder.move_east()
+        rooms.main_street_upper(builder)
+
         builder.move_east()
         rooms.pawn_shop(builder)
+
+        builder.move_west()
+        builder.move_south()
+        rooms.main_street_lower(builder)
+
+        builder.move_south()
+        rooms.central_bank(builder)
+
+        builder.move_east()
+        rooms.central_bank_employee_lounge(builder)
+
+        builder.move_west()
+        builder.move_south()
+        rooms.central_bank_hallway(builder)
+
+        builder.move_east()
+        rooms.central_bank_managers_office(builder)
+
+        builder.move_west()
+        builder.move_south()
+        rooms.central_bank_vault(builder)
 
         # Set the input prompt
         builder.set_input_prompt(" > ")

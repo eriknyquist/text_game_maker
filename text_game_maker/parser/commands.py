@@ -291,7 +291,7 @@ def _do_smell(player, word, item_name):
         player.on_smell()
         return True
 
-    fields = utils.english_to_list(item_name)
+    fields = utils.english_to_list(item_name.strip())
     if len(fields) > 1:
         utils._wrap_print("Slow down, big-nose. You can only %s one thing at a "
             "time." % word)

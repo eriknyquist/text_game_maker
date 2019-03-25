@@ -1,3 +1,5 @@
+import random
+
 from text_game_maker.game_objects.person import Person, Context
 from text_game_maker.utils.responses import STANDARD_GREETINGS
 from text_game_maker.utils.utils import serializable_callback
@@ -20,6 +22,18 @@ hallway_id = "prison_hallway"
 alleyway_id = "prison_alleyway"
 prisonyard_id = "prison_yard"
 pawnshop_id = "pawnshop"
+bankdoor_id = "central_bank_dront_door"
+mainstreet_upper_id = "mainstreet_upper"
+mainstreet_lower_id = "mainstreet_lower"
+bank_entrance_id = "bank_entrance"
+bank_hallway_id = "bank_hallway"
+bank_office_id = "bank_office"
+bank_lounge_id = "bank_lounge"
+bank_vault_id = "bank_vault"
+bank_vaultdoor_id = "bank_vaultdoor"
+
+class config(object):
+    idnumber = random.randrange(10000000, 50000000)
 
 @serializable_callback
 def _do_buy(person, player):
@@ -145,7 +159,7 @@ def prison_yard(builder):
     puddle = Item("a", "murky puddle", location="on the ground",
         material=Material.MUD)
     bench = Furniture("a", "wooden bench", location="in the corner")
-    album = Item("a copy of", "Nickelback's Greatest Hits",
+    album = Item("a", "Nickelback's Greatest Hits CD",
         location="on the bench", value=5)
 
     builder.add_items([puddle, bench, album])
@@ -181,7 +195,7 @@ def prison_office(builder):
     idcard = Paper("a", "business card", paragraphs=[
             "<playername>, Senior Accountant",
             "Branch: 115N",
-            "CID: 55458868"
+            "CID: %d" % config.idnumber
         ], header="Central Bank", footer="Central Bank"
     )
 
@@ -199,6 +213,7 @@ def prison_alleyway(builder):
     builder.set_smell("It smells like wet concrete and rotting food")
 
 def pawn_shop(builder):
+    builder.set_tile_id(pawnshop_id)
     builder.set_name("a pawn shop")
     builder.set_description("inside the pawn shop")
     builder.set_first_visit_message("a long flourescent bulb flickers faintly "
@@ -232,3 +247,80 @@ def pawn_shop(builder):
 
     desk = Furniture("a", "small wooden desk", location="against the wall",
         combustible=False)
+
+def main_street_upper(builder):
+    builder.set_tile_id(mainstreet_upper_id)
+    builder.set_name("upper main street")
+    builder.set_description("on upper main street")
+    builder.set_smell("It smells like sewage")
+
+def main_street_lower(builder):
+    builder.set_tile_id(mainstreet_lower_id)
+    builder.set_name("lower main street")
+    builder.set_description("on lower main street")
+    builder.set_smell("It smells like sewage")
+    builder.add_door("a", "large wooden door", "south", door_id=bankdoor_id)
+
+def central_bank(builder):
+    builder.set_tile_id(bank_entrance_id)
+    builder.set_name("the central bank entrance hall")
+    builder.set_description("in the central bank entrance hall")
+    builder.set_first_visit_message("your footsteps echo sharply around the "
+            "high ceilings as your feet strike the higly polished marble floor")
+    builder.set_smell("It smells like pine and lemon")
+
+def central_bank_hallway(builder):
+    builder.set_tile_id(bank_hallway_id)
+    builder.set_name("a hallway")
+    builder.set_description("in a bright, clean hallway")
+    builder.set_smell("It smells like pine and lemon")
+    builder.add_keypad_door("a", "large metal door with a keypad", "south",
+            config.idnumber, door_id=bank_vaultdoor_id)
+
+def central_bank_vault(builder):
+    builder.set_tile_id(bank_vault_id)
+    builder.set_name("the bank vault")
+    builder.set_description("in the bank vault")
+    builder.set_first_visit_message("rows of lockboxes line the walls, and "
+            "the ceiling and floor are solid steel. It looks like the vault has"
+            " also been looted, and there's not much left in here.")
+    builder.set_smell("It smells like steel")
+
+    coins = Coins(value=582, location="on the table")
+    table = Furniture("a", "square metal table", location="in the centre of "
+            "the room")
+
+    builder.add_items([coins, table])
+
+def central_bank_employee_lounge(builder):
+    builder.set_tile_id(bank_lounge_id)
+    builder.set_name("the employee lounge")
+    builder.set_description("in the employee lounge")
+    builder.set_first_visit_message("it looks like somebody left this room in a "
+        "hurry")
+    builder.set_smell("It smells like coffee and bananas")
+
+    banana = Food("a", "banana", location="on the ground", energy=15)
+    mug = Item("a", "mug", location="on the ground")
+    sandwich = Food("a", "sandwich", location="on the table", energy=15)
+    battery = Battery(location="on the table")
+    table = Furniture("a", "round wooden table", location="in the centre of the room")
+    chair = Furniture("a", "chair", location="in the centre of the room")
+
+    builder.add_items([banana, mug, sandwich, table, chair])
+
+def central_bank_managers_office(builder):
+    builder.set_tile_id(bank_office_id)
+    builder.set_name("the managers office")
+    builder.set_description("in the managers office")
+    builder.set_first_visit_message("this room also looks like it has been "
+            "ransacked")
+    builder.set_smell("It smell like pine and lemon")
+
+    desk = Furniture("a", "wide mahogany desk", location="against the wall",
+        combustible=False)
+    chair = Furniture("a", "worn leather chair", location="against the wall",
+        combustible=False)
+    cabinet = LargeContainer("a", "filing cabinet", location="in the corner")
+
+    builder.add_items([desk, chair, cabinet])

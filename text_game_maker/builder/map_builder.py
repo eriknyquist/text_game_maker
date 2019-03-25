@@ -5,9 +5,10 @@ import sys
 import os
 import errno
 
-import parser
-import text_game_maker
-from text_game_maker.tile.tile import Tile, LockedDoor, reverse_direction
+from text_game_maker.tile.tile import (Tile, LockedDoor, reverse_direction,
+    LockedDoorWithKeypad
+)
+
 from text_game_maker.game_objects.items import Item
 from text_game_maker.player import player
 from text_game_maker.audio import audio
@@ -571,6 +572,31 @@ class MapBuilder(object):
         """
 
         self.current.description = utils._remove_leading_whitespace(desc)
+
+    def add_keypad_door(self, prefix, name, direction, code,
+            doorclass=LockedDoorWithKeypad, door_id=None):
+        """
+        Add a locked door that blocks the player from exiting the current room,
+        and requires a specific code to be entered on the keypad to unlock it.
+
+        :param str prefix: prefix for door name, e.g. "a"
+        :param str name: door name, e.g. "locked door"
+        :param str direction: direction to locked door from current tile, e.g.\
+            "north"
+        :param int code: keypad code required to unlock door
+        :param doorclass: class object to instantiate for door
+        :param door_id: unique ID to represent door in save files
+        """
+        dirs = ['north', 'south', 'east', 'west']
+        if direction not in dirs:
+            raise ValueError('Invalid direction: must be one of %s' % dirs)
+
+        replace = getattr(self.current, direction)
+        door = doorclass(code, prefix=prefix, name=name, src_tile=self.current, replacement_tile=replace)
+        if door_id:
+            door.set_tile_id(door_id)
+
+        setattr(self.current, direction, door)
 
     def add_door(self, prefix, name, direction, doorclass=LockedDoor,
             door_id=None):
