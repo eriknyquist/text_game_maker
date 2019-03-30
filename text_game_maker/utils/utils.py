@@ -1102,7 +1102,7 @@ def read_line_raw(msg, cancel_word=None, default=None):
     if cancel_word:
         cancel_desc = ", or '%s'" % cancel_word
 
-    prompt = "%s%s%s " % (msg, cancel_desc, default_desc)
+    prompt = "%s%s%s > " % (msg, cancel_desc, default_desc)
     printfunc('')
 
     if sequence:

@@ -97,7 +97,7 @@ class ExampleMapRunner(runner.MapRunner):
         rooms.central_bank_vault(builder)
 
         # Set the input prompt
-        builder.set_input_prompt(" > ")
+        builder.set_input_prompt("")
 
         # Set on_game_run callback to get player's name
         builder.set_on_game_run(on_game_run)
