@@ -31,9 +31,11 @@ bank_office_id = "bank_office"
 bank_lounge_id = "bank_lounge"
 bank_vault_id = "bank_vault"
 bank_vaultdoor_id = "bank_vaultdoor"
+bank_officedoor_id = "bank_officedoor"
 
 class config(object):
-    idnumber = random.randrange(10000000, 50000000)
+    idnumber = random.randrange(100000, 500000)
+    vaultcode = random.randrange(10000000, 50000000)
 
 @serializable_callback
 def _do_buy(person, player):
@@ -192,8 +194,8 @@ def prison_office(builder):
     chair = Furniture("a", "chair", location="against the wall",
         combustible=False)
 
-    idcard = Paper("a", "business card", paragraphs=[
-            "<playername>, Senior Accountant",
+    idcard = Paper("an", "ID badge", paragraphs=[
+            "<playername>, Branch Manager",
             "Branch: 115N",
             "CID: %d" % config.idnumber
         ], header="Central Bank", footer="Central Bank"
@@ -274,8 +276,12 @@ def central_bank_hallway(builder):
     builder.set_name("a hallway")
     builder.set_description("in a bright, clean hallway")
     builder.set_smell("It smells like pine and lemon")
+
+    builder.add_keypad_door("a", "wooden door with a keypad and a sign reading "
+            "'MANAGER'", "east", config.idnumber, door_id=bank_officedoor_id,
+            prompt="Enter employee CID to unlock the door")
     builder.add_keypad_door("a", "large metal door with a keypad", "south",
-            config.idnumber, door_id=bank_vaultdoor_id)
+            config.vaultcode, door_id=bank_vaultdoor_id)
 
 def central_bank_vault(builder):
     builder.set_tile_id(bank_vault_id)
@@ -317,10 +323,15 @@ def central_bank_managers_office(builder):
             "ransacked")
     builder.set_smell("It smell like pine and lemon")
 
+    postit = Paper("a", "post-it note", paragraphs=[
+            "code 4 vault: %d" % config.vaultcode
+        ], location="stuck to the wall"
+    )
+
     desk = Furniture("a", "wide mahogany desk", location="against the wall",
         combustible=False)
     chair = Furniture("a", "worn leather chair", location="against the wall",
         combustible=False)
     cabinet = LargeContainer("a", "filing cabinet", location="in the corner")
 
-    builder.add_items([desk, chair, cabinet])
+    builder.add_items([desk, chair, cabinet, postit])
