@@ -529,11 +529,19 @@ class LockedDoorWithKeypad(LockedDoor):
     def __init__(self, unlock_code=None, **kwargs):
         super(LockedDoorWithKeypad, self).__init__(**kwargs)
         self.unlock_code = unlock_code
+        self.prompt = "Enter keypad code to unlock the door"
+
+    def set_prompt(self, prompt):
+        """
+        Set text to be display when prompting player to input keypad code
+
+        :param str prompt: text to prompt with
+        """
+        self.prompt = prompt
 
     def on_open(self, player):
         while True:
-            code = utils.read_line_raw("Enter keypad code to unlock the door",
-                cancel_word="cancel")
+            code = utils.read_line_raw(self.prompt, cancel_word="cancel")
             if (code == None) or (code.strip() == ""):
                 utils.game_print("Cancelled.")
                 return

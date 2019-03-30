@@ -583,7 +583,7 @@ class MapBuilder(object):
         self.current.description = utils._remove_leading_whitespace(desc)
 
     def add_keypad_door(self, prefix, name, direction, code,
-            doorclass=LockedDoorWithKeypad, door_id=None):
+            doorclass=LockedDoorWithKeypad, door_id=None, prompt=None):
         """
         Add a locked door that blocks the player from exiting the current room,
         and requires a specific code to be entered on the keypad to unlock it.
@@ -604,6 +604,8 @@ class MapBuilder(object):
         door = doorclass(code, prefix=prefix, name=name, src_tile=self.current, replacement_tile=replace)
         if door_id:
             door.set_tile_id(door_id)
+        if prompt:
+            door.set_prompt(prompt)
 
         setattr(self.current, direction, door)
 
