@@ -549,7 +549,7 @@ def is_location(player, name):
     :rtype: bool
     """
     for direction in player.current.iterate_directions():
-        if direction and direction.is_door() and (name in direction.name):
+        if direction and direction.matches_name(name):
             return True
 
     for loc in player.current.items:

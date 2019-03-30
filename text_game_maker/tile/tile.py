@@ -194,6 +194,12 @@ class Tile(GameEntity):
 
         self.tile_id = _register_tile(self)
 
+    def matches_name(self, name):
+        if name.startswith("the"):
+            name = name[4:]
+
+        return name in self.name
+
     def on_smell(self):
         """
         Called when player types 'smell' or equivalent on this tile
