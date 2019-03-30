@@ -175,7 +175,12 @@ def _do_eat(player, word, item_name):
     if not item:
         item = utils.find_person(player, item_name)
         if not item:
-            _no_item_message(player, item_name)
+            if utils.is_location(player, item_name):
+                utils.game_print(messages.nonsensical_action_message(
+                    '%s %s' % (word, item_name)))
+            else:
+                _no_item_message(player, item_name)
+
             utils.save_sound(audio.FAILURE_SOUND)
             return False
 

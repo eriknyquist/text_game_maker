@@ -4,6 +4,14 @@ def _randmsg(choices, *args):
     choice = random.choice(choices)
     return choice.format(*args)
 
+def bad_taste_message():
+    return _randmsg([
+        "It doesn't taste great.",
+        "You have tasted better.",
+        "It's not very good.",
+        "It does not taste good."
+    ])
+
 def eat_living_person_message(name):
     return _randmsg([
         "{0} doesn't appreciate your advances, and bites back.",

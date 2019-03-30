@@ -28,7 +28,8 @@ class Item(GameEntity):
 
         self.combustible = True
         self.inanimate = True
-        self.edible = True
+        self.edible = False
+        self.damage = 0
         self.value = 0
         self.location = ""
         self.name = name
@@ -53,7 +54,7 @@ class Item(GameEntity):
         """
         if self.size > ITEM_SIZE_SMALL:
             utils.game_print(messages.nonsensical_action_message('%s %s'
-                % (word, self.name)))
+                % (word, self.prep)))
             utils.save_sound(audio.FAILURE_SOUND)
             return
 
@@ -80,7 +81,8 @@ class Item(GameEntity):
             player.decrement_health(self.damage)
 
         else:
-            msg = "You %s the %s. %s" % messages.bad_taste_message()
+            msg = "You %s %s. %s" % (word, self.prep, messages.bad_taste_message())
+            self.delete()
 
         if msg:
             utils.game_print(msg)
