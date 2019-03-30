@@ -145,10 +145,14 @@ def main():
         logger.debug('"%s"' % command)
         return command
 
+    # Send game output to slack
     utils.set_printfunc(printfunc)
+
+    # Block on game input from slack
     utils.set_inputfunc(inputfunc)
 
-    utils.disable_commands("load", "save", "audio")
+    # Disable audio, loading/saving states, debugging
+    utils.disable_commands("load", "save", "audio", "&")
 
     try:
         run_map_from_filename(sys.argv[1])

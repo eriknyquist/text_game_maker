@@ -3,6 +3,7 @@ import time
 import random
 import sys
 import os
+import pdb
 import errno
 
 from text_game_maker.tile.tile import (Tile, LockedDoor, reverse_direction,
@@ -25,12 +26,16 @@ BADWORDS = [
 ]
 
 info = {
-    'instance': None
+    'instance': None,
+    'debug_next': False
 }
 
 _format_tokens = {
     "<playername>": lambda: get_instance().player.name
 }
+
+def _debug_next():
+    info['debug_next'] = True
 
 def add_format_tokens():
     for tok in _format_tokens:
@@ -408,6 +413,10 @@ class MapBuilder(object):
         return None
 
     def _parse_command(self, player, action):
+        if info['debug_next']:
+            info['debug_next'] = False
+            pdb.set_trace()
+
         if action == '':
             action = utils.get_last_command()
             utils.printfunc('\n' + action)

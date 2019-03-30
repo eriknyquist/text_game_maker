@@ -45,6 +45,9 @@ INVENTORY_WORDS = [
     'i', 'inventory', 'show inventory', 'show pockets', 'pockets'
 ]
 
+def _do_debug(player, word, remaining):
+    map_builder._debug_next()
+
 class Command(object):
     """
     Container class for data needed to execute a particular game command
@@ -164,6 +167,8 @@ class CommandParser(SimpleTextFSM):
         super(CommandParser, self).__init__()
 
         default_commands = [
+            ["&", _do_debug, ""],
+
             [HELP_WORDS, map_builder._do_help, "show basic help information"],
 
             [SHOW_COMMAND_LIST_WORDS, map_builder._do_show_command_list,
