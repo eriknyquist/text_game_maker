@@ -693,11 +693,13 @@ class MapBuilder(object):
 
         old = self.current
 
-        if not door:
+        if not door and (getattr(self.current, direction) is None):
             setattr(self.current, direction, new_tile)
 
         self.current = new_tile
-        setattr(self.current, reverse_direction(direction), old)
+        rdir = reverse_direction(direction)
+        if getattr(self.current, rdir) is None:
+            setattr(self.current, rdir, old)
 
     def move_west(self, num=1, name=None, description=None, tileclass=Tile):
         """
