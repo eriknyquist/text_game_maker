@@ -526,7 +526,7 @@ class LockedDoor(Tile):
             return False
 
 class LockedDoorWithKeypad(LockedDoor):
-    def __init__(self, unlock_code, **kwargs):
+    def __init__(self, unlock_code=None, **kwargs):
         super(LockedDoorWithKeypad, self).__init__(**kwargs)
         self.unlock_code = unlock_code
 
