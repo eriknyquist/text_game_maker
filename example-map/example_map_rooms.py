@@ -101,14 +101,14 @@ def prison_entrance_hall(builder):
         "Fascinating, yes.", "Oh, yes? Interesting.", "Mmhmm.")
 
     oldman.add_responses(
-        (["(.* )?(what( is|'?s)? (wrong|happening|going on)).*"],
+        (["(.* )?(what( is|'?s)? (wrong|happening|goin(g)? on)).*"],
             ["Huh. You just woke up or somethin? Raiders rolled in, gutted the "
             "place. If I were you, I'd take the freebie and get out of here "
             "before the replacements show up. Probably on their way right "
             "now."]),
         (["(.* )?where.* i .*go.*"], ["Anywhere besides here.", "Away from "
             "the prison, obviously"]),
-        (["(.* )?(where (are we|is this)|what is this place).*"], ["A prison. "
+        (["(.* )?(where (are we|is this)|what( is|'?s) this place).*"], ["A prison. "
             "You couldn't figure that out by yourself?"]),
     )
 
