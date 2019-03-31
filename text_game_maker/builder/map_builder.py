@@ -830,17 +830,17 @@ class MapBuilder(object):
                 if self.on_game_run:
                     self.on_game_run(self.player)
 
+                self.reset_state_data = self.player.save_to_string()
                 utils.game_print(self.player.describe_current_tile())
                 break
 
             elif choice == 1:
                 if _do_load(self.player, '', ''):
+                    self.reset_state_data = self.player.save_to_string()
                     break
 
             elif choice == 2:
                 utils.printfunc(utils.get_full_controls())
-
-        self.reset_state_data = self.player.save_to_string()
 
     def _check_flags(self):
         if self.player.load_from_file:
