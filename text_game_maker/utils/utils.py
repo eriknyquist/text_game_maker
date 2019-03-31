@@ -58,7 +58,12 @@ _middle_names = os.path.join(_location, "middle-names.txt")
 
 disabled_commands = []
 
-def _is_connected_tile(player, tile, adj_tile):
+class BorderType(object):
+    OPEN = 0
+    WALL = 1
+    DOOR = 2
+
+def _border_type(player, tile, adj_tile):
     """
     Used by map drawing routine. Checks if 'adj_tile' is connected to and can
     be seen from 'tile'
@@ -70,7 +75,13 @@ def _is_connected_tile(player, tile, adj_tile):
     :rtype: bool
     """
     direction = tile and adj_tile and tile.direction_to(adj_tile)
-    return direction and (not adj_tile.is_door())
+    if not direction:
+        return BorderType.WALL
+
+    if adj_tile.is_door():
+        return BorderType.DOOR
+
+    return BorderType.OPEN
 
 def _check_borders(player, tilemap, x, y, size):
     """
@@ -83,21 +94,22 @@ def _check_borders(player, tilemap, x, y, size):
     :param int y: y position in tilemap
     :param int size: tilemap size (width and height)
     :return: tuple of the form (top, bottom, left, right) where each value \
-        is a boolean representing whether that side requires a border
+        is the BorderType for that side
     """
     tile = tilemap[y][x]
-    top, bottom, left, right = True, True, True, True
-    if (y > 0) and _is_connected_tile(player, tile, tilemap[y - 1][x]):
-        top = False
+    top, bottom, left, right = (BorderType.OPEN,) * 4
 
-    if (y < (size - 1)) and _is_connected_tile(player, tile, tilemap[y + 1][x]):
-        bottom = False
+    if y > 0:
+        top = _border_type(player, tile, tilemap[y - 1][x])
 
-    if (x > 0) and _is_connected_tile(player, tile, tilemap[y][x - 1]):
-        left = False
+    if y < (size - 1):
+        bottom = _border_type(player, tile, tilemap[y + 1][x])
 
-    if (x < (size - 1)) and _is_connected_tile(player, tile, tilemap[y][x + 1]):
-        right = False
+    if x > 0:
+        left = _border_type(player, tile, tilemap[y][x - 1])
+
+    if x < (size - 1):
+        right = _border_type(player, tile, tilemap[y][x + 1])
 
     return top, bottom, left, right
 
@@ -111,15 +123,17 @@ def _boxify(lines, width, height, top, bottom, left, right):
         current tile
     :param int width: width of tile (in ASCII characters)
     :param int height: height of tile (in lines)
-    :param bool top: defines whether this tile needs a top border
-    :param bool bottom: defines whether this tile needs a bottom border
-    :param bool left: defines whether this tile needs a left border
-    :param bool right: defines whether this tile needs a right border
+    :param BorderType top: defines top border type
+    :param BorderType bottom: defines bottom border type
+    :param BorderType left: defines left border type
+    :param BorderType right: defines right border type
     :return: padded and bordered string data for map tile
     :rtype: [str]
     """
-    usable_height = height - (int(top) + int(bottom))
-    usable_width = width - (int(left) + int(right))
+    usable_height = (height - (int(top != BorderType.OPEN)
+            + int(bottom != BorderType.OPEN)))
+    usable_width = (width - (int(left != BorderType.OPEN)
+            + int(right != BorderType.OPEN)))
 
     if len(lines) > usable_height:
         lines = lines[:usable_height]
@@ -135,18 +149,46 @@ def _boxify(lines, width, height, top, bottom, left, right):
             lines[i] = lines[i][:usable_width]
 
         if len(lines[i]) < usable_width:
+            linedelta = usable_width - len(lines[i])
+            end = True
+
+            while linedelta:
+                if end:
+                    lines[i] += " "
+                else:
+                    lines[i] = " " + lines[i]
+
+                linedelta -= 1
+                end = not end
+
             lines[i] += " " * (usable_width - len(lines[i]))
 
-        if left:
+        target_i = (usable_height / 2)
+        if left == BorderType.WALL:
             lines[i] = "|" + lines[i]
-        if right:
-            lines[i] = lines[i] + "|"
+        elif left == BorderType.DOOR:
+            char = "#" if target_i - 1 <= i <= target_i + 1 else "|"
+            lines[i] = char + lines[i]
 
-    borderline = ("+" + ("-" * (width - 2)) + "+")
-    if bottom:
-        lines.append(borderline)
-    if top:
-        lines.insert(0, borderline)
+        if right == BorderType.WALL:
+            lines[i] = lines[i] + "|"
+        elif right == BorderType.DOOR:
+            char = "#" if target_i - 1 <= i <= target_i + 1 else "|"
+            lines[i] = lines[i] + char
+
+    index = (width / 2) - 2
+    wallborder = ("+" + ("-" * (width - 2)) + "+")
+    doorborder = wallborder[:index] + "####" + wallborder[index + 4:]
+
+    if bottom == BorderType.WALL:
+        lines.append(wallborder)
+    elif bottom == BorderType.DOOR:
+        lines.append(doorborder)
+
+    if top == BorderType.WALL:
+        lines.insert(0, wallborder)
+    elif top == BorderType.DOOR:
+        lines.insert(0, doorborder)
 
     return lines
 
@@ -255,10 +297,9 @@ def draw_map_of_nearby_tiles(player):
             top, bottom, left, right = _check_borders(player,
                     tilemap, x, y, mapsize)
 
-            use_borders = True
             if tile.is_door():
                 text = "?"
-                top, bottom, left, right = False, False, False, False
+                top, bottom, left, right = (BorderType.OPEN,) * 4
             elif tile is player.current:
                 text = "You"
             else:

@@ -157,7 +157,7 @@ class SimpleTextFSM(object):
                 and (self.searchfilter(self.current.token))):
             ret.append(self.current.text)
 
-        ret.extend(self._dump_children_text(self.current))
+        ret.extend(self._dump_children_text())
         return ret
 
     def run(self, input_string):
