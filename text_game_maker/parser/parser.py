@@ -53,11 +53,12 @@ class Command(object):
     Container class for data needed to execute a particular game command
     """
 
-    def __init__(self, word_list, callback, desc, phrase_fmt):
+    def __init__(self, word_list, callback, desc, phrase_fmt, hidden):
         self.word_list = word_list
         self.callback = callback
         self.desc = desc
         self.phrase_fmt = phrase_fmt
+        self.hidden = hidden
 
         if self.desc:
             self.desc = self.desc[0].upper() + self.desc[1:]
@@ -90,6 +91,11 @@ class SimpleTextFSM(object):
     def __init__(self):
         self.start = Node('')
         self.current = self.start
+        self.searchfilter = lambda x: True
+
+    def set_search_filter(self, callback):
+        if callback:
+            self.searchfilter = callback
 
     def _extend_fsm(self, string, token):
         current = self.start
@@ -120,7 +126,7 @@ class SimpleTextFSM(object):
         if node is None:
             node = self.start
 
-        if node.token:
+        if node.token and self.searchfilter(node.token):
             yield node.token
 
         for c in node.children:
@@ -132,7 +138,8 @@ class SimpleTextFSM(object):
         for c in node.children:
             child = node.children[c]
 
-            if child.text and child.text != "" and c != ' ':
+            if ((child.text not in [None, ""]) and (c != ' ')
+                    and (self.searchfilter(child.token))):
                 ret.append(child.text)
 
             ret.extend(self._dump_text(child))
@@ -142,7 +149,8 @@ class SimpleTextFSM(object):
     def get_children(self):
         ret = []
 
-        if self.current.text and self.current.text != "":
+        if ((self.current.text not in [None, ""])
+                and (self.searchfilter(self.current.token))):
             ret.append(self.current.text)
 
         ret.extend(self._dump_text(self.current))
@@ -165,9 +173,10 @@ class SimpleTextFSM(object):
 class CommandParser(SimpleTextFSM):
     def __init__(self, *args, **kwargs):
         super(CommandParser, self).__init__()
+        self.set_search_filter(lambda x: not x.hidden)
 
         default_commands = [
-            ["&", _do_debug, ""],
+            [["debug next command"], _do_debug, None, None, True],
 
             [HELP_WORDS, map_builder._do_help, "show basic help information"],
 
@@ -213,7 +222,8 @@ class CommandParser(SimpleTextFSM):
 
         commands.add_commands(self)
 
-    def add_command(self, word_set, callback, help_text=None, fmt=None):
-        cmd = Command(word_set, callback, help_text, fmt)
+    def add_command(self, word_set, callback, help_text=None, fmt=None,
+            hidden=False):
+        cmd = Command(word_set, callback, help_text, fmt, hidden)
         for word in word_set:
             self.add_token(word, cmd)

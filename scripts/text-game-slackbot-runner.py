@@ -152,7 +152,7 @@ def main():
     utils.set_inputfunc(inputfunc)
 
     # Disable audio, loading/saving states, debugging
-    utils.disable_commands("load", "save", "audio", "&")
+    utils.disable_commands("load", "save", "audio", "debug next command")
 
     try:
         run_map_from_filename(sys.argv[1])

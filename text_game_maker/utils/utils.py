@@ -1254,9 +1254,15 @@ def _find_word_end(string, i):
 def _parser_suggestions(fsm, text, i):
     _unrecognised(text)
 
-    if i > 0:
-        printfunc('\nDid you mean...\n\n%s'
-            % ('\n'.join(['  %s' % w for w in fsm.get_children()])))
+    if i <= 0:
+        return
+
+    children = fsm.get_children()
+    if not children:
+        return
+
+    printfunc('\nDid you mean...\n\n%s'
+            % ('\n'.join(['  %s' % c for c in children])))
 
 def run_fsm(fsm, action):
     i, cmd = fsm.run(action)

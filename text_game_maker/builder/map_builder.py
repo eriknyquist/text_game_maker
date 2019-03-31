@@ -61,7 +61,7 @@ def _do_help(player, word, setting):
         return
 
     i, cmd = utils.run_fsm(player.fsm, setting)
-    if cmd:
+    if cmd and (not cmd.hidden):
         text = cmd.help_text()
 
     if text is None:
