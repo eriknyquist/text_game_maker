@@ -2,6 +2,7 @@ from __future__ import unicode_literals, print_function
 import sys
 import os
 import time
+import copy
 import random
 import fnmatch
 import inspect
@@ -16,13 +17,11 @@ from prompt_toolkit.history import InMemoryHistory
 ITEM_LIST_FMT = "      {0:33}{1:1}({2})"
 
 COMPASS = [
-    "**********",
-    "*        *",
-    "*   N    *",
-    "* W-|-E  *",
-    "*   S    *",
-    "*        *",
-    "**********"
+    "------+",
+    "|  N  |",
+    "|W-|-E|",
+    "|  S  |",
+    "------+"
 ]
 
 history = InMemoryHistory()
@@ -204,6 +203,21 @@ def _get_local_tile_map(player, crawltiles=2, mapsize=5):
 
     return tilemap
 
+def _overlay_line(base, overlay):
+    if len(overlay) >= len(base):
+        return overlay[:len(base)]
+
+    return overlay + base[len(overlay):]
+
+def _make_overlay_tile(base, overlay):
+    numlines = min(len(base), len(overlay))
+    ret = copy.deepcopy(base)
+
+    for i in range(numlines):
+        ret[i] = _overlay_line(base[i], overlay[i])
+
+    return ret
+
 def draw_map_of_nearby_tiles(player):
     """
     Draw a ASCII representation of tile surrounding the player's current
@@ -256,7 +270,8 @@ def draw_map_of_nearby_tiles(player):
                     top, bottom, left, right)
 
     mapdata = ""
-    linemap[0][0] = COMPASS
+    linemap[0][0] = _make_overlay_tile(linemap[0][0], COMPASS)
+
     for row in linemap:
         for i in range(len(row[0])):
             linedata = ""
