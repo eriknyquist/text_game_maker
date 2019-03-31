@@ -15,9 +15,15 @@ from prompt_toolkit.history import InMemoryHistory
 
 ITEM_LIST_FMT = "      {0:33}{1:1}({2})"
 
-COMPASS ="""  N
-W-|-E
-  S"""
+COMPASS = [
+    "**********",
+    "*        *",
+    "*   N    *",
+    "* W-|-E  *",
+    "*   S    *",
+    "*        *",
+    "**********"
+]
 
 history = InMemoryHistory()
 session = PromptSession(history=history, enable_history_search=True)
@@ -183,15 +189,11 @@ def _get_local_tile_map(player, crawltiles=2, mapsize=5):
 
         if movedir:
             x, y = movetable[movedir]()
-            if (x < (-crawltiles)) or (x > crawltiles):
-                continue
-
-            if (y < (-crawltiles)) or (y > crawltiles):
-                continue
-
             pos = (x, y)
 
-        tilemap[pos[1] + crawltiles][pos[0] + crawltiles] = tile
+        if ((-crawltiles <= pos[0] <= crawltiles)
+                and (-crawltiles <= pos[1] <= crawltiles)):
+            tilemap[pos[1] + crawltiles][pos[0] + crawltiles] = tile
 
         for direction in movetable:
             adj = getattr(tile, direction)
@@ -253,25 +255,19 @@ def draw_map_of_nearby_tiles(player):
             linemap[y][x] = _boxify(lines, tilewidth, tileheight,
                     top, bottom, left, right)
 
-    compassdata = COMPASS.split("\n")
-    for i in range(len(compassdata)):
-        if len(compassdata[i]) < mapwidth:
-            delta = mapwidth - len(compassdata[i])
-            compassdata[i] = "|" + compassdata[i] + (" " * (delta - 2)) + "|"
-
-    mapdata = "\n".join(compassdata) + "\n"
+    mapdata = ""
+    linemap[0][0] = COMPASS
     for row in linemap:
         for i in range(len(row[0])):
             linedata = ""
             for j in range(len(row)):
                 linedata += row[j][i]
 
-
             mapdata += "|" + linedata[1:-1] + "|" + "\n"
 
-    mapdata = "\n".join(mapdata.rstrip().split("\n")[:-1])
+    maplines = mapdata.strip().split("\n")[1:-1]
     header = "+" + ("-" * (mapwidth - 2)) + "+"
-    return "\n" + header + "\n" + mapdata + "\n" + header + "\n"
+    return "\n".join([header] + maplines + [header])
 
 def is_disabled_command(*commands):
     """
