@@ -122,27 +122,31 @@ class SimpleTextFSM(object):
     def dump_json(self):
         return json.dumps(self._dump_json(self.start), indent=2)
 
-    def iterate(self, node=None):
-        if node is None:
-            node = self.start
+    def iterate(self):
+        stack = [self.start]
 
-        if node.token and self.searchfilter(node.token):
-            yield node.token
+        while stack:
+            node = stack.pop(0)
+            if node.token and self.searchfilter(node.token):
+                yield node.token
 
-        for c in node.children:
-            for token in self.iterate(node.children[c]):
-                yield token
+            for c in node.children:
+                stack.append(node.children[c])
 
-    def _dump_text(self, node):
+    def _dump_children_text(self):
         ret = []
-        for c in node.children:
-            child = node.children[c]
+        stack = [self.current]
 
-            if ((child.text not in [None, ""]) and (c != ' ')
-                    and (self.searchfilter(child.token))):
-                ret.append(child.text)
+        while stack:
+            node = stack.pop(0)
+            for c in node.children:
+                child = node.children[c]
 
-            ret.extend(self._dump_text(child))
+                if ((child.text not in [None, ""]) and (c != ' ')
+                        and (self.searchfilter(child.token))):
+                    ret.append(child.text)
+
+                stack.append(child)
 
         return ret
 
@@ -153,7 +157,7 @@ class SimpleTextFSM(object):
                 and (self.searchfilter(self.current.token))):
             ret.append(self.current.text)
 
-        ret.extend(self._dump_text(self.current))
+        ret.extend(self._dump_children_text(self.current))
         return ret
 
     def run(self, input_string):
