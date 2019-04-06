@@ -5,6 +5,7 @@ from text_game_maker.messages import messages
 from text_game_maker.utils import utils
 from text_game_maker.audio import audio
 from text_game_maker.materials.materials import Material, get_properties
+from text_game_maker.game_objects import __object_model_version__
 
 TYPE_KEY = '_type_key'
 
@@ -31,22 +32,23 @@ def build_instance(type_key):
 
     return ins
 
-def deserialize(data):
+def deserialize(data, version):
     """
     Recursively deserialize item and all contained items
 
-    :param dict data: data to deserialize
+    :param dict data: serialized item data
+    :param str version: object model version of serialized data
     :return: deserialized object
     """
     if is_deserializable_type(data):
         item = build_instance(data[TYPE_KEY])
-        item.set_attrs(data)
+        item.set_attrs(data, version)
     elif type(data) == list:
         item = []
 
         if len(data) > 0:
             for sub in data:
-                item.append(deserialize(sub))
+                item.append(deserialize(sub, version))
     else:
         item = data
 
@@ -76,6 +78,15 @@ def serialize(attr):
         ret = attr
 
     return ret
+
+class ObjectModelMigration(object):
+    def __init__(self, from_version, to_version, migration_function):
+        self.from_version = from_version
+        self.to_version = to_version
+        self._do_migration = migration_function
+
+    def migrate(self, attrs):
+        return self._do_migration(attrs)
 
 class GameEntity(object):
     """
@@ -124,6 +135,7 @@ class GameEntity(object):
     __metaclass__ = utils.SubclassTrackerMetaClass
 
     def __init__(self):
+        self._migrations = []
         self.inanimate = True
         self.combustible = True
         self.scenery = False
@@ -168,6 +180,35 @@ class GameEntity(object):
 
         return False
 
+    def add_migration(self, from_version, to_version, migration_function):
+        """
+        Add function to migrate a serialized version of this object to a new
+        object model version
+
+        :param str from_version: version to migrate from
+        :param str to_version: version to migrate to
+        :param migration_function: function to perform migration
+        """
+        m = ObjectModelMigration(from_version, to_version, migration_function)
+        self._migrations.append(m)
+
+    def migrate(self, old_version, attrs):
+        """
+        Migrate serialized version of this object to the current object model
+        version
+
+        :param str old_version: object model version to migrate from
+        :param attrs: object to migrate as a serialized dict
+        :return: migrated serialized dict
+        """
+        current_version = old_version
+        for migration in self._migrations:
+            if migration.from_version == current_version:
+                attrs = migration.migrate(attrs)
+                current_version = migration.to_version
+
+        return attrs
+
     def get_special_attrs(self):
         """
         Serialize any attributes that you want to handle specially here. Any
@@ -180,13 +221,14 @@ class GameEntity(object):
         """
         return {}
 
-    def set_special_attrs(self, attrs):
+    def set_special_attrs(self, attrs, version):
         """
         Deserialize any attributes that you want to handle specially here.
         Make sure to delete any specially handled attributes from the return
         dict so that they are not deserialized by the main set_attrs method
 
         :param dict attrs: all serialized attributes for this object
+        :param str version: object model version of serialized attributes
         :return: all attributes not serialized by this method
         :rtype: dict
         """
@@ -200,7 +242,7 @@ class GameEntity(object):
         :return: serializable dict of item and contained items
         :rtype: dict
         """
-        skip_attrs = ['home']
+        skip_attrs = ['home', '_migrations']
         ret = self.get_special_attrs()
 
         for key in self.__dict__:
@@ -213,19 +255,24 @@ class GameEntity(object):
         ret.update({TYPE_KEY: self.__class__.full_class_name})
         return ret
 
-    def set_attrs(self, attrs):
+    def set_attrs(self, attrs, version):
         """
         Recursively deserialize all attributes of this item and any contained
         items
 
         :param dict attrs: item attributes
+        :param str version: object model version of item attributes
         """
         item = None
-        attrs = self.set_special_attrs(attrs)
+
+        if version != __object_model_version__:
+            attrs = self.migrate(version, attrs)
+
+        attrs = self.set_special_attrs(attrs, version)
 
         if ('items' in attrs) and (type(attrs['items']) == list):
             for d in attrs['items']:
-                item = deserialize(d)
+                item = deserialize(d, version)
                 self.add_item(item)
 
             del attrs['items']
@@ -239,7 +286,7 @@ class GameEntity(object):
                 raise RuntimeError("Error: %s object has no attribute '%s'"
                     % (type(self).__name__, key))
 
-            item = deserialize(attr)
+            item = deserialize(attr, version)
             setattr(self, key, item)
 
     def add_item(self, item):

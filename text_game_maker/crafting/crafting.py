@@ -15,11 +15,11 @@ def serialize():
 
     return ret
 
-def deserialize(data):
+def deserialize(data, version):
     d = {}
     for key in data:
         items, item = data[key]
-        d[key] = [base_deserialize(items), base_deserialize(item)]
+        d[key] = [base_deserialize(items, version), base_deserialize(item, version)]
 
     craftables.clear()
     craftables.update(d)

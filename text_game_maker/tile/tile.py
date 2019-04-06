@@ -83,13 +83,14 @@ def crawler(start):
 
     return ret
 
-def builder(tiledata, start_tile_id):
+def builder(tiledata, start_tile_id, version):
     """
     Deserialize a list of serialized tiles, then re-link all the tiles to
     re-create the map described by the tile links
 
     :param list tiledata: list of serialized tiles
     :param start_tile_id: tile ID of tile that should be used as the start tile
+    :param str version: object model version of the tile data to be deserialized
     :return: starting tile of built map
     :rtype: text_game_maker.tile.tile.Tile
     """
@@ -98,7 +99,7 @@ def builder(tiledata, start_tile_id):
     _tiles.clear()
 
     for d in tiledata:
-        tile = deserialize(d)
+        tile = deserialize(d, version)
         tiles[tile.tile_id] = tile
 
     if start_tile_id not in tiles:
@@ -271,13 +272,16 @@ class Tile(GameEntity):
 
         return ret
 
-    def set_special_attrs(self, data):
+    def set_special_attrs(self, data, version):
         for loc in data['items']:
             for d in data['items'][loc]:
-                item = deserialize(d)
+                item = deserialize(d, version)
                 self.add_item(item)
 
-        self.people = {x:deserialize(data['people'][x]) for x in data['people']}
+        self.people = {}
+        for name in data['people']:
+            self.people[name] = deserialize(data['people'][name], version)
+
         self.set_tile_id(data['tile_id'])
 
         del data['items']

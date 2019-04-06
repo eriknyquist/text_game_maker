@@ -4,6 +4,7 @@ import json
 import text_game_maker
 
 from text_game_maker.audio import audio
+from text_game_maker.game_objects import __object_model_version__
 from text_game_maker.game_objects.items import SmallBag, Lighter, Coins
 from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.crafting import crafting
@@ -12,9 +13,19 @@ from text_game_maker.tile import tile
 from text_game_maker.messages import messages
 from text_game_maker.materials.materials import Material, get_properties
 
+OBJECT_VERSION_KEY = '_object_model_version'
 CRAFTABLES_KEY = '_craftables_data'
 TILES_KEY = '_tile_list'
 MOVE_ENERGY_COST = 0.25
+
+def _old_object_model_warning(version):
+    utils.printfunc("\n" + utils.line_banner("WARNING") + "\n\n" +
+        utils._wrap_text("the save state you are loading contains an "
+        "old object model version (%s). It can be be migrated to the current "
+        "version (%s), but any future saves will not be playable when an "
+        "object model version lower than %s is in use" % (version,
+        __object_model_version__, __object_model_version__)) + "\n" +
+        "\n" + utils.line_banner("WARNING"))
 
 def load_from_string(strdata, compression=True):
     """
@@ -29,9 +40,14 @@ def load_from_string(strdata, compression=True):
         strdata = zlib.decompress(strdata)
 
     data = json.loads(strdata)
+    version = data[OBJECT_VERSION_KEY]
+    del data[OBJECT_VERSION_KEY]
+
+    if version != __object_model_version__:
+        _old_object_model_warning(version)
 
     player = Player()
-    player.set_attrs(data)
+    player.set_attrs(data, version)
     return player
 
 def load_from_file(filename, compression=True):
@@ -291,6 +307,7 @@ class Player(GameEntity):
                 utils.serialize_callback(callback), turns, scheduled_turns
             ]
 
+        ret[OBJECT_VERSION_KEY] = __object_model_version__
         ret[TILES_KEY] = tile.crawler(self.start)
         ret[CRAFTABLES_KEY] = crafting.serialize()
         ret['start'] = self.start.tile_id
@@ -299,16 +316,15 @@ class Player(GameEntity):
         ret['fsm'] = None
         return ret
 
-    def set_special_attrs(self, attrs):
+    def set_special_attrs(self, attrs, version):
         for taskid in attrs['scheduled_tasks']:
             cb_name, turns, scheduled_turns = attrs['scheduled_tasks'][taskid]
             callback = utils.deserialize_callback(cb_name)
             self.scheduled_tasks[taskid] = (callback, turns, scheduled_turns)
 
-        self.start = tile.builder(attrs[TILES_KEY], attrs['start'])
+        self.start = tile.builder(attrs[TILES_KEY], attrs['start'], version)
         self.current = tile.get_tile_by_id(attrs['current'])
-
-        crafting.deserialize(attrs[CRAFTABLES_KEY])
+        crafting.deserialize(attrs[CRAFTABLES_KEY], version)
 
         del attrs['scheduled_tasks']
         del attrs['start']

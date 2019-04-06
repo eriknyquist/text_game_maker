@@ -65,7 +65,7 @@ class Context(GameEntity, responder.Context):
 
         return ret
 
-    def set_special_attrs(self, attrs):
+    def set_special_attrs(self, attrs, version):
         self.entry.clear()
         self.responses.clear()
         self.chains = []
@@ -134,7 +134,7 @@ class Responder(GameEntity, responder.Responder):
         ret['contexts'] = serialized_contexts
         return ret
 
-    def set_special_attrs(self, attrs):
+    def set_special_attrs(self, attrs, version):
         self.responses = _deserialize_redict(attrs['responses'])
         self.contexts = []
         self.context = None
@@ -147,7 +147,7 @@ class Responder(GameEntity, responder.Responder):
 
         for contextdata in attrs['contexts']:
             context = Context()
-            context.set_special_attrs(contextdata)
+            context.set_special_attrs(contextdata, version)
             self.contexts.append(context)
 
         if attrs['context']:
