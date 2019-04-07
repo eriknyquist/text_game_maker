@@ -55,20 +55,12 @@ Features
 Getting started
 ===============
 
-Clone from github
-#################
-
-::
-
-    git clone https://github.com/eriknyquist/text_game_maker
-    cd text_game_maker
-
 Install
 #######
 
 ::
 
-    python setup.py install
+    pip install text_game_maker
 
 Run the example map
 ###################
