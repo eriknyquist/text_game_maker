@@ -75,7 +75,7 @@ Run the example map
 
 ::
 
-    python scripts/text-game-runner.py example-map/example_map.py
+    python -m text_game_maker.example
 
 Writing maps
 ============
@@ -85,16 +85,28 @@ Writing maps
    See ``example-map/example_map.py`` and the
    `API documentation <https://text-game-maker.readthedocs.io>`_ for reference.
 
-#. Run ``scripts/text-game-runner.py`` with the name of the ``.py`` file
-   containing your MapRunner class, e.g.:
+#. Run ``text_game_maker.runner`` with the name of the ``.py`` file containing
+   your MapRunner class, e.g.:
 
    ::
 
-       python scripts/text-game-runner.py mymaprunner.py
+       python -m text_game_maker.runner mymaprunner.py
 
-   ``text-game-runner.py`` will import the file and run the first instance it
-   finds of a class which is a subclass of
-   text_game_maker.utils.runner.MapRunner
+   In this example, ``text_game_maker.runner`` will import the
+   ``mymaprunner.py`` file and run the first instance it finds of a class
+   which is a subclass of text_game_maker.utils.runner.MapRunner
+
+To run a MapRunner class as a slackbot to play your game over slack, the
+procedure is the same, except use the ``text_game_maker.slackbot_runner``
+script, e.g.:
+
+::
+
+    python -m text_game_maker.slackbot_runner mymaprunner.py
+
+Note that when using the slackbot runner you must have already created a
+bot user in your slack workspace, and the API token for the bot user must be
+available in an environment variable named ``SLACK_BOT_TOKEN``.
 
 API Documentation
 =================
