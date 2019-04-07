@@ -325,7 +325,7 @@ class Person(Item):
 
     def on_speak(self, player):
         speech = ' '
-        prompt = 'talking to %s (say nothing to exit): >' % self.name
+        prompt = 'talking to %s (say nothing to exit):' % self.name
 
         if self.introduction:
             self.say(self.introduction)
