@@ -167,7 +167,7 @@ class SimpleTextFSM(object):
         for c in input_string:
             try:
                 self.current = self.current.children[c]
-            except KeyError, AttributeError:
+            except (KeyError, AttributeError):
                 return i, self.current.token
 
             i += 1
