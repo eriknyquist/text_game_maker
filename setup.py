@@ -22,8 +22,8 @@ with open(REQFILE, 'r') as fh:
 
 setup(
     name='text_game_maker',
-    version='0.0.2',
-    description=('Framework for making text-based adventure games'),
+    version='0.5.0',
+    description=('Framework for making text-based adventure games (interactive finction)'),
     long_description=long_description,
     url='http://github.com/eriknyquist/text_game_maker',
     author='Erik Nyquist',
