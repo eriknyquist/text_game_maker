@@ -6,12 +6,7 @@ Text Adventure Game Maker
 .. contents:: Contents
 
 |projectname| is a framework for building simple text-based games. Supports
-Python 2.7x on Linux and Windows (tested on Debian and Windows 10).
-
-Coming Soon
-===========
-
-* Python 3
+Python 2 and 3 on Linux and Windows (tested on Debian and Windows 10).
 
 Features
 ========
