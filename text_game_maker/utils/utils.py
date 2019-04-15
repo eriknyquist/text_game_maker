@@ -140,8 +140,8 @@ def _boxify(lines, width, height, top, bottom, left, right):
     elif len(lines) < usable_height:
         delta = usable_height - len(lines)
         emptyline = ' ' * usable_width
-        header = ([emptyline] * (delta / 2))
-        footer = ([emptyline] * (delta - (delta / 2)))
+        header = ([emptyline] * int(delta / 2.0))
+        footer = ([emptyline] * (delta - int((delta / 2))))
         lines = header + lines + footer
 
     for i in range(len(lines)):
@@ -163,7 +163,7 @@ def _boxify(lines, width, height, top, bottom, left, right):
 
             lines[i] += " " * (usable_width - len(lines[i]))
 
-        target_i = (usable_height / 2)
+        target_i = int(usable_height / 2.0)
         if left == BorderType.WALL:
             lines[i] = "|" + lines[i]
         elif left == BorderType.DOOR:
@@ -176,7 +176,7 @@ def _boxify(lines, width, height, top, bottom, left, right):
             char = "#" if target_i - 1 <= i <= target_i + 1 else "|"
             lines[i] = lines[i] + char
 
-    index = (width / 2) - 2
+    index = int(width / 2.0) - 2
     wallborder = ("+" + ("-" * (width - 2)) + "+")
     doorborder = wallborder[:index] + "####" + wallborder[index + 4:]
 
@@ -278,7 +278,7 @@ def draw_map_of_nearby_tiles(player):
     crawl_tiles = 2
 
     # width and height of map area in tiles
-    mapsize = mapwidth / tilewidth
+    mapsize = int(mapwidth / tilewidth)
 
     tilemap = _get_local_tile_map(player, crawl_tiles, mapsize)
     linemap = []
@@ -366,7 +366,7 @@ def _fpeek(fh):
     return ret
 
 def _rand_line(filename):
-    with open(filename, 'r') as fh:
+    with open(filename, 'rb') as fh:
         # Get file size in bytes
         fh.seek(0, 2)
         size = fh.tell()
@@ -377,13 +377,13 @@ def _rand_line(filename):
         fh.seek(pos)
 
         # Seek backwards to a newline
-        while (fh.tell() > 0) and (_fpeek(fh) != '\n'):
+        while (fh.tell() > 0) and (_fpeek(fh) != b'\n'):
             fh.seek(-1, 1)
 
-        if _fpeek(fh) == '\n':
+        if _fpeek(fh) == b'\n':
             fh.seek(1, 1)
 
-        name = fh.readline().strip().lower()
+        name = fh.readline().decode("utf-8").strip().lower()
         return name[:1].upper() + name[1:]
 
 def set_inputfunc(func):
@@ -1079,7 +1079,7 @@ def centre_text(string, line_width=None):
     if diff <= 2:
         return string
 
-    spaces = ' ' * (diff / 2)
+    spaces = ' ' * int(diff / 2)
     return spaces + string + spaces
 
 def line_banner(text, width=None, bannerchar='-', spaces=1):
@@ -1102,7 +1102,7 @@ def line_banner(text, width=None, bannerchar='-', spaces=1):
         width = wrapper.width
 
     name = (' ' * spaces) + text + (' ' * spaces)
-    half = ('-' * ((width / 2) - (len(name) / 2)))
+    half = ('-' * (int(width / 2) - int(len(name) / 2)))
     return (half + name + half)[:width]
 
 def container_listing(container, item_fmt=ITEM_LIST_FMT, width=50,

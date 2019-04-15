@@ -1,4 +1,5 @@
 import sys
+from future.utils import with_metaclass
 
 import text_game_maker
 from text_game_maker.messages import messages
@@ -88,7 +89,7 @@ class ObjectModelMigration(object):
     def migrate(self, attrs):
         return self._do_migration(attrs)
 
-class GameEntity(object):
+class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object)):
     """
     Base class for anything that the player can interact with in the
     game, like usable items, food, people, etc.
@@ -131,8 +132,6 @@ class GameEntity(object):
     :ivar str verb: singluar verb e.g. "the key is on the floor", or plural \
         e.g. "the coins are on the floor"
     """
-
-    __metaclass__ = utils.SubclassTrackerMetaClass
 
     def __init__(self):
         self._migrations = []

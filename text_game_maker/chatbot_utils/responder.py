@@ -19,7 +19,7 @@ def _check_pattern_response_pair(pair):
     patterns, response = pair
     if isinstance(patterns, list):
         regex = "|".join(patterns)
-    elif isinstance(patterns, basestring):
+    elif isinstance(patterns, str):
         regex = patterns
     else:
         raise ValueError("First item in pattern response pair must be "

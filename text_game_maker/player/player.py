@@ -1,6 +1,8 @@
 import time
 import zlib
 import json
+import sys
+
 import text_game_maker
 
 from text_game_maker.audio import audio
@@ -17,6 +19,12 @@ OBJECT_VERSION_KEY = '_object_model_version'
 CRAFTABLES_KEY = '_craftables_data'
 TILES_KEY = '_tile_list'
 MOVE_ENERGY_COST = 0.25
+
+def _encode_for_zlib(data):
+    if (sys.version_info > (3, 0)):
+        return bytes(data, encoding="utf8")
+
+    return data
 
 def _old_object_model_warning(version):
     utils.printfunc("\n" + utils.line_banner("WARNING") + "\n\n" +
@@ -37,7 +45,7 @@ def load_from_string(strdata, compression=True):
     :rtype: text_game_maker.player.player.Player
     """
     if compression:
-        strdata = zlib.decompress(strdata)
+        strdata = zlib.decompress(strdata).decode("utf-8")
 
     data = json.loads(strdata)
     version = data[OBJECT_VERSION_KEY]
@@ -409,9 +417,9 @@ class Player(GameEntity):
         """
         data = json.dumps(self.get_attrs())
         if compression:
-            return zlib.compress(data)
+            return zlib.compress(_encode_for_zlib(data))
 
-        return data
+        return _encode_for_zlib(data)
 
     def save_to_file(self, filename, compression=True):
         """

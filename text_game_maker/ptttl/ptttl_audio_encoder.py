@@ -6,7 +6,7 @@ import struct
 import subprocess
 import tempfile
 
-from ptttl_parser import PTTTLParser
+from text_game_maker.ptttl.ptttl_parser import PTTTLParser
 
 sys.path.insert(0, 'tones')
 import tones
