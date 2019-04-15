@@ -158,7 +158,7 @@ def prison_yard(builder):
     builder.set_dark(True)
     builder.set_name("the prison yard")
     builder.set_description("in the prison yard")
-    puddle = Item("a", "murky puddle", location="on the ground",
+    puddle = Furniture("a", "murky puddle", location="on the ground",
         material=Material.MUD)
     bench = Furniture("a", "wooden bench", location="in the corner")
     album = Item("a", "Nickelback's Greatest Hits CD",
