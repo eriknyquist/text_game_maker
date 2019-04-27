@@ -218,7 +218,7 @@ class Player(GameEntity):
                 return
 
             coins.decrement(item.value)
-            person.add_coins(self, item.value)
+            person.add_coins(item.value)
             item.add_to_player_inventory(self)
             utils.game_print("You bought %s." % item.prep)
 

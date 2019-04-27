@@ -190,8 +190,22 @@ class Person(Item):
         self.task_id = 0
         self.responses = Responder()
 
-    def add_coins(self, player, value=1):
-        coins = utils.find_item_class(player, Coins, [self.items])
+    def find_item_class(self, classobj):
+        """
+        Find an item held by this person which is an instance of a specific
+        class
+
+        :param classobj: class to look for an instance of
+        :return: instance of classobj if found, otherwise None
+        """
+        for item in self.items:
+            if isinstance(item, classobj):
+                return item
+
+        return None
+
+    def add_coins(self, value=1):
+        coins = self.find_item_class(Coins)
         if not coins:
             coins = Coins(value=value)
             self.add_item(coins)
