@@ -1,6 +1,7 @@
 import unittest
 import os
 from setuptools import setup, find_packages
+from distutils.core import Command
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 README = os.path.join(HERE, "README.rst")
@@ -20,6 +21,20 @@ with open(README, 'r') as f:
 with open(REQFILE, 'r') as fh:
 	dependencies = fh.readlines()
 
+class TestRunner(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        suite = unittest.TestLoader().discover("test")
+        t = unittest.TextTestRunner(verbosity=2)
+        t.run(suite)
+
 setup(
     name='text_game_maker',
     version='0.6.0',
@@ -33,6 +48,7 @@ setup(
     packages=find_packages(exclude=['example-map']),
     package_dir={'text_game_maker':'text_game_maker'},
     package_data={'text_game_maker':['ptttl-data/*.txt', 'utils/*.txt']},
+    cmdclass={'test': TestRunner},
     include_package_data=True,
     zip_safe=False
 )
