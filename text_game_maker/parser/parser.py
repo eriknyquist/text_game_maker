@@ -53,28 +53,65 @@ class Command(object):
     Container class for data needed to execute a particular game command
     """
 
-    def __init__(self, word_list, callback, desc, phrase_fmt, hidden):
+    def __init__(self, word_list, callback, desc, usage_fmt, hidden):
+        """
+        :param list word_list: list of action words that can trigger this\
+            parser command.
+        :param callback: callback function to be invoked when the player types\
+            something beginning with one of the action words. Callback should\
+            be of the form ``callback(player, word, remaining)``, where\
+            ``player`` is the ``text_game_maker.player.player.Player``\
+            instance, ``word`` is the action word typed by the player as a\
+            string, and ``remaining`` is the remaining text following the\
+            action word as a string.
+        :param str desc: text that will be shown when player types "help"\
+            followed by one of the action words.
+        :param str usage_fmt: format string that will be used to show a usage\
+            example for each action word. The format string should contain a\
+            single string format character, which will be replaced with the
+            action word e.g.``"%s <item>"`` where ``%s`` will be replaced with\
+            an action word.
+        :param bool hidden: if True, command can still be triggered normally\
+            by player input but will be excluded from "help" queries and parser\
+            suggestions.
+        """
         self.word_list = word_list
         self.callback = callback
         self.desc = desc
-        self.phrase_fmt = phrase_fmt
+        self.usage_fmt = usage_fmt
         self.hidden = hidden
 
         if self.desc:
             self.desc = self.desc[0].upper() + self.desc[1:]
 
     def help_text(self):
-        if (not self.desc) or (not self.phrase_fmt):
+        """
+        Get the help text with usage examples
+
+        :return: generated help text and usage examples
+        :rtype: str
+        """
+        if (not self.desc) or (not self.usage_fmt):
             return None
 
         ret = '\n' + self.desc + ':\n\n'
         for w in self.word_list:
-            ret += ('    "' + self.phrase_fmt + '"\n') % w
+            ret += ('    "' + self.usage_fmt + '"\n') % w
 
         return ret
 
-class Node(object):
+class CharacterTrieNode(object):
+    """
+    A single node in a CharacterTrie
+    """
     def __init__(self, char, token=None, text=None):
+        """
+        :param str char: character for this node.
+        :param token: optional arbitrary object to store at this node.
+        :param str text: optional string to store at this node, currently used\
+            to hold the full matching text in the last node of a command. Allows
+            for easy/quick iterating of all words in the trie.
+        """
         self.char = char
         self.children = {}
         self.parent = None
@@ -87,13 +124,27 @@ class Node(object):
     def __repr__(self):
         return self.char
 
-class SimpleTextFSM(object):
+class CharacterTrie(object):
+    """
+    Simple trie structure where each node is a single character. Used to hold
+    all action words for quick retrieval of the command object for a particular
+    action word.
+    """
     def __init__(self):
-        self.start = Node('')
+        self.start = CharacterTrieNode('')
         self.current = self.start
         self.searchfilter = lambda x: True
 
     def set_search_filter(self, callback):
+        """
+        Set function to filter token objects when iterating through the trie
+
+        :param callback: callback function of the form ``callback(token)``,\
+            where ``token`` is the token attribute from a Node in the trie. If\
+            callback returns True, then this token object will be included in\
+            the objects returned by iteration. Otherwise, this token object\
+            will be exluded from the objects returned by iteration.
+        """
         if callback:
             self.searchfilter = callback
 
@@ -101,7 +152,7 @@ class SimpleTextFSM(object):
         current = self.start
         for c in string:
             if c not in current.children:
-                current.children[c] = Node(c)
+                current.children[c] = CharacterTrieNode(c)
 
             current = current.children[c]
 
@@ -109,6 +160,13 @@ class SimpleTextFSM(object):
         current.text = string
 
     def add_token(self, string, token):
+        """
+        Add an action word to the parser
+
+        :param str string: action word
+        :param token: object to set as token attribute of the last node of\
+            action word
+        """
         self._extend_fsm(string, token)
         self._extend_fsm(string + ' ', token)
 
@@ -120,9 +178,19 @@ class SimpleTextFSM(object):
         return ret
 
     def dump_json(self):
+        """
+        Dump the whole trie as JSON-encoded text
+
+        :return: JSON-encoded trie structure
+        :rtype: str
+        """
         return json.dumps(self._dump_json(self.start), indent=2)
 
     def iterate(self):
+        """
+        Iterate over all nodes in the trie that have non-None token attributes
+        :return: iterator for all trie nodes with non-None tokens
+        """
         stack = [self.start]
 
         while stack:
@@ -151,6 +219,14 @@ class SimpleTextFSM(object):
         return ret
 
     def get_children(self):
+        """
+        Return the text of all nodes below the node reached by the last ``run``
+        call. Used to generate action word suggestions when an action word is
+        partially or incorrectly typed.
+
+        :return: list of action words from all children nodes
+        :rtype: [str]
+        """
         ret = []
 
         if ((self.current.text not in [None, ""])
@@ -174,8 +250,11 @@ class SimpleTextFSM(object):
 
         return i, self.current.token
 
-class CommandParser(SimpleTextFSM):
-    def __init__(self, *args, **kwargs):
+class CommandParser(CharacterTrie):
+    """
+    Thin wrapper around a CharacterTrie that adds some default commands
+    """
+    def __init__(self):
         super(CommandParser, self).__init__()
         self.set_search_filter(lambda x: not x.hidden)
 
@@ -226,8 +305,30 @@ class CommandParser(SimpleTextFSM):
 
         commands.add_commands(self)
 
-    def add_command(self, word_set, callback, help_text=None, fmt=None,
+    def add_command(self, word_set, callback, help_text=None, usage_fmt=None,
             hidden=False):
-        cmd = Command(word_set, callback, help_text, fmt, hidden)
+        """
+        Add a command to the parser.
+
+        :param [str] word_set: list of action words that can trigger command
+        :param callback: callback function to be invoked when the player types\
+            something beginning with one of the action words. Callback should\
+            be of the form ``callback(player, word, remaining)``, where\
+            ``player`` is the ``text_game_maker.player.player.Player``\
+            instance, ``word`` is the action word typed by the player as a\
+            string, and ``remaining`` is the remaining text following the\
+            action word as a string.
+        :param str help_text: text that will be shown when player types "help"\
+            followed by one of the action words.
+        :param str usage_fmt: format string that will be used to show a usage\
+            example for each action word. The format string should contain a\
+            single string format character, which will be replaced with the
+            action word e.g.``"%s <item>"`` where ``%s`` will be replaced with\
+            an action word.
+        :param bool hidden: if True, command can still be triggered normally\
+            by player input but will be excluded from "help" queries and parser\
+            suggestions.
+        """
+        cmd = Command(word_set, callback, help_text, usage_fmt, hidden)
         for word in word_set:
             self.add_token(word, cmd)
