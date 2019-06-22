@@ -432,7 +432,7 @@ class Player(GameEntity):
         :param bool compression: whether to compress string
         """
         with open(filename, 'wb') as fh:
-            fh.write(self.save_to_string(compression=False))
+            fh.write(self.save_to_string(compression=True))
 
     def death(self):
         """
