@@ -921,7 +921,7 @@ class MapBuilder(object):
                     break
 
             elif choice == 2:
-                utils.printfunc(utils.get_full_controls())
+                utils.printfunc(utils.get_full_controls(self.player.parser))
 
     def _check_flags(self):
         if self.player.load_from_file:

@@ -282,7 +282,7 @@ class CommandParser(CharacterTrie):
                 "%s <seconds>"],
 
             [SOUND_WORDS, map_builder._do_set_audio, "turn audio on or off",
-                "%s [on|off]"],
+                "%s on|off"],
 
             [PRINT_WIDTH_WORDS, map_builder._do_set_print_width,
                 "set the maximum line width for game output", "%s <width>"],
@@ -293,7 +293,7 @@ class CommandParser(CharacterTrie):
                 "move the player (north/south/east/west)", "%s <direction>"],
 
             [CRAFT_WORDS, map_builder._do_craft,
-                "Craft an item", "%s <item name>"],
+                "Craft an item", "%s <item>"],
 
             [INVENTORY_WORDS, map_builder._do_inventory_listing,
             "show player's inventory", "%s"]

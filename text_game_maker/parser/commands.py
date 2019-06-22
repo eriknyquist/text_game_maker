@@ -754,7 +754,8 @@ def add_commands(parser):
 
         [SET_NAME_WORDS, _do_set_name, "change player's name", "%s"],
 
-        [TAKE_WORDS, _do_take, "add an item to your inventory", "%s <item>"],
+        [TAKE_WORDS, _do_take, "Take an item and add it to your inventory",
+            "%s <item> [from <location>]"],
 
         [PUT_WORDS, _do_put, "put an item somewhere", "%s <item> <location>"],
 
