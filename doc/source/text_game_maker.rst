@@ -15,6 +15,7 @@ Subpackages
     text_game_maker.builder
     text_game_maker.chatbot_utils
     text_game_maker.crafting
+    text_game_maker.event
     text_game_maker.game_objects
     text_game_maker.materials
     text_game_maker.messages

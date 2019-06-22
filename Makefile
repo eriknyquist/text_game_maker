@@ -6,7 +6,7 @@ RST_SRCDIR := $(DOCS_DIR)/source
 PYTHON_SRCDIR := text_game_maker
 BUILD := build
 AUTODOC_EXCLUDE_DIRS := text_game_maker/example.py text_game_maker/runner.py\
-	text_game_maker/example-map/* text_game_maker/slackbot_runner.py
+	text_game_maker/example_map/* text_game_maker/slackbot_runner.py
 
 all:
 	$(PYTHON) cxfreeze-setup.py build_exe
