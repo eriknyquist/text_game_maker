@@ -1,0 +1,23 @@
+# Tile IDs.
+# WARNING: changing these names will break any previously created save files
+celldoor_id = "cell_door"
+prisondoor_id = "prison_main_door"
+startingcell_id = "cell_01"
+othercell_id = "cell_02"
+prisonoffice_id = "prison_office"
+entrance_id = "prison_entrance"
+hallway_id = "prison_hallway"
+alleyway_id = "prison_alleyway"
+prisonyard_id = "prison_yard"
+pawnshop_id = "pawnshop"
+bankdoor_id = "central_bank_dront_door"
+mainstreet_upper_id = "mainstreet_upper"
+mainstreet_lower_id = "mainstreet_lower"
+bank_entrance_id = "bank_entrance"
+bank_hallway_id = "bank_hallway"
+bank_office_id = "bank_office"
+bank_lounge_id = "bank_lounge"
+bank_vault_id = "bank_vault"
+bank_vaultdoor_id = "bank_vaultdoor"
+bank_officedoor_id = "bank_officedoor"
+

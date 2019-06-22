@@ -2,6 +2,7 @@ import json
 from text_game_maker.utils import utils
 from text_game_maker.builder import map_builder
 from text_game_maker.parser import commands
+from text_game_maker.event.event import Event
 
 PRINT_SPEED_WORDS = ['print speed']
 
@@ -80,6 +81,7 @@ class Command(object):
         self.desc = desc
         self.usage_fmt = usage_fmt
         self.hidden = hidden
+        self.event = Event()
 
         if self.desc:
             self.desc = self.desc[0].upper() + self.desc[1:]
@@ -148,7 +150,7 @@ class CharacterTrie(object):
         if callback:
             self.searchfilter = callback
 
-    def _extend_fsm(self, string, token):
+    def _extend_trie(self, string, token):
         current = self.start
         for c in string:
             if c not in current.children:
@@ -167,8 +169,8 @@ class CharacterTrie(object):
         :param token: object to set as token attribute of the last node of\
             action word
         """
-        self._extend_fsm(string, token)
-        self._extend_fsm(string + ' ', token)
+        self._extend_trie(string, token)
+        self._extend_trie(string + ' ', token)
 
     def _dump_json(self, node):
         ret = {}
@@ -304,6 +306,43 @@ class CommandParser(CharacterTrie):
             self.add_command(*arglist)
 
         commands.add_commands(self)
+
+    def add_event_handler(self, word, callback):
+        """
+        Add an event handler to run whenever a command is used, in addition to
+        the regular handler for that command.
+
+        :param str word: action word associated with the command to add the\
+            event handler to.
+        :param callback: callback function to be invoked when the player types\
+            something beginning with one of the action words. Callback should\
+            be of the form ``callback(player, word, remaining)``, where\
+            ``player`` is the ``text_game_maker.player.player.Player``\
+            instance, ``word`` is the action word typed by the player as a\
+            string, and ``remaining`` is the remaining text following the\
+            action word as a string.
+        """
+        stripped = word.strip()
+        i, cmd = self.run(stripped)
+        if (i < len(stripped)) or (cmd is None):
+            raise ValueError("no parser commands matching '%s'" % stripped)
+
+        cmd.event.add_handler(callback)
+
+    def remove_event_handler(self, word, callback):
+        """
+        Remove a previously added event handler for a command
+
+        :param str word: action word associated with the command to remove the\
+            event handler from.
+        :param callback: callback function for event handler to remove
+        """
+        stripped = word.strip()
+        i, cmd = self.run(stripped)
+        if (i < len(stripped)) or (cmd is None):
+            raise ValueError("no parser commands matching '%s'" % stripped)
+
+        cmd.event.remove_handler(callback)
 
     def add_command(self, word_set, callback, help_text=None, usage_fmt=None,
             hidden=False):

@@ -51,7 +51,7 @@ def _do_quit(player, word, name):
         sys.exit()
 
 def _do_show_command_list(player, word, setting):
-    utils.printfunc(utils.get_full_controls(player.fsm))
+    utils.printfunc(utils.get_full_controls(player.parser))
 
 def _do_help(player, word, setting):
     text = None
@@ -60,7 +60,7 @@ def _do_help(player, word, setting):
         _do_show_command_list(player, word, setting)
         return
 
-    i, cmd = utils.run_fsm(player.fsm, setting)
+    i, cmd = utils.run_parser(player.parser, setting)
     if cmd and (not cmd.hidden):
         text = cmd.help_text()
 
@@ -387,12 +387,12 @@ class MapBuilder(object):
         utils.set_builder_instance(self)
         self.reset_state_data = None
         self.on_game_run = None
-        self.fsm = parser
+        self.parser = parser
         self.start = None
         self.current = None
         self.prompt = " > "
         random.seed(time.time())
-        self.player = None
+        self.player = player.Player(input_prompt="> ")
 
     def start_map(self, name="", description=""):
         """
@@ -421,21 +421,34 @@ class MapBuilder(object):
             action = utils.get_last_command()
             utils.printfunc('\n' + action)
 
+        cmd = None
+        word = None
+        remaining = None
+
         if self._is_shorthand_direction(action):
             if not _do_move(player, 'go', action):
                 return
+
+            word = action
         else:
-            i, cmd = utils.run_fsm(self.fsm, action)
+            i, cmd = utils.run_parser(self.parser, action)
             if not cmd:
                 utils.save_sound(audio.ERROR_SOUND)
                 return
 
-            ret = cmd.callback(player, action[:i].strip(), action[i:].strip())
+            word = action[:i].strip()
+            remaining = action[i:].strip()
+
+            ret = cmd.callback(player, word, remaining)
             if not ret:
                 return
 
         utils.flush_waiting_prints()
         utils.set_last_command(action)
+
+        if cmd is not None:
+            cmd.event.generate(player, word, remaining)
+
         player.scheduler_tick()
 
     def set_on_game_run(self, callback):
@@ -663,6 +676,72 @@ class MapBuilder(object):
 
         self.current.add_person(person)
 
+    def add_enter_event_handler(self, handler):
+        """
+        Add a handler to be invoked when player enters the current tile
+
+        :param handler: handler of the form ``handler(player, src, dest)``,\
+            where ``player`` is the ``text_game_maker.player.player.Player``\
+            instance, ``src`` is the ``text_game_maker.tile.tile.Tile``\
+            instance that the player just exited, and ``dest`` is the\
+            ``text_game_maker.tile.tile.Tile`` instance the player has just\
+            entered
+        """
+        self.current.enter_event.add_handler(handler)
+
+    def clear_enter_event_handler(self, handler):
+        """
+        Clear specific enter event handler attached to the current tile
+
+        :param handler: enter event handler that was previously added to the\
+            current tile
+        """
+        self.current.enter_event.clear_handler(handler)
+
+    def clear_enter_event_handlers(self):
+        """
+        Clear all enter event handler attached to the current tile
+        """
+        self.current.enter_event.clear_handlers()
+
+    def add_exit_event_handler(self, handler):
+        """
+        Add a handler to be invoked when player exits the current tile
+
+        :param handler: handler of the form ``handler(player, src, dest)``,\
+            where ``player`` is the ``text_game_maker.player.player.Player``\
+            instance, ``src`` is the ``text_game_maker.tile.tile.Tile``\
+            instance that the player just exited, and ``dest`` is the\
+            ``text_game_maker.tile.tile.Tile`` instance the player has just\
+            entered
+        """
+        self.current.exit_event.add_handler(handler)
+
+    def clear_exit_event_handler(self, handler):
+        """
+        Clear specific exit event handler attached to the current tile
+
+        :param handler: exit event handler that was previously added to the\
+            current tile
+        """
+        self.current.exit_event.clear_handler(handler)
+
+    def clear_exit_event_handlers(self):
+        """
+        Clear all exit event handler attached to the current tile
+        """
+        self.current.exit_event.clear_handlers()
+
+    def add_new_game_start_event_handler(self, handler):
+        """
+        Add a handler to be invoked when a new game is started
+
+        :param handler: handler to be invoked when a new game is started.\
+            Handler should be of the form ``handler(player)`` where ``player``\
+            is the ``text_game_maker.player.player.Player`` instance
+        """
+        self.player.new_game_event.add_handler(handler)
+
     def set_input_prompt(self, prompt):
         """
         Set the message to print when prompting a player for game input
@@ -815,8 +894,9 @@ class MapBuilder(object):
     def _do_init(self):
         add_format_tokens()
 
-        self.player = player.Player(self.start, self.prompt)
-        self.player.fsm = self.fsm
+        self.player.start = self.start
+        self.player.current = self.start
+        self.player.parser = self.parser
         menu_choices = ["New game", "Load game", "Controls"]
 
         while True:
@@ -832,6 +912,7 @@ class MapBuilder(object):
 
                 self.reset_state_data = self.player.save_to_string()
                 utils.game_print(self.player.describe_current_tile())
+                self.player.new_game_event.generate(self.player)
                 break
 
             elif choice == 1:
@@ -848,7 +929,7 @@ class MapBuilder(object):
             self.player = player.load_from_file(filename)
             self.player.loaded_file = filename
             self.player.load_from_file = False
-            self.player.fsm = self.fsm
+            self.player.parser = self.parser
             self.reset_state_data = self.player.save_to_string()
             utils.game_print(self.player.describe_current_tile())
 
@@ -859,7 +940,7 @@ class MapBuilder(object):
 
             self.player = player.load_from_string(self.reset_state_data)
             self.player.reset_game = False
-            self.player.fsm = self.fsm
+            self.player.parser = self.parser
             self.reset_state_data = self.player.save_to_string()
             utils.game_print(self.player.describe_current_tile())
 

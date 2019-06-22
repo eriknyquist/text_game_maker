@@ -1307,26 +1307,26 @@ def _find_word_end(string, i):
 
     return len(string)
 
-def _parser_suggestions(fsm, text, i):
+def _parser_suggestions(parser, text, i):
     _unrecognised(text)
 
     if i <= 0:
         return
 
-    children = fsm.get_children()
+    children = parser.get_children()
     if not children:
         return
 
     printfunc('\nDid you mean...\n\n%s'
             % ('\n'.join(['  %s' % c for c in children])))
 
-def run_fsm(fsm, action):
-    i, cmd = fsm.run(action)
+def run_parser(parser, action):
+    i, cmd = parser.run(action)
     if  i > 0 and i < len(action) and action[i - 1] != ' ':
-        _parser_suggestions(fsm, action[:_find_word_end(action, i)], i)
+        _parser_suggestions(parser, action[:_find_word_end(action, i)], i)
         return i, None
     elif not cmd:
-        _parser_suggestions(fsm, action, i)
+        _parser_suggestions(parser, action, i)
         return i, None
 
     return i, cmd
@@ -1344,7 +1344,7 @@ def get_print_controls():
     '    game output'
     )
 
-def get_full_controls(fsm):
+def get_full_controls(parser):
     """
     Returns a comprehensive listing of of all game command words
     """
@@ -1352,7 +1352,7 @@ def get_full_controls(fsm):
     descs = []
 
     ret = ""
-    for cmd in fsm.iterate():
+    for cmd in parser.iterate():
         text = cmd.help_text()
         if text and (text not in descs):
             ret += '\n' + text

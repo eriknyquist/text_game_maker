@@ -14,6 +14,7 @@ from text_game_maker.utils import utils
 from text_game_maker.tile import tile
 from text_game_maker.messages import messages
 from text_game_maker.materials.materials import Material, get_properties
+from text_game_maker.event.event import Event
 
 OBJECT_VERSION_KEY = '_object_model_version'
 CRAFTABLES_KEY = '_craftables_data'
@@ -76,6 +77,8 @@ class Player(GameEntity):
     Base class to hold player related methods & data
     """
 
+    skip_attrs = ["parser", "new_game_event"]
+
     def __init__(self, start_tile=None, input_prompt=None):
         """
         :param text_game_maker.game_objects.tile.Tile start_tile: Starting tile
@@ -84,11 +87,12 @@ class Player(GameEntity):
 
         super(Player, self).__init__()
 
+        self.new_game_event = Event()
         self.material = Material.SKIN
         self.smell_description = None
         self.taste_description = None
 
-        self.fsm = None
+        self.parser = None
         self.turns = 0
         self.max_health = 100
         self.max_energy = 100
@@ -321,7 +325,6 @@ class Player(GameEntity):
         ret['start'] = self.start.tile_id
         ret['current'] = self.current.tile_id
         ret['scheduled_tasks'] = tasks
-        ret['fsm'] = None
         return ret
 
     def set_special_attrs(self, attrs, version):
@@ -429,7 +432,7 @@ class Player(GameEntity):
         :param bool compression: whether to compress string
         """
         with open(filename, 'wb') as fh:
-            fh.write(self.save_to_string(compression))
+            fh.write(self.save_to_string(compression=False))
 
     def death(self):
         """
@@ -472,9 +475,14 @@ class Player(GameEntity):
             utils.save_sound(audio.FAILURE_SOUND)
             return
 
+        self.current.exit_event.generate(self, self.current, dest)
+        old = self.current
+
         self.move_history.append(self.current.tile_id)
         self.current = dest
         self.current.name = self.current.original_name
+
+        self.current.enter_event.generate(self, old, self.current)
 
         self.set_alternate_names(self.current)
         move_message = "You %s %s" % (word, name)

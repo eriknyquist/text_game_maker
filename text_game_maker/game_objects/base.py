@@ -132,6 +132,9 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
     :ivar str verb: singluar verb e.g. "the key is on the floor", or plural \
         e.g. "the coins are on the floor"
     """
+    
+    global_skip_attrs = ['home', '_migrations']
+    skip_attrs = []
 
     def __init__(self):
         self._migrations = []
@@ -241,11 +244,11 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
         :return: serializable dict of item and contained items
         :rtype: dict
         """
-        skip_attrs = ['home', '_migrations']
+        to_skip = self.__class__.global_skip_attrs + self.__class__.skip_attrs
         ret = self.get_special_attrs()
 
         for key in self.__dict__:
-            if (key in ret) or (key in skip_attrs):
+            if (key in ret) or (key in to_skip):
                 continue
 
             attr = getattr(self, key)

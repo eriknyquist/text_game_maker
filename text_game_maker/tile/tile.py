@@ -3,6 +3,7 @@ from text_game_maker.utils import utils
 from text_game_maker.materials.materials import get_properties
 from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
 from text_game_maker.game_objects.items import Lockpick
+from text_game_maker.event.event import Event
 
 _tiles = {}
 
@@ -141,6 +142,8 @@ class Tile(GameEntity):
         "on the ground"
     ]
 
+    skip_attrs = ["enter_event", "exit_event"]
+
     def __init__(self, name=None, description=None):
         """
         Initialise a Tile instance
@@ -155,6 +158,8 @@ class Tile(GameEntity):
         self.description = ""
         self.name = name
         self.original_name = self.name
+        self.enter_event = Event()
+        self.exit_event = Event()
 
         self.name_from_dir = {
             "north": None,
