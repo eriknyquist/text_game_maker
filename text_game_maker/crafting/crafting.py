@@ -59,23 +59,7 @@ def _find_item(item, items):
 
     return None
 
-def _need_items(name, word, items):
-    names = [str(x) for x in items]
-    utils.save_sound(audio.FAILURE_SOUND)
-    utils.game_print("Can't %s %s. Need %s."
-            % (word, name, utils.list_to_english(names)))
-
-def craft(name, word, player):
-    """
-    Craft an item by name. Deletes ingredients from player's inventory and
-    places crafted item into player's inventory.
-
-    :param str name: name of the item to craft
-    :param str word: command/action word used by player
-    :param Player player: player object
-    :return: crafted item, or None if crafting fails
-    :rtype: text_game_maker.game_objects.items.Item
-    """
+def _find_craftable(name):
     items = []
     item = None
 
@@ -87,7 +71,41 @@ def craft(name, word, player):
                 items, item = craftables[k]
                 break
 
-    if (not items) or (not item):
+    return items, item
+
+def _need_items(name, word, items):
+    names = [str(x) for x in items]
+    utils.save_sound(audio.FAILURE_SOUND)
+    utils.game_print("Can't %s %s. Need %s."
+            % (word, name, utils.list_to_english(names)))
+
+def can_craft(name):
+    """
+    Check if player has the ability to craft an item by name. Note this function
+    only checks if player has acquired the blueprint to craft an item, and does
+    not care whether the player has ingredients required to craft the item.
+
+    :param str name: item name
+    :return: True if player can craft the item, False otherwise
+    :rtype: bool
+    """
+    _, item = _find_craftable(name)
+    return not (item is None)
+
+def craft(name, word, player):
+    """
+    Craft an item by name. Deletes ingredients from player's inventory and
+    places crafted item into player's inventory.
+
+    :param str name: name of the item to craft
+    :param str word: command/action word used by player
+    :param text_game_maker.player.player.Player player: player instance
+    :return: crafted item, or None if crafting fails
+    :rtype: text_game_maker.game_objects.items.Item
+    """
+
+    items, item = _find_craftable(name)
+    if item is None:
         utils.save_sound(audio.FAILURE_SOUND)
         utils.game_print("Don't know how to %s %s" % (word, name))
         return None

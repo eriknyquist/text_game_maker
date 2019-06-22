@@ -390,9 +390,8 @@ class MapBuilder(object):
         self.parser = parser
         self.start = None
         self.current = None
-        self.prompt = " > "
         random.seed(time.time())
-        self.player = player.Player(input_prompt="> ")
+        self.player = player.Player()
 
     def start_map(self, name="", description=""):
         """
@@ -749,7 +748,7 @@ class MapBuilder(object):
         :param str prompt: message to print
         """
 
-        self.prompt = prompt
+        self.player.prompt = prompt
 
     def __do_move(self, direction, name, description, tileclass):
         dest = getattr(self.current, direction)
@@ -910,9 +909,17 @@ class MapBuilder(object):
                 if self.on_game_run:
                     self.on_game_run(self.player)
 
-                self.reset_state_data = self.player.save_to_string()
-                utils.game_print(self.player.describe_current_tile())
+                # First, generate the new game event, to ensure any tasks
+                # started here get serialized when we save the game state for
+                # resets on the next line
                 self.player.new_game_event.generate(self.player)
+
+                # Save the game state as a string, to reload if the player
+                # dies or resets
+                self.reset_state_data = self.player.save_to_string()
+
+                # Describe the current scene to the player
+                utils.game_print(self.player.describe_current_tile())
                 break
 
             elif choice == 1:
@@ -956,7 +963,7 @@ class MapBuilder(object):
                 self._check_flags()
 
                 utils.save_sound(audio.SUCCESS_SOUND)
-                raw = utils.read_line_raw("%s" % self.player.prompt)
+                raw = utils.read_line_raw(self.player.prompt)
                 action = ' '.join(raw.split())
 
                 if _has_badword(action):

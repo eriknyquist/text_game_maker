@@ -1134,7 +1134,7 @@ def del_from_lists(item, *lists):
 def read_path_autocomplete(msg):
     return prompt_toolkit_prompt(msg, completer=PathCompleter())
 
-def read_line_raw(msg, cancel_word=None, default=None):
+def read_line_raw(msg="", cancel_word=None, default=None):
     """
     Read a line of input from stdin
 
