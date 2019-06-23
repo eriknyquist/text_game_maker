@@ -1,4 +1,3 @@
-import text_game_maker
 from text_game_maker.utils import utils
 from text_game_maker.materials.materials import get_properties
 from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
@@ -142,8 +141,6 @@ class Tile(GameEntity):
         "on the ground"
     ]
 
-    skip_attrs = ["enter_event", "exit_event"]
-
     def __init__(self, name=None, description=None):
         """
         Initialise a Tile instance
@@ -274,6 +271,8 @@ class Tile(GameEntity):
 
         ret['items'] = {x:serialize(self.items[x]) for x in self.items}
         ret['people'] = {x:serialize(self.people[x]) for x in self.people}
+        ret['enter_event'] = self.enter_event.serialize()
+        ret['exit_event'] = self.exit_event.serialize()
 
         return ret
 
@@ -288,10 +287,15 @@ class Tile(GameEntity):
             self.people[name] = deserialize(data['people'][name], version)
 
         self.set_tile_id(data['tile_id'])
+        self.enter_event.deserialize(data['enter_event'])
+        self.exit_event.deserialize(data['exit_event'])
 
         del data['items']
         del data['people']
         del data['tile_id']
+        del data['enter_event']
+        del data['exit_event']
+
         return data
 
     def iterate_directions(self):

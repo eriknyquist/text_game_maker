@@ -329,7 +329,7 @@ class CommandParser(CharacterTrie):
 
         cmd.event.add_handler(callback)
 
-    def remove_event_handler(self, word, callback):
+    def clear_event_handler(self, word, callback):
         """
         Remove a previously added event handler for a command
 
@@ -342,7 +342,7 @@ class CommandParser(CharacterTrie):
         if (i < len(stripped)) or (cmd is None):
             raise ValueError("no parser commands matching '%s'" % stripped)
 
-        cmd.event.remove_handler(callback)
+        cmd.event.clear_handler(callback)
 
     def add_command(self, word_set, callback, help_text=None, usage_fmt=None,
             hidden=False):

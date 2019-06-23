@@ -1,3 +1,5 @@
+from text_game_maker.utils import utils
+
 class Event(object):
     """
     Class to represent a generic event that handlers can be registered for
@@ -28,7 +30,7 @@ class Event(object):
         self._handlers.append(handler)
         return self
 
-    def remove_handler(self, handler):
+    def clear_handler(self, handler):
         """
         Unregisters a handler.
 
@@ -55,3 +57,9 @@ class Event(object):
             handler(*event_args)
 
         return self
+
+    def serialize(self):
+        return [utils.serialize_callback(cb) for cb in self._handlers]
+
+    def deserialize(self, attrs):
+        self._handlers = [utils.deserialize_callback(name) for name in attrs]

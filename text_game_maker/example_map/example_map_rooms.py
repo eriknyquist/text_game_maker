@@ -29,7 +29,7 @@ def on_use_event(player, word, remaining):
     # if they haven't acquired the rucksack yet
     if player.equipped and player.equipped.is_light_source:
         # Remove event so it doesn't trigger anymore
-        player.parser.remove_event_handler('use', on_use_event)
+        player.parser.clear_event_handler('use', on_use_event)
 
         player.schedule_task(hints.rucksack_hint_callback, 10)
 
