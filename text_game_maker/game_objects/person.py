@@ -378,6 +378,8 @@ class Person(LivingItem):
             self.die(player)
 
         if player.is_dead():
+            utils.game_print("You have been defeated by %s. You are dead."
+                             % self.prep)
             player.death()
 
     def on_eat(self, player, word):

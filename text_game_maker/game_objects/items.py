@@ -70,17 +70,40 @@ class Weapon(Item):
     """
     Class to represent a weapon
     """
-
     def __init__(self, prefix="", name="", **kwargs):
         super(Weapon, self).__init__(prefix, name, **kwargs)
         self.edible = False
-        self.damage = damage
+        self.damage = 1
+
+class Crowbar(Weapon):
+    def __init__(self, **kwargs):
+        super(Crowbar, self).__init__("a", "crowbar", **kwargs)
+        self.damage = 7
+
+class PocketKnife(Weapon):
+    def __init__(self, **kwargs):
+        super(PocketKnife, self).__init__("a", "pocket knife", **kwargs)
+        self.damage = 7
+
+class HuntingKnife(Weapon):
+    def __init__(self, **kwargs):
+        super(HuntingKnife, self).__init__("a", "hunting knife", **kwargs)
+        self.damage = 15
+
+class BaseballBat(Weapon):
+    def __init__(self, **kwargs):
+        super(BaseballBat, self).__init__("a", "baseball bat", **kwargs)
+        self.damage = 15
+
+class Machete(Weapon):
+    def __init__(self, **kwargs):
+        super(Machete, self).__init__("a", "machete", **kwargs)
+        self.damage = 25
 
 class Food(Item):
     """
     Class to represent a food item
     """
-
     def __init__(self, *args, **kwargs):
         super(Food, self).__init__(*args, **kwargs)
         self.material = Material.MEAT

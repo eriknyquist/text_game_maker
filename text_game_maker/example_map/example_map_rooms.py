@@ -9,7 +9,8 @@ from text_game_maker.materials.materials import Material
 
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
-    Furniture, Matches, Flashlight, Battery, Lockpick, StrongLockpick, Lighter
+    Furniture, Matches, Flashlight, Battery, Lockpick, StrongLockpick, Lighter,
+    Machete
 )
 
 class config(object):
@@ -136,6 +137,8 @@ def prison_entrance_hall(builder):
     oldman.add_context(greeting_context)
     oldman.add_context(raiders_context)
     oldman.add_context(replacements_context)
+
+    oldman.add_item(Machete())
 
     builder.add_item(oldman)
 

@@ -20,12 +20,12 @@ def attack_with_nonweapon_message(target_name, item_name):
         "You strike {0} with your {1}, but it doesn't seem terribly effective."
     ], target_name, item_name)
 
-def attack_returned_with_weapon_message(target_name, item_name):
+def attack_returned_weapon_message(target_name, item_name):
     return _randmsg([
         "{0} returns the attack visciously with {1}, causing you to stumble."
     ], target_name, item_name)
 
-def attack_returned_with_nonweapon_message(target_name, item_name):
+def attack_returned_nonweapon_message(target_name, item_name):
     return _randmsg([
         "{0} returns the attack with {1}, but this does not hurt you."
     ], target_name, item_name)
