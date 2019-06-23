@@ -440,6 +440,7 @@ class MapBuilder(object):
 
             ret = cmd.callback(player, word, remaining)
             if not ret:
+                utils.save_sound(audio.FAILURE_SOUND)
                 return
 
         utils.flush_waiting_prints()

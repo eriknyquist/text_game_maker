@@ -353,6 +353,17 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
         self.home = location
         return location[-1]
 
+    def on_attack(self, player, item):
+        """
+        Called when player attacks this item
+
+        :param text_game_maker.player.player.Player player: player instance
+        :param text_game_maker.game_objects.base.GameEntity item: item that\
+            player is using to attack this item
+        """
+        utils.game_print(messages.attack_inanimate_object_message(self.name,
+            item.name))
+
     def on_smell(self, player):
         """
         Called when player smells this item

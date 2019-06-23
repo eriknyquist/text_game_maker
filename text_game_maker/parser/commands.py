@@ -24,6 +24,10 @@ RESET_WORDS = [
     'reset', 'restart', 'start'
 ]
 
+ATTACK_WORDS = [
+    "attack", "fight", "hurt", "injure", "strike"
+]
+
 EAT_WORDS = [
     'eat', 'scoff', 'swallow', 'ingest', 'consume'
 ]
@@ -181,7 +185,6 @@ def _do_eat(player, word, item_name):
             else:
                 _no_item_message(player, item_name)
 
-            utils.save_sound(audio.FAILURE_SOUND)
             return False
 
     item.on_eat(player, word)
@@ -217,7 +220,6 @@ def _do_read(player, word, item_name):
     else:
         utils._wrap_print(messages.no_item_message(item_name))
 
-    utils.save_sound(audio.FAILURE_SOUND)
     return False
 
 def _look_for_door(player, item_name):
@@ -406,7 +408,6 @@ def _do_put(player, word, remaining):
         items = utils.get_all_items(player, except_item=dest_item)
         if not items:
             utils._wrap_print("Nothing to %s." % word)
-            utils.save_sound(audio.FAILURE_SOUND)
             return False
 
     elif fields:
@@ -414,14 +415,12 @@ def _do_put(player, word, remaining):
             item = utils.find_any_item(player, name)
             if not item:
                 _no_item_message(player, name)
-                utils.save_sound(audio.FAILURE_SOUND)
                 return False
 
             items.append(item)
 
     if not items:
         _no_item_message(player, item_name)
-        utils.save_sound(audio.FAILURE_SOUND)
         return False
 
     real_names = []
@@ -504,14 +503,12 @@ def _do_take(player, word, remaining):
             item = utils.find_item(player, name, locations, ignoredark)
             if not item:
                 _no_item_message(player, name)
-                utils.save_sound(audio.FAILURE_SOUND)
                 return False
 
             items.append(item)
 
     if not items:
         _nothing_message(player, word)
-        utils.save_sound(audio.FAILURE_SOUND)
         return False
 
     names = []
@@ -571,7 +568,6 @@ def _do_drop(player, word, item_name):
 
     if not item_names:
         utils._wrap_print("Nothing to %s." % word)
-        utils.save_sound(audio.FAILURE_SOUND)
         return False
 
     items = []
@@ -597,7 +593,6 @@ def _do_speak(player, word, name):
         p = utils.find_item(player, name)
         if not p:
             utils._wrap_print("Don't know how to %s %s." % (word, name))
-            utils.save_sound(audio.FAILURE_SOUND)
             return False
 
     utils.game_print('You speak to %s.' % p.prep)
@@ -614,7 +609,6 @@ def _do_equip(player, word, item_name):
     if not item:
         utils._wrap_print("No %s in your inventory to %s."
             % (item_name, word))
-        utils.save_sound(audio.FAILURE_SOUND)
         return False
 
     if item is player.equipped:
@@ -656,7 +650,6 @@ def _do_loot(player, word, name):
         p = utils.find_item(player, name)
         if not p:
             utils.game_print("Not sure how to %s %s." % (word, name))
-            utils.save_sound(audio.FAILURE_SOUND)
             return False
 
     if p.alive:
@@ -699,8 +692,6 @@ def _do_inspect(player, word, item):
         utils._wrap_print(
             messages.dontknow_message("%s %s" % (word, item)))
 
-        utils.save_sound(audio.FAILURE_SOUND)
-
     return False
 
 
@@ -714,7 +705,6 @@ def _do_look(player, word, item):
 def _do_look_under(player, word, item):
     if item == '':
         utils._wrap_print("What do you want to %s?" % word)
-        utils.save_sound(audio.FAILURE_SOUND)
         return False
 
     target = utils.find_any_item(player, item)
@@ -724,8 +714,44 @@ def _do_look_under(player, word, item):
 
     utils._wrap_print(messages.dontknow_message("%s %s"
         % (word, item)))
-    utils.save_sound(audio.FAILURE_SOUND)
     return False
+
+def _do_attack(player, word, remaining):
+    if remaining == '':
+        utils._wrap_print("What do you want to %s?" % word)
+        return False
+
+    target_name = None
+    item_name = None
+
+    if ' with ' in remaining:
+        fields = remaining.split(' with ')
+        target_name = fields[0].strip()
+        item_name = fields[1].strip()
+
+    unset_name_values = ["", None]
+    if (target_name in unset_name_values) or (item_name in unset_name_values):
+        utils._wrap_print("What do you want to attack %s with?" % remaining)
+        return False
+
+    item = utils.find_inventory_item(player, item_name)
+    if not item:
+        utils._wrap_print("No %s in your inventory to %s with."
+                % (item_name, word))
+        return False
+
+    target = utils.find_item(player, target_name)
+    if not target:
+        target = utils.find_person(player, target_name)
+        if not target:
+            if utils.is_location(player, target_name):
+                utils.game_print(messages.nonsensical_action_message(
+                    '%s %s' % (word, target_name)))
+            else:
+                _no_item_message(player, target_name)
+
+    target.on_attack(player, item)
+    return True
 
 def _do_picknose(player, word, remaining):
     utils.game_print(messages.gross_action_message("pick your nose"))
@@ -741,6 +767,9 @@ def add_commands(parser):
             "%s <item>"],
 
         [MAP_WORDS, _do_show_map, "show a map of your current area", "%s"],
+
+        [ATTACK_WORDS, _do_attack, "attack something with a weapon",
+            "%s <thing> with <item>"],
 
         [OPEN_WORDS, _do_open, "open a container or door", "%s <item>"],
 

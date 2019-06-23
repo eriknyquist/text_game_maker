@@ -131,7 +131,7 @@ class Item(GameEntity):
         return not self.__eq__(other)
 
     def __str__(self):
-        if self.prefix:
+        if self.prefix not in ['', None]:
             return '%s %s' % (self.prefix, self.name)
 
         return self.name

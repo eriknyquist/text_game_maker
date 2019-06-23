@@ -6,9 +6,9 @@ import sys
 import text_game_maker
 
 from text_game_maker.audio import audio
+from text_game_maker.game_objects.living import LivingGameEntity
 from text_game_maker.game_objects import __object_model_version__
 from text_game_maker.game_objects.items import SmallBag, Lighter, Coins
-from text_game_maker.game_objects.base import GameEntity
 from text_game_maker.crafting import crafting
 from text_game_maker.utils import utils
 from text_game_maker.tile import tile
@@ -72,7 +72,7 @@ def load_from_file(filename, compression=True):
     with open(filename, 'rb') as fh:
         return load_from_string(fh.read(), compression)
 
-class Player(GameEntity):
+class Player(LivingGameEntity):
     """
     Base class to hold player related methods & data
     """
@@ -344,24 +344,6 @@ class Player(GameEntity):
         del attrs[CRAFTABLES_KEY]
         return attrs
 
-    def _dec_clamp(self, curr, val, min_val):
-        if curr == min_val:
-            return 0
-
-        if curr - val < min_val:
-            return min_val + curr
-
-        return val
-
-    def _inc_clamp(self, curr, val, max_val):
-        if  curr == max_val:
-            return 0
-
-        if curr + val > max_val:
-            return max_val - curr
-
-        return val
-
     def increment_energy(self, val=1):
         """
         Increment player energy
@@ -383,30 +365,6 @@ class Player(GameEntity):
         dec = self._dec_clamp(self.energy, val, 0)
         if dec > 0:
             self.energy -= dec
-
-        return dec
-
-    def increment_health(self, val=1):
-        """
-        Increment player health
-
-        :param int val: number to increment player health by
-        """
-        inc = self._inc_clamp(self.health, val, self.max_health)
-        if inc > 0:
-            self.health += inc
-
-        return inc
-
-    def decrement_health(self, val=1):
-        """
-        Decrement player health
-
-        :param int val: number to decrement player health by
-        """
-        dec = self._dec_clamp(self.health, val, 0)
-        if dec > 0:
-            self.health -= dec
 
         return dec
 

@@ -2,6 +2,7 @@ import sys
 import random
 
 from text_game_maker.game_objects.items import Coins
+from text_game_maker.game_objects.living import LivingItem
 from text_game_maker.game_objects.generic import (Item, GameEntity,
     ITEM_SIZE_LARGE
 )
@@ -158,7 +159,7 @@ class Responder(GameEntity, responder.Responder):
         del attrs['context']
         return attrs
 
-class Person(Item):
+class Person(LivingItem):
     """
     Represents a person that the player can interact with
     """
@@ -173,14 +174,13 @@ class Person(Item):
         :param list items: List of Items held by this person
         """
 
-        super(Person, self).__init__(**kwargs)
+        super(Person, self).__init__(prefix, name, **kwargs)
 
         self.edible = True
         self.inanimate = False
         self.alive = True
         self.prefix = prefix
         self.name = name
-        self.prep = 'the ' + self.name
         self.size = ITEM_SIZE_LARGE
         self.introduction = None
         self.shopping_list = {}
@@ -189,6 +189,11 @@ class Person(Item):
         self.script_pos = 0
         self.task_id = 0
         self.responses = Responder()
+
+        if self.prefix in ['', None]:
+            self.prep = self.name
+        else:
+            self.prep = 'the ' + self.name
 
     def find_item_class(self, classobj):
         """
@@ -296,17 +301,14 @@ class Person(Item):
         :param text_game_maker.player.player.Player player: player instance
         :param str msg: message to print informing player of person's death
         """
-
-        p = utils.find_person(player, self.name)
+        if msg is None or msg == "":
+            msg = '%s has died.' % self.name
 
         self.alive = False
-        self.name = "%s's corpse" % self.name
+        self.name = "%s's corpse" % self.prep
         self.prep = self.name
         self.location = "on the ground"
         player.current.add_person(self)
-
-        if msg is None or msg == "":
-            msg = '%s has died.' % self.name
 
         utils.game_print(msg)
 
@@ -328,6 +330,55 @@ class Person(Item):
         """
 
         utils.game_print('%s says:  "%s"' % (self.name, msg))
+
+    def _find_highest_damage_item(self):
+        if not self.items:
+            return None
+
+        highest = self.items[0]
+        for item in self.items[1:]:
+            if item.damage > highest.damage:
+                highest = item
+
+        return highest
+
+    def on_attack(self, player, item):
+        if self.is_dead():
+            utils.game_print(messages.attack_corpse_message(self.prep, item.name))
+            return
+
+        msg = ""
+
+        if item.damage > 0:
+            msg += messages.attack_with_weapon_message(self.prep, item.name)
+        else:
+            msg += messages.attack_with_nonweapon_message(self.prep, item.name)
+
+        msg += " "
+
+        # See if we have an item to attack back with
+        found_item = self._find_highest_damage_item()
+
+        if found_item is None:
+            msg += messages.attack_not_returned_message(self.prep)
+        elif found_item.damage > 0:
+            msg += messages.attack_returned_weapon_message(self.prep,
+                                                           str(found_item))
+        else:
+            msg += messages.attack_returned_nonweapon_message(self.prep,
+                                                              str(found_item))
+
+        utils.game_print(msg)
+        self.decrement_health(item.damage)
+
+        if found_item is not None:
+            player.decrement_health(found_item.damage)
+
+        if self.is_dead():
+            self.die(player)
+
+        if player.is_dead():
+            player.death()
 
     def on_eat(self, player, word):
         if self.alive:
