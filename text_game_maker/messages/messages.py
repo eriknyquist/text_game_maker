@@ -8,26 +8,54 @@ def attack_corpse_message(target_name, item_name):
     return _randmsg([
         "You strike {0} with your {1}.",
         "You attempt to fight {0} with your {1}. Even the {1} is embarrassed.",
+        "You attack {0} with your {1}. {0}, naturally, makes no attempt to "
+            "fend you off.",
+        "Despite the fact that {0} is completely helpless, and indeed poses no "
+            "immediate danger, you attack {0} ferociously with your {1}, which "
+            "I suppose makes you feel good about yourself or something."
     ], target_name, item_name)
 
 def attack_with_weapon_message(target_name, item_name):
     return _randmsg([
-        "You strike {0} with your {1}, hitting your mark and injuring {0}."
+        "You attack {0} with your {1}, and your attack is successful, wounding "
+            "{0}.",
+        "You strike {0} with your {1}, hitting your mark and injuring {0}.",
+        "Clutching your {1}, you strike {0} with great force and precision, "
+            "who stumbles and cries out in pain.",
+        "Brandishing your {1}, you attack {0}, who fails to evade you and "
+            "received the full force of your attack."
     ], target_name, item_name)
 
 def attack_with_nonweapon_message(target_name, item_name):
     return _randmsg([
-        "You strike {0} with your {1}, but it doesn't seem terribly effective."
+        "You strike {0} with your {1}, but it doesn't seem terribly effective.",
+        "You attack {0} with your {1}, but {0} appears to absorb your blows "
+            "without much consequence.",
+        "Stabbing wildly with your {1}, you assault {0}, who seems rather "
+            "annoyed but not as wounded as you had hoped.",
+        "Brandishing your {1}, you attack {0} with great speed and precision, "
+            "causing {0} to exclaim in mild discomfort."
     ], target_name, item_name)
 
 def attack_returned_weapon_message(target_name, item_name):
     return _randmsg([
-        "{0} returns the attack visciously with {1}, causing you to stumble."
+        "{0} returns the attack visciously with {1}, causing you to stumble.",
+        "{0} lunges at you with {1} in hand, attacking and wounding you.",
+        "{0}, grasping {1} with both hands, strikes you in retaliation and "
+            "injures you.",
+        "{0} returns the assault, striking you with {1} and injuring you."
     ], target_name, item_name)
 
 def attack_returned_nonweapon_message(target_name, item_name):
     return _randmsg([
-        "{0} returns the attack with {1}, but this does not hurt you."
+        "{0} returns the attack, striking you with {1}, but this does not hurt "
+            "you.",
+        "Desperately, {0} launches a retaliatory assault with a {1}, which "
+            "you manage to endure without lasting discomfort.",
+        "{0} attacks you ferociously with a {1}, but this is not very "
+            "effective and you emerge unscathed.",
+        "{0} strikes you with {1} in retaliation, which stings a bit but "
+            "doesn't quite injure you as {0} probably hoped."
     ], target_name, item_name)
 
 def attack_not_returned_message(target_name):
@@ -45,11 +73,12 @@ def attack_inanimate_object_message(target_name, weapon_name):
             "fight back.",
         "You attack the {0} with your {1}. This is pointless, and frankly "
             "stupid, but also rather entertaining to watch.",
-        "You attack the {0} with your {1}, and the {0} is defeated with ease. "
-            "Good job. Who's a formidable warrior? You are!",
+        "You attack the {0} with your {1}, and the {0} is defeated with ease, "
+            "offerring no resistance whatsoever. Good job. Who's a formidable "
+            "warrior? You are!",
         "You approach the {0}, {1} in hand. The {0} transforms into a laser "
-        "unicorn and burns your face off (nope, just kidding, it's a {0}. "
-        "You're fine. The {0} is just a {0})."
+            "unicorn and burns your face off (nope, just kidding, it's a {0}. "
+            "You're fine)."
     ], target_name, weapon_name)
 
 def bad_taste_message():
