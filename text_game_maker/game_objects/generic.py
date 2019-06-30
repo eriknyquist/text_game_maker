@@ -148,7 +148,12 @@ class FuelConsumer(Item):
         self.fuel = self.max_fuel
         self.spent = False
         self.original_name = None
+
+        # Item name will change to this when fuel is spent
         self.spent_name = "dead %s" % self.name
+
+        # Message to be used when fuel is spent but player attempts some action
+        # that requires fuel
         self.spent_use_message = "%s is dead." % self.name
 
     def on_fuel_empty(self):
@@ -157,11 +162,11 @@ class FuelConsumer(Item):
     def on_refuel(self):
         pass
 
-    def make_spent(self):
+    def make_spent(self, print_output=True):
         self.spent = True
         self.original_name = self.name
         self.name = self.spent_name
-        self.on_fuel_empty()
+        self.on_fuel_empty(print_output)
 
     def refuel(self, fuel=None):
         if fuel is None:
@@ -195,13 +200,23 @@ class LightSource(FuelConsumer):
     def __init__(self, *args, **kwargs):
         super(LightSource, self).__init__(*args, **kwargs)
         self.is_light_source = True
+
+        # Message used to describe how this light source illuminates
+        # player's surroundings
         self.illuminate_msg = "illuminating everything around you"
+
+        # Message used when player equips this light source in a dark place
         self.equip_msg = ("You take out the %s, %s." % (self.name,
             self.illuminate_msg))
+
+        # Message used when player equips this light source but it is spent
         self.spent_equip_msg = ("You take out the %s. The %s does not work "
             "anymore." % (self.name, self.name))
+
+        # Message used when this light source becomes spent
+        self.spent_message = "The %s has stopped working." % self.name
+
         self.original_equip_msg = self.equip_msg
-        self.fuel_empty_message = None
 
     def _describe_partial(self, player):
         txt = player.current.summary() + player.describe_current_tile_contents()
@@ -212,12 +227,13 @@ class LightSource(FuelConsumer):
 
         return txt
 
-    def on_fuel_empty(self):
+    def on_fuel_empty(self, print_output=True):
         self.is_light_source = False
         self.original_equip_msg = self.equip_msg
         self.equip_msg = self.spent_equip_msg
-        if self.fuel_empty_message is not None:
-            utils.game_print(self.fuel_empty_message)
+
+        if print_output and (self.spent_message is not None):
+            utils.game_print(self.spent_message)
 
     def on_refuel(self):
         self.is_light_source = True

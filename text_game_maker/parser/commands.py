@@ -253,7 +253,11 @@ def _do_burn(player, word, item_name):
     if fire is None:
         utils._wrap_print("You can't %s anything without a flame source."
             % word)
-        return False
+        return True
+
+    if not player.can_see():
+        utils._wrap_print(messages.dark_search_message())
+        return True
 
     if not item_name or item_name == "":
         utils._wrap_print("What do you want to %s?" % word)
@@ -267,7 +271,7 @@ def _do_burn(player, word, item_name):
 
     if fire.get_fuel() <= 0.0:
         utils._wrap_print(fire.spent_use_message)
-        return False
+        return True
 
     item = utils.find_any_item(player, item_name)
     if item:
@@ -277,10 +281,12 @@ def _do_burn(player, word, item_name):
 
     if utils.is_location(player, item_name):
         utils._wrap_print(messages.burn_noncombustible_message(item_name))
+        fire.decrement_fuel()
     else:
         _no_item_message(player, item_name)
+        return False
 
-    return False
+    return True
 
 def _do_set_name(player, word, remaining):
     player.read_player_name_and_set()

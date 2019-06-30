@@ -424,6 +424,12 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
                 "would catch fire." % self.name)
             return
 
+        elif self.home is player.pockets.items:
+            utils.game_print("The %s is in your pocket. You shouldn't burn "
+                "things in your pockets because your trousers would catch on "
+                "fire." % self.name)
+            return
+
         if self.combustible:
             if self.is_container:
                 items = utils.get_all_contained_items(self,

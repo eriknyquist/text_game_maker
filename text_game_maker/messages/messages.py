@@ -228,8 +228,7 @@ def burn_noncombustible_message(item_name):
         "You try burning the {0}, but it will not take the flame.",
         "You try to burn the {0}. You can't.",
         "You hold a flame up to the {0} for quite a while. The flame will not "
-        "transfer to the {0}",
-        ""
+        "transfer to the {0}.",
     ], item_name)
 
 def no_inventory_item_message(item_name):

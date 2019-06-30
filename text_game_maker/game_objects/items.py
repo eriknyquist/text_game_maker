@@ -31,13 +31,13 @@ class Flashlight(ElectricLightSource):
         self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
         self.fuel = 0.0
-        self.fuel_empty_message = ("Your %s's battery is dead. You'll need "
-            "a new battery to make it work again." % self.name)
         self.illuminate_msg = ("casting a bright white light across everything "
             "in front of you")
         self.equip_msg = ("You take out the %s, and switch it on. It has "
             "a wide beam, %s." % (self.name, self.illuminate_msg))
-        self.make_spent()
+        self.spent_message = ("Your %s's battery is dead. You'll need "
+            "a new battery to make it work again." % self.name)
+        self.make_spent(print_output=False)
 
     def on_take(self, player):
         if self.get_fuel() <= 0.0:
@@ -50,20 +50,23 @@ class Lighter(FlameSource):
         super(Lighter, self).__init__("a", "lighter", **kwargs)
         self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
-        self.fuel = 25.0
+        self.fuel = 35.0
         self.value = 3
         self.damage = 100
         self.equip_msg = ("You take out the %s, illuminating everything "
             "around you with a dancing yellow glow." % self.name)
-        self.fuel_empty_message = ("Your %s has run out of fuel. You'll need "
-            "to find a new light source." % self.name)
+        self.spent_message = ("Your %s has run out of fuel. You'll need "
+            "to find a new flame source." % self.name)
 
-class Matches(FlameSource):
+class BoxOfMatches(FlameSource):
     def __init__(self, *args, **kwargs):
-        super(Matches, self).__init__("a", "box of matches", **kwargs)
+        super(BoxOfMatches, self).__init__("a", "box of matches", **kwargs)
         self.size = ITEM_SIZE_SMALL
         self.material = Material.CARDBOARD
-        self.fuel = 10.0
+        self.fuel = 25.0
+
+        self.spent_message = ("You have run out of matches. You'll need to "
+            "find a new flame source.")
         self.spent_name = "empty %s" % self.name
         self.spent_use_message = "%s is empty." % self.name
         self.equip_msg = ("You strike a match, illuminating everything "

@@ -9,8 +9,8 @@ from text_game_maker.materials.materials import Material
 
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
-    Furniture, Matches, Flashlight, Battery, Lockpick, StrongLockpick, Lighter,
-    Machete
+    Furniture, BoxOfMatches, Flashlight, Battery, Lockpick, StrongLockpick,
+    Lighter, Machete
 )
 
 class config(object):
@@ -183,7 +183,7 @@ def other_cell(builder):
     builder.set_dark(True)
 
     paperbag = PaperBag("a", "paper bag", location="on the bunk")
-    paperbag.add_items([Coins(value=7), Matches(), Battery()])
+    paperbag.add_items([Coins(value=7), BoxOfMatches(), Battery()])
 
     bunk = Furniture("a", "narrow bunk", location="in the corner",
         combustible=False)
