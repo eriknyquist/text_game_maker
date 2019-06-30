@@ -8,9 +8,12 @@ from text_game_maker.game_objects.generic import (Item, GameEntity,
 )
 
 from text_game_maker.utils import utils
+from text_game_maker.tile import tile
 from text_game_maker.chatbot_utils.redict import ReDict
 from text_game_maker.chatbot_utils import responder
 from text_game_maker.messages import messages
+
+MAX_PLAYER_WAIT_COUNT = 5
 
 def _serialize_redict(d):
     ret = d.dump_to_dict()
@@ -85,6 +88,7 @@ class Context(GameEntity, responder.Context):
         del attrs['responses']
         del attrs['chains']
         del attrs['chain']
+        return attrs
 
     def _build_from_lists(self, lists):
         target_length = 3
@@ -186,14 +190,29 @@ class Person(LivingItem):
         self.shopping_list = {}
         self.speak_count = 0
         self.script = None
+        self.following = False
+        self.looking = False
+        self.wait_count = 0
+        self.tile_id = None
         self.script_pos = 0
         self.task_id = 0
+        self.original_location = None
         self.responses = Responder()
 
         if self.prefix in ['', None]:
             self.prep = self.name
         else:
             self.prep = 'the ' + self.name
+
+    def get_special_attrs(self):
+        attrs = {}
+        attrs['tile_id'] = self.tile_id
+        return attrs
+
+    def set_special_attrs(self, attrs, version):
+        self.tile_id = attrs['tile_id']
+        del attrs['tile_id']
+        return attrs
 
     def find_item_class(self, classobj):
         """
@@ -342,45 +361,136 @@ class Person(LivingItem):
 
         return highest
 
-    def on_attack(self, player, item):
-        if self.is_dead():
-            utils.game_print(messages.attack_corpse_message(self.prep, item.name))
-            return
-
+    def _do_attack_player(self, player):
         msg = ""
-
-        if item.damage > 0:
-            msg += messages.attack_with_weapon_message(self.prep, item.name)
-        else:
-            msg += messages.attack_with_nonweapon_message(self.prep, item.name)
-
-        msg += " "
-
-        # See if we have an item to attack back with
+        # See if we have an item to attack with
         found_item = self._find_highest_damage_item()
-
         if found_item is None:
-            msg += messages.attack_not_returned_message(self.prep)
-        elif found_item.damage > 0:
-            msg += messages.attack_returned_weapon_message(self.prep,
+            return False
+
+        if found_item.damage > 0:
+            msg = messages.attacked_with_weapon_message(self.prep,
                                                            str(found_item))
         else:
-            msg += messages.attack_returned_nonweapon_message(self.prep,
+            msg = messages.attacked_with_nonweapon_message(self.prep,
                                                               str(found_item))
 
         utils.game_print(msg)
-        self.decrement_health(item.damage)
 
-        if found_item is not None:
-            player.decrement_health(found_item.damage)
-
-        if self.is_dead():
-            self.die(player)
+        player.decrement_health(found_item.damage)
 
         if player.is_dead():
             utils.game_print("You have been defeated by %s. You are dead."
                              % self.prep)
             player.death()
+
+        return True
+
+    def _do_attacked_by_player(self, player, item):
+        if self.is_dead():
+            utils.game_print(messages.attack_corpse_message(self.prep, item.name))
+            return False
+
+        if item.damage > 0:
+            msg = messages.attack_with_weapon_message(self.prep, item.name)
+        else:
+            msg = messages.attack_with_nonweapon_message(self.prep, item.name)
+
+        utils.game_print(msg)
+
+        self.decrement_health(item.damage)
+
+        if self.is_dead():
+            self.die(player)
+            return False
+
+        return True
+
+    def _stop_following_player(self, player):
+        self.location = self.original_location
+        self.looking = False
+        self.following = False
+        self_tile = tile.get_tile_by_id(self.tile_id)
+        self_tile.add_person(self)
+
+    def _start_following_player(self, player):
+        self.following = True
+        self.original_location = self.location
+        self.location = "standing next to you"
+        self_tile = tile.get_tile_by_id(self.tile_id)
+        self_tile.add_person(self)
+        player.schedule_task(self._follow_attack_player, 2)
+
+    def _follow_attack_player(self, player, turns):
+        if not self.alive:
+            self._stop_following_player(player)
+            return
+
+        self_tile = tile.get_tile_by_id(self.tile_id)
+
+        # Waiting for player to emerge
+        if self.looking:
+            if self_tile is player.current:
+                # Player emerged
+                self.looking = False
+                self.wait_count = 0
+                self._do_attack_player(player)
+
+            else:
+                if not player.current.is_connected_to(self_tile):
+                    # Player exited to a non-adjacent tile
+                    self._stop_following_player(player)
+                    return
+
+                if self.wait_count >= MAX_PLAYER_WAIT_COUNT:
+                    utils.game_print("%s gets bored of waiting, and forgets "
+                        "about you." % self.prep)
+                    self._stop_following_player(player)
+                    return
+
+                self.wait_count += 1
+                utils.game_print("%s is still waiting for you to emerge from "
+                    "darkness." % self.prep)
+
+        elif self_tile != player.current:
+            # Player moved to a different tile
+            if not player.current.is_connected_to(self_tile):
+                # Player moved to a non-adjacent tile
+                utils.game_print("%s is unable to follow you." % self.prep)
+                self._stop_following_player(player)
+                return
+
+            if player.can_see():
+                # We can still see the player, follow them
+                player.current.add_person(self)
+                utils.game_print("%s follows you." % self.prep)
+            else:
+                # Can't see player, wait outside
+                utils.game_print("%s does not follow you into the darkness,"
+                    " but stands waiting for you to emerge" % self.prep)
+                self.looking = True
+
+            if not self.looking:
+                self._do_attack_player(player)
+
+        player.schedule_task(self._follow_attack_player, 1)
+
+    def on_attack(self, player, item):
+
+        if not self._do_attacked_by_player(player, item):
+            return
+
+        # If already following player, the callback will handle attacking the
+        # player so no need to attack here
+        if self.following:
+            return
+
+        if not self._do_attack_player(player):
+            utils.game_print(messages.attack_not_returned_message(self.prep))
+            return
+
+        # Start following player, if not already following
+        self._start_following_player(player)
 
     def on_eat(self, player, word):
         if self.alive:
@@ -391,13 +501,18 @@ class Person(LivingItem):
         super(Person, self).on_eat(player, word)
 
     def on_speak(self, player):
+        if self.following:
+            utils.game_print("%s is not interested in talking right now."
+                % self.prep)
+            return False
+
         speech = ' '
         prompt = 'talking to %s (say nothing to exit):' % self.name
 
         if self.introduction:
             self.say(self.introduction)
 
-        while speech != '': 
+        while speech != '':
             speech = utils.read_line_raw(prompt).strip()
             if speech == '':
                 break

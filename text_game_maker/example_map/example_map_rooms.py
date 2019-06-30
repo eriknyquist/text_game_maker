@@ -150,7 +150,7 @@ def prison_entrance_hall(builder):
 
     oldman.add_item(Machete())
 
-    builder.add_item(oldman)
+    builder.add_person(oldman)
 
     # Add a door to the east. The door will be locked and will require a
     # lockpick to unlock.

@@ -311,6 +311,20 @@ class Tile(GameEntity):
 
             yield tile
 
+    def is_connected_to(self, tile):
+        """
+        Checks if this tile is connected to the given tile
+
+        :param Tile tile: tile to check against this tile
+        :return: True if tile is connected to this tile, False otherwise
+        :rtype: bool
+        """
+        for connected in self.iterate_directions():
+            if tile is connected:
+                return True
+
+        return False
+
     def is_door(self):
         return False
 
@@ -387,7 +401,10 @@ class Tile(GameEntity):
 
         ret = ""
         for loc in items:
-            itemlist = [str(i) for i in items[loc] if testfunc and testfunc(i)]
+            itemlist = []
+            for item in items[loc]:
+                if (not testfunc) or testfunc(item):
+                    itemlist.append(str(item))
 
             if not itemlist:
                 continue
@@ -452,6 +469,10 @@ class Tile(GameEntity):
         if person.location not in self.people:
             self.people[person.location] = []
 
+        if person in self.people[person.location]:
+            return
+
+        person.tile_id = self.tile_id
         person.move(self.people[person.location])
 
     def summary(self):

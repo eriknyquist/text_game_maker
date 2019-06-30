@@ -37,25 +37,24 @@ def attack_with_nonweapon_message(target_name, item_name):
             "causing {0} to exclaim in mild discomfort."
     ], target_name, item_name)
 
-def attack_returned_weapon_message(target_name, item_name):
+def attacked_with_weapon_message(target_name, item_name):
     return _randmsg([
-        "{0} returns the attack visciously with {1}, causing you to stumble.",
+        "{0} attacks you visciously with {1}, causing you to stumble.",
         "{0} lunges at you with {1} in hand, attacking and wounding you.",
-        "{0}, grasping {1} with both hands, strikes you in retaliation and "
-            "injures you.",
-        "{0} returns the assault, striking you with {1} and injuring you."
+        "{0}, grasping {1} with both hands, strikes you and injures you.",
+        "{0} assaults you, striking you with {1} and injuring you."
     ], target_name, item_name)
 
-def attack_returned_nonweapon_message(target_name, item_name):
+def attacked_with_nonweapon_message(target_name, item_name):
     return _randmsg([
-        "{0} returns the attack, striking you with {1}, but this does not hurt "
+        "{0} attacks you, striking you with {1}, but this does not hurt "
             "you.",
-        "Desperately, {0} launches a retaliatory assault with a {1}, which "
-            "you manage to endure without lasting discomfort.",
+        "Desperately, {0} assaults you with a {1}, which you manage to endure "
+            "without lasting discomfort.",
         "{0} attacks you ferociously with a {1}, but this is not very "
             "effective and you emerge unscathed.",
-        "{0} strikes you with {1} in retaliation, which stings a bit but "
-            "doesn't quite injure you as {0} probably hoped."
+        "{0} strikes you with {1}, which stings a bit but doesn't quite injure "
+            "you as {0} probably hoped."
     ], target_name, item_name)
 
 def attack_not_returned_message(target_name):
