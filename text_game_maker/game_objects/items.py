@@ -31,6 +31,8 @@ class Flashlight(ElectricLightSource):
         self.size = ITEM_SIZE_SMALL
         self.material = Material.PLASTIC
         self.fuel = 0.0
+        self.fuel_empty_message = ("Your %s's battery is dead. You'll need "
+            "a new battery to make it work again." % self.name)
         self.illuminate_msg = ("casting a bright white light across everything "
             "in front of you")
         self.equip_msg = ("You take out the %s, and switch it on. It has "
@@ -50,8 +52,11 @@ class Lighter(FlameSource):
         self.material = Material.PLASTIC
         self.fuel = 25.0
         self.value = 3
+        self.damage = 100
         self.equip_msg = ("You take out the %s, illuminating everything "
             "around you with a dancing yellow glow." % self.name)
+        self.fuel_empty_message = ("Your %s has run out of fuel. You'll need "
+            "to find a new light source." % self.name)
 
 class Matches(FlameSource):
     def __init__(self, *args, **kwargs):

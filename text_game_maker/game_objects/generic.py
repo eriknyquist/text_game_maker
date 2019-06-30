@@ -201,6 +201,7 @@ class LightSource(FuelConsumer):
         self.spent_equip_msg = ("You take out the %s. The %s does not work "
             "anymore." % (self.name, self.name))
         self.original_equip_msg = self.equip_msg
+        self.fuel_empty_message = None
 
     def _describe_partial(self, player):
         txt = player.current.summary() + player.describe_current_tile_contents()
@@ -215,6 +216,8 @@ class LightSource(FuelConsumer):
         self.is_light_source = False
         self.original_equip_msg = self.equip_msg
         self.equip_msg = self.spent_equip_msg
+        if self.fuel_empty_message is not None:
+            utils.game_print(self.fuel_empty_message)
 
     def on_refuel(self):
         self.is_light_source = True
