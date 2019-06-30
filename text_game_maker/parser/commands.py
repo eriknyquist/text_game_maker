@@ -749,6 +749,7 @@ def _do_attack(player, word, remaining):
                     '%s %s' % (word, target_name)))
             else:
                 _no_item_message(player, target_name)
+                return False
 
     target.on_attack(player, item)
     return True
