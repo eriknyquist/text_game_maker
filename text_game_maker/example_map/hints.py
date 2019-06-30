@@ -1,3 +1,4 @@
+from text_game_maker.crafting import crafting
 from text_game_maker.example_map import room_ids
 from text_game_maker.utils import utils
 from text_game_maker.utils.utils import serializable_callback
@@ -34,6 +35,16 @@ def rucksack_hint_callback(player, turn):
     utils._wrap_print("Hint: say things like 'get rucksack', 'take rucksack' or"
         " just 'take sack' to acquire the rucksack and increase your inventory"
         " capacity")
+
+@serializable_callback
+def small_tin_hint_callback(player, turn):
+    # Don't give a hint if player knows how to make the lockpick
+    if crafting.can_craft('lockpick'):
+        return
+
+    utils._wrap_print("Hint: say things like 'look inside <item>' to see if an "
+        "item contains other items. Say things like 'get <item> from <item>' "
+        "to retrieve an item that is contained inside another item.")
 
 @serializable_callback
 def light_source_decay_callback(player, turns):

@@ -34,11 +34,21 @@ def on_use_event(player, word, remaining):
 
         player.schedule_task(hints.rucksack_hint_callback, 10)
 
+def on_take_event(player, word, remaining):
+    # As soon as player gets the rucksack, set up hint to trigger in 10 moves
+    # if they haven't gotten the lockpick blueprint yet
+    if player.inventory is not None:
+        # Remove event so it doesn't trigger anymore
+        player.parser.clear_event_handler('take', on_take_event)
+
+        player.schedule_task(hints.small_tin_hint_callback, 10)
+
 def new_game_event_handler(player):
     player.schedule_task(hints.light_source_decay_callback, 1)
     player.schedule_task(hints.lighter_equip_hint, 5)
 
     player.parser.add_event_handler("use", on_use_event)
+    player.parser.add_event_handler("take", on_take_event)
 
 def prison_starting_cell(builder):
     # Start building the map; create the first tile/room
