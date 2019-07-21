@@ -19,6 +19,7 @@ from text_game_maker.event.event import Event
 OBJECT_VERSION_KEY = '_object_model_version'
 CRAFTABLES_KEY = '_craftables_data'
 TILES_KEY = '_tile_list'
+START_TILE_KEY = 'start'
 MOVE_ENERGY_COST = 0.25
 
 def _encode_for_zlib(data):
@@ -322,7 +323,7 @@ class Player(LivingGameEntity):
         ret[OBJECT_VERSION_KEY] = __object_model_version__
         ret[TILES_KEY] = tile.crawler(self.start)
         ret[CRAFTABLES_KEY] = crafting.serialize()
-        ret['start'] = self.start.tile_id
+        ret[START_TILE_KEY] = self.start.tile_id
         ret['current'] = self.current.tile_id
         ret['scheduled_tasks'] = tasks
         return ret
@@ -333,12 +334,12 @@ class Player(LivingGameEntity):
             callback = utils.deserialize_callback(cb_name)
             self.scheduled_tasks[taskid] = (callback, turns, scheduled_turns)
 
-        self.start = tile.builder(attrs[TILES_KEY], attrs['start'], version)
+        self.start = tile.builder(attrs[TILES_KEY], attrs[START_TILE_KEY], version)
         self.current = tile.get_tile_by_id(attrs['current'])
         crafting.deserialize(attrs[CRAFTABLES_KEY], version)
 
         del attrs['scheduled_tasks']
-        del attrs['start']
+        del attrs[START_TILE_KEY]
         del attrs['current']
         del attrs[TILES_KEY]
         del attrs[CRAFTABLES_KEY]
