@@ -3,6 +3,7 @@ import time
 import random
 import sys
 import os
+import json
 import pdb
 import errno
 
@@ -12,6 +13,7 @@ from text_game_maker.tile.tile import (Tile, LockedDoor, reverse_direction,
 
 from text_game_maker.game_objects.items import Item
 from text_game_maker.player import player
+from text_game_maker.tile import tile
 from text_game_maker.audio import audio
 from text_game_maker.crafting import crafting
 from text_game_maker.messages import messages
@@ -392,6 +394,27 @@ class MapBuilder(object):
         self.current = None
         random.seed(time.time())
         self.player = player.Player()
+
+    def load_map_data(self, filename):
+        """
+        Load a map file saved from the map editor GUI
+
+        :param str filename: name of map editor save file to load
+        """
+        with open(filename, 'r') as fh:
+            attrs = json.load(fh)
+
+        self.start = tile.builder(attrs[player.TILES_KEY],
+                                  attrs[player.START_TILE_KEY],
+                                  attrs[player.OBJECT_VERSION_KEY])
+
+    def set_current_tile(self, tile_id):
+        """
+        Set the current tile to build on by tile ID
+
+        :param str tile_id: tile ID of tile to set as current tile
+        """
+        self.current = tile.get_tile_by_id(tile_id)
 
     def start_map(self, name="", description=""):
         """

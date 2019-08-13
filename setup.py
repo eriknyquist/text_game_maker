@@ -47,7 +47,7 @@ setup(
     install_requires=dependencies,
     packages=find_packages(exclude=['example-map']),
     package_dir={'text_game_maker':'text_game_maker'},
-    package_data={'text_game_maker':['ptttl-data/*.txt', 'utils/*.txt']},
+    package_data={'text_game_maker':['ptttl-data/*.txt', 'utils/*.txt', 'example_map/example_map.json']},
     cmdclass={'test': TestRunner},
     include_package_data=True,
     zip_safe=False

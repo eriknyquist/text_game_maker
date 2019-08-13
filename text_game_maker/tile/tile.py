@@ -4,6 +4,12 @@ from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
 from text_game_maker.game_objects.items import Lockpick
 from text_game_maker.event.event import Event
 
+ITEMS_KEY = "items"
+PEOPLE_KEY = "people"
+TILE_ID_KEY = "tile_id"
+ENTER_EVENT_KEY = "enter_event"
+EXIT_EVENT_KEY = "exit_event"
+
 _tiles = {}
 
 def _register_tile(tile, tile_id=None):
@@ -277,24 +283,34 @@ class Tile(GameEntity):
         return ret
 
     def set_special_attrs(self, data, version):
-        for loc in data['items']:
-            for d in data['items'][loc]:
-                item = deserialize(d, version)
-                self.add_item(item)
+        self.items = {}
+
+        if ITEMS_KEY in data:
+            for loc in data[ITEMS_KEY]:
+                for d in data[ITEMS_KEY][loc]:
+                    item = deserialize(d, version)
+                    self.add_item(item)
+
+            del data[ITEMS_KEY]
 
         self.people = {}
-        for name in data['people']:
-            self.people[name] = deserialize(data['people'][name], version)
 
-        self.set_tile_id(data['tile_id'])
-        self.enter_event.deserialize(data['enter_event'])
-        self.exit_event.deserialize(data['exit_event'])
+        if PEOPLE_KEY in data:
+            for name in data[PEOPLE_KEY]:
+                self.people[name] = deserialize(data[PEOPLE_KEY][name], version)
 
-        del data['items']
-        del data['people']
-        del data['tile_id']
-        del data['enter_event']
-        del data['exit_event']
+            del data[PEOPLE_KEY]
+
+        self.set_tile_id(data[TILE_ID_KEY])
+        del data[TILE_ID_KEY]
+
+        if ENTER_EVENT_KEY in data:
+            self.enter_event.deserialize(data[ENTER_EVENT_KEY])
+            del data[ENTER_EVENT_KEY]
+
+        if EXIT_EVENT_KEY in data:
+            self.exit_event.deserialize(data[EXIT_EVENT_KEY])
+            del data[EXIT_EVENT_KEY]
 
         return data
 

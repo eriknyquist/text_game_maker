@@ -6,6 +6,7 @@ from text_game_maker.game_objects.person import Person, Context
 from text_game_maker.utils.responses import STANDARD_GREETINGS
 from text_game_maker.utils.utils import serializable_callback
 from text_game_maker.materials.materials import Material
+from text_game_maker.tile import tile
 
 from text_game_maker.game_objects.items import (Item, Food, Weapon, Bag,
     SmallBag, SmallTin, Coins, Blueprint, Paper, PaperBag, LargeContainer,
@@ -51,21 +52,7 @@ def new_game_event_handler(player):
     player.parser.add_event_handler("take", on_take_event)
 
 def prison_starting_cell(builder):
-    # Start building the map; create the first tile/room
-    builder.start_map()
-    builder.set_tile_id(room_ids.startingcell_id)
-    builder.set_name("your cell")
-    builder.set_description("in a small, windowless cell of bare concrete")
-    builder.set_first_visit_message(
-        "you do not know where you are, and you cannot remember how you got "
-        "here. In fact, you can't remember anything at all, except for your "
-        "name. Your name is <playername>."
-    )
-
-    builder.set_smell("It smells like urine and sweat.")
-    builder.set_ground_smell("The ground smells like urine and concrete.")
-    builder.set_dark(True)
-    builder.set_first_visit_message_in_dark(True)
+    builder.set_current_tile(room_ids.startingcell_id)
 
     # Create all the items in the room
     paperclip = Item("a", "paperclip", location="on the floor", combustible=False)
@@ -91,16 +78,10 @@ def prison_starting_cell(builder):
 
     # Add all the items to the room
     builder.add_items([bunk, string, paperclip, rucksack])
-    builder.add_door("a", "cell door", "east", door_id=room_ids.celldoor_id)
-
     builder.add_new_game_start_event_handler(new_game_event_handler)
 
 def prison_entrance_hall(builder):
-    builder.set_tile_id(room_ids.entrance_id)
-    builder.set_name("the entrance hall")
-    builder.set_description("in the prison entrance hall")
-    builder.set_first_visit_message("It is not quite so dark in here, and you "
-        "can see clearly. There doesn't seem to be anyone around.")
+    builder.set_current_tile(room_ids.entrance_id)
 
     builder.set_name_from_east("the prison entrance")
     oldman = Person("an", "old man", location="squatting in the corner")
@@ -152,22 +133,13 @@ def prison_entrance_hall(builder):
 
     builder.add_person(oldman)
 
-    # Add a door to the east. The door will be locked and will require a
-    # lockpick to unlock.
-    builder.add_door("a", "heavy iron door", "east",
-                     door_id=room_ids.prisondoor_id)
-
 def prison_hallway(builder):
-    builder.set_tile_id(room_ids.hallway_id)
-    builder.set_dark(True)
-    builder.set_name("a narrow hallway")
-    builder.set_description("in a narrow, low-ceilinged hallway")
+    builder.set_current_tile(room_ids.hallway_id)
+    pass
 
 def prison_yard(builder):
-    builder.set_tile_id(room_ids.prisonyard_id)
-    builder.set_dark(True)
-    builder.set_name("the prison yard")
-    builder.set_description("in the prison yard")
+    builder.set_current_tile(room_ids.prisonyard_id)
+
     puddle = Furniture("a", "murky puddle", location="on the ground",
         material=Material.MUD)
     bench = Furniture("a", "wooden bench", location="in the corner")
@@ -177,10 +149,7 @@ def prison_yard(builder):
     builder.add_items([puddle, bench, album])
 
 def other_cell(builder):
-    builder.set_tile_id(room_ids.othercell_id)
-    builder.set_name("another cell")
-    builder.set_description("in a small cell identical to your own cell.")
-    builder.set_dark(True)
+    builder.set_current_tile(room_ids.othercell_id)
 
     paperbag = PaperBag("a", "paper bag", location="on the bunk")
     paperbag.add_items([Coins(value=7), BoxOfMatches(), Battery()])
@@ -191,11 +160,7 @@ def other_cell(builder):
     builder.add_items([bunk, paperbag])
 
 def prison_office(builder):
-    builder.set_tile_id(room_ids.prisonoffice_id)
-    builder.set_name("the prison office")
-    builder.set_description("in the prison office")
-    builder.set_first_visit_message("It looks like the office has been ransacked.")
-    builder.set_dark(True)
+    builder.set_current_tile(room_ids.prisonoffice_id)
 
     flashlight = Flashlight(location="on the desk")
     coins = Coins(location="on the desk", value=32)
@@ -216,21 +181,11 @@ def prison_office(builder):
     builder.add_items([desk, chair, cabinet, coins, flashlight])
 
 def prison_alleyway(builder):
-    builder.set_tile_id(room_ids.alleyway_id)
-    builder.set_name("a dark alley")
-    builder.set_description("in a dimly lit alleyway outside the prison")
-    builder.set_first_visit_message("it is raining lightly, and in the "
-        "distance you can hear sirens")
-
-    builder.set_smell("It smells like wet concrete and rotting food")
+    builder.set_current_tile(room_ids.alleyway_id)
+    pass
 
 def pawn_shop(builder):
-    builder.set_tile_id(room_ids.pawnshop_id)
-    builder.set_name("a pawn shop")
-    builder.set_description("inside the pawn shop")
-    builder.set_first_visit_message("a long flourescent bulb flickers faintly "
-        "on the ceiling.")
-    builder.set_smell("It smells like mould and bleach")
+    builder.set_current_tile(room_ids.pawnshop_id)
 
     counter = Furniture("a", "long wooden counter", location="along one side of "
         "the room", combustible=False)
@@ -261,48 +216,28 @@ def pawn_shop(builder):
         combustible=False)
 
 def main_street_upper(builder):
-    builder.set_tile_id(room_ids.mainstreet_upper_id)
-    builder.set_name("upper main street")
-    builder.set_description("on upper main street")
-    builder.set_smell("It smells like sewage")
+    builder.set_current_tile(room_ids.mainstreet_upper_id)
+    pass
 
 def main_street_lower(builder):
-    builder.set_tile_id(room_ids.mainstreet_lower_id)
-    builder.set_name("lower main street")
-    builder.set_description("on lower main street")
-    builder.set_smell("It smells like sewage")
-    builder.add_door("a", "large wooden door", "south",
-                     door_id=room_ids.bankdoor_id)
+    builder.set_current_tile(room_ids.mainstreet_lower_id)
+    pass
 
 def central_bank(builder):
-    builder.set_tile_id(room_ids.bank_entrance_id)
-    builder.set_name("the central bank entrance hall")
-    builder.set_description("in the central bank entrance hall")
-    builder.set_first_visit_message("your footsteps echo sharply around the "
-            "high ceilings as your feet strike the higly polished marble floor")
-    builder.set_smell("It smells like pine and lemon")
+    builder.set_current_tile(room_ids.bank_entrance_id)
+    pass
 
 def central_bank_hallway(builder):
-    builder.set_tile_id(room_ids.bank_hallway_id)
-    builder.set_name("a hallway")
-    builder.set_description("in a bright, clean hallway")
-    builder.set_smell("It smells like pine and lemon")
+    builder.set_current_tile(room_ids.bank_hallway_id)
 
-    builder.add_keypad_door("a", "wooden door with a keypad and a sign reading "
-            "'MANAGER'", "east", config.idnumber,\
-            door_id=room_ids.bank_officedoor_id,
-            prompt="Enter employee CID to unlock the door")
-    builder.add_keypad_door("a", "large metal door with a keypad", "south",
-            config.vaultcode, door_id=room_ids.bank_vaultdoor_id)
+    # Need to set randomly-generated codes for keypad doors
+    office_door = tile.get_tile_by_id(room_ids.bank_officedoor_id)
+    vault_door = tile.get_tile_by_id(room_ids.bank_vaultdoor_id)
+    office_door.unlock_code = config.idnumber
+    vault_door.unlock_code = config.vaultcode
 
 def central_bank_vault(builder):
-    builder.set_tile_id(room_ids.bank_vault_id)
-    builder.set_name("the bank vault")
-    builder.set_description("in the bank vault")
-    builder.set_first_visit_message("rows of lockboxes line the walls, and "
-            "the ceiling and floor are solid steel. It looks like the vault has"
-            " also been looted, and there's not much left in here.")
-    builder.set_smell("It smells like steel")
+    builder.set_current_tile(room_ids.bank_vault_id)
 
     coins = Coins(value=582, location="on the table")
     table = Furniture("a", "square metal table", location="in the centre of "
@@ -311,12 +246,7 @@ def central_bank_vault(builder):
     builder.add_items([coins, table])
 
 def central_bank_employee_lounge(builder):
-    builder.set_tile_id(room_ids.bank_lounge_id)
-    builder.set_name("the employee lounge")
-    builder.set_description("in the employee lounge")
-    builder.set_first_visit_message("it looks like somebody left this room in a "
-        "hurry")
-    builder.set_smell("It smells like coffee and bananas")
+    builder.set_current_tile(room_ids.bank_lounge_id)
 
     banana = Food("a", "banana", location="on the ground", energy=15)
     mug = Item("a", "mug", location="on the ground")
@@ -328,12 +258,7 @@ def central_bank_employee_lounge(builder):
     builder.add_items([banana, mug, sandwich, table, chair])
 
 def central_bank_managers_office(builder):
-    builder.set_tile_id(room_ids.bank_office_id)
-    builder.set_name("the managers office")
-    builder.set_description("in the managers office")
-    builder.set_first_visit_message("this room also looks like it has been "
-            "ransacked")
-    builder.set_smell("It smell like pine and lemon")
+    builder.set_current_tile(room_ids.bank_office_id)
 
     postit = Paper("a", "post-it note", paragraphs=[
             "code 4 vault: %d" % config.vaultcode

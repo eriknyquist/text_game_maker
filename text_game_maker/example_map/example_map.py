@@ -1,4 +1,6 @@
+import os
 from text_game_maker.example_map import example_map_rooms as rooms
+from text_game_maker.example_map import room_ids
 
 from text_game_maker.crafting import crafting
 from text_game_maker.tile import tile
@@ -11,55 +13,25 @@ def on_game_run(player):
 
 class ExampleMapRunner(runner.MapRunner):
     def build_map(self, builder):
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        mapdata_path = os.path.join(script_dir, 'example_map.json')
+        builder.load_map_data(mapdata_path)
+
         rooms.prison_starting_cell(builder)
-
-        builder.move_east()
         rooms.prison_entrance_hall(builder)
-
-        builder.move_south()
         rooms.prison_hallway(builder)
-
-        builder.move_south()
-        rooms.other_cell(builder)
-
-        builder.move_north()
-        builder.move_west()
         rooms.prison_yard(builder)
-
-        builder.move_east()
-        builder.move_north(2)
+        rooms.other_cell(builder)
         rooms.prison_office(builder)
-
-        builder.move_south()
-        builder.move_east()
         rooms.prison_alleyway(builder)
-
-        builder.move_east()
-        rooms.main_street_upper(builder)
-
-        builder.move_east()
         rooms.pawn_shop(builder)
-
-        builder.move_west()
-        builder.move_south()
+        rooms.main_street_upper(builder)
         rooms.main_street_lower(builder)
-
-        builder.move_south()
         rooms.central_bank(builder)
-
-        builder.move_east()
-        rooms.central_bank_employee_lounge(builder)
-
-        builder.move_west()
-        builder.move_south()
         rooms.central_bank_hallway(builder)
-
-        builder.move_east()
-        rooms.central_bank_managers_office(builder)
-
-        builder.move_west()
-        builder.move_south()
         rooms.central_bank_vault(builder)
+        rooms.central_bank_employee_lounge(builder)
+        rooms.central_bank_managers_office(builder)
 
         # Set the input prompt
         builder.set_input_prompt("")
