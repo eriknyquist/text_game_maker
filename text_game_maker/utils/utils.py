@@ -192,14 +192,13 @@ def _boxify(lines, width, height, top, bottom, left, right):
 
     return lines
 
-def _get_local_tile_map(player, crawltiles=2, mapsize=5):
+def get_local_tile_map(tileobj, crawltiles=2, mapsize=5):
     """
     Builds a 2D list of tiles, representing an x/y grid of tiles sorrounding
     the players current position.
 
-    :param text_game_maker.player.player.Player player: player object
-    :param int crawltiles: maximum distance to show from player's current tile \
-        (in tiles)
+    :param text_game_maker.tile.tile.Tile tileobj: starting tile
+    :param int crawltiles: maximum tiles to travel from starting tile
     :param int mapsize: map height and width in tiles
     :return: 2D list representing x/y grind of tiles around player
     """
@@ -208,7 +207,7 @@ def _get_local_tile_map(player, crawltiles=2, mapsize=5):
         tilemap.append([None] * mapsize)
 
     pos = (0, 0)
-    tilestack = [(player.current, None, None)]
+    tilestack = [(tileobj, None, None)]
     seen = []
 
     movetable = {
@@ -280,7 +279,7 @@ def draw_map_of_nearby_tiles(player):
     # width and height of map area in tiles
     mapsize = int(mapwidth / tilewidth)
 
-    tilemap = _get_local_tile_map(player, crawl_tiles, mapsize)
+    tilemap = get_local_tile_map(player, crawl_tiles, mapsize)
     linemap = []
     empty = [(' ' * tilewidth)] * tileheight
 
