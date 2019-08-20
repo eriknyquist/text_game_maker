@@ -515,7 +515,13 @@ class Tile(GameEntity):
 
 class LockedDoor(Tile):
     def __init__(self, prefix="", name="", src_tile="", replacement_tile=""):
+        if prefix in ["", None]:
+            prefix = "a"
+        if name in ["", None]:
+            name = "door"
+
         super(LockedDoor, self).__init__(name, "")
+
         self.name = '%s %s' % (prefix, name)
         self.short_name = name
         self.prep = "the " + self.short_name
