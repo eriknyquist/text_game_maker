@@ -14,7 +14,7 @@ def on_game_run(player):
 class ExampleMapRunner(runner.MapRunner):
     def build_map(self, builder):
         script_dir = os.path.dirname(os.path.realpath(__file__))
-        mapdata_path = os.path.join(script_dir, 'example_map.json')
+        mapdata_path = os.path.join(script_dir, 'example_map.tgmdata')
         builder.load_map_data(mapdata_path)
 
         rooms.prison_starting_cell(builder)

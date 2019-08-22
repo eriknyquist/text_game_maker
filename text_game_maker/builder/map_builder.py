@@ -4,6 +4,7 @@ import random
 import sys
 import os
 import json
+import zlib
 import pdb
 import errno
 
@@ -401,8 +402,11 @@ class MapBuilder(object):
 
         :param str filename: name of map editor save file to load
         """
-        with open(filename, 'r') as fh:
-            attrs = json.load(fh)
+        with open(filename, 'rb') as fh:
+            strdata = fh.read()
+
+        decompressed = zlib.decompress(strdata).decode("utf-8")
+        attrs = json.loads(decompressed)
 
         self.start = tile.builder(attrs[player.TILES_KEY],
                                   attrs[player.START_TILE_KEY],
