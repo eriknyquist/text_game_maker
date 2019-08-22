@@ -279,7 +279,7 @@ def draw_map_of_nearby_tiles(player):
     # width and height of map area in tiles
     mapsize = int(mapwidth / tilewidth)
 
-    tilemap = get_local_tile_map(player, crawl_tiles, mapsize)
+    tilemap = get_local_tile_map(player.current, crawl_tiles, mapsize)
     linemap = []
     empty = [(' ' * tilewidth)] * tileheight
 
