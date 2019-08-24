@@ -24,9 +24,6 @@ COMPASS = [
     "------+"
 ]
 
-history = InMemoryHistory()
-session = PromptSession(history=history, enable_history_search=True)
-
 sequence = []
 saved_prints = []
 
@@ -44,7 +41,8 @@ info = {
     'sound': None,
     'instance': None,
     'printfunc': _default_printfunc,
-    'inputfunc': session.prompt
+    'inputfunc': None,
+    'prompt_session': None
 }
 
 wrapper = textwrap.TextWrapper()
@@ -405,6 +403,12 @@ def inputfunc(prompt):
     :return: user input
     :rtype: str
     """
+    if info['inputfunc'] is None:
+        history = InMemoryHistory()
+        session = PromptSession(history=history, enable_history_search=True)
+        info['prompt_session'] = session
+        info['inputfunc'] = session.prompt
+
     return info['inputfunc'](prompt)
 
 def set_printfunc(func):
