@@ -89,7 +89,7 @@ def crawler(start):
 
     return ret
 
-def builder(tiledata, start_tile_id, version):
+def builder(tiledata, start_tile_id, version, clear_old_tiles=True):
     """
     Deserialize a list of serialized tiles, then re-link all the tiles to
     re-create the map described by the tile links
@@ -102,7 +102,9 @@ def builder(tiledata, start_tile_id, version):
     """
     tiles = {}
     visited = []
-    _tiles.clear()
+
+    if clear_old_tiles:
+        _tiles.clear()
 
     for d in tiledata:
         tile = deserialize(d, version)
