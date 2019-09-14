@@ -51,6 +51,8 @@ SUICIDE_WORDS = [
 
 OPEN_WORDS = ['open']
 
+UNLOCK_WORDS = ['unlock']
+
 EVERYTHING_WORDS = [
     'everything', 'all'
 ]
@@ -228,6 +230,22 @@ def _look_for_door(player, item_name):
             return tile
 
     return None
+
+def _do_unlock(player, word, item_name):
+    if not player.can_see():
+        utils._wrap_print(messages.dark_search_message())
+        return False
+
+    if not item_name or item_name == "":
+        utils._wrap_print("What do you want to %s?" % word)
+        return False
+
+    doorobj = _look_for_door(player, item_name)
+    if not doorobj:
+        utils._wrap_print("No %s to %s." % (item_name, word))
+
+    doorobj.on_open(player)
+    return True
 
 def _do_open(player, word, item_name):
     if not player.can_see():
@@ -779,6 +797,8 @@ def add_commands(parser):
             "%s <thing> with <item>"],
 
         [OPEN_WORDS, _do_open, "open a container or door", "%s <item>"],
+
+        [UNLOCK_WORDS, _do_unlock, "unlock a locked container or door", "%s <item>"],
 
         [BURN_WORDS, _do_burn, "burn an item", "%s <item>"],
 
