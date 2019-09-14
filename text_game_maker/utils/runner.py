@@ -72,6 +72,24 @@ def get_runner_from_filename(filename):
 
     return None
 
+def run_map_from_class(classobj):
+    """
+    Create an instance of the given map runner class, and run it
+
+    :param classobj: mapp runner class object
+    """
+    runner = classobj()
+    parser = CommandParser()
+
+    runner.build_parser(parser)
+    builder = MapBuilder(parser)
+    runner.build_map(builder)
+
+    try:
+        builder.run_game()
+    except KeyboardInterrupt:
+        return
+
 def run_map_from_filename(filename):
     """
     Import a file, look for any classes that are subclasses of
@@ -84,14 +102,4 @@ def run_map_from_filename(filename):
         raise MapRunnerError("Unable to find a MapRunner class in %s"
             % filename)
 
-    runner = runnerclass()
-    parser = CommandParser()
-
-    runner.build_parser(parser)
-    builder = MapBuilder(parser)
-    runner.build_map(builder)
-
-    try:
-        builder.run_game()
-    except KeyboardInterrupt:
-        return
+    run_map_from_class(runnerclass)
