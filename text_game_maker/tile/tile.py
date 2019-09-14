@@ -22,6 +22,18 @@ def _register_tile(tile, tile_id=None):
     _tiles[ret] = tile
     return ret
 
+def unregister_tile_id(tile_id):
+    """
+    Unregister a tile ID so it can be used again. Should only be used if you
+    are deleting all instances of a tile object.
+
+    :param tile_id: tile ID to unregister
+    """
+    if tile_id not in _tiles:
+        return
+
+    del _tiles[tile_id]
+
 def get_tile_by_id(tile_id):
     """
     Get Tile instance by tile ID
