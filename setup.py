@@ -37,7 +37,7 @@ class TestRunner(Command):
 
 setup(
     name='text_game_maker',
-    version='0.7.1',
+    version='0.7.2',
     description=('Framework for making text-based adventure games (interactive finction)'),
     long_description=long_description,
     url='http://github.com/eriknyquist/text_game_maker',
