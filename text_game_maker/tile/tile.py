@@ -223,6 +223,13 @@ class Tile(GameEntity):
 
         return name in self.name
 
+    @property
+    def map_identifier(self):
+        if self.name in ["", None]:
+            return str(self.tile_id)
+
+        return self.name
+
     def on_smell(self):
         """
         Called when player types 'smell' or equivalent on this tile

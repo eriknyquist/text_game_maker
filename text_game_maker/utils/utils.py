@@ -300,7 +300,7 @@ def draw_map_of_nearby_tiles(player):
             elif tile is player.current:
                 text = "You"
             else:
-                text = tile.name if tile.name else ""
+                text = tile.map_identifier
 
             wr = _wrap_text(text, width=labelwidth).split('\n')
             lines = [centre_text(t, line_width=labelwidth) for t in wr]
