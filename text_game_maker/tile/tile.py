@@ -217,6 +217,46 @@ class Tile(GameEntity):
 
         self.tile_id = _register_tile(self)
 
+    def set_name_from_north(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile north from this tile
+
+        :param str desc: description text
+        """
+
+        self.name_from_dir["north"] = name
+
+    def set_name_from_south(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile south from this tile
+
+        :param str desc: description text
+        """
+
+        self.name_from_dir["south"] = name
+
+    def set_name_from_east(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile east from this tile
+
+        :param str desc: description text
+        """
+
+        self.name_from_dir["east"] = name
+
+    def set_name_from_west(self, name):
+        """
+        Set the name that will be shown when player looks at this tile from
+        an adjacent tile west from this tile
+
+        :param str desc: description text
+        """
+
+        self.name_from_dir["west"] = name
+
     def matches_name(self, name):
         if name.startswith("the"):
             name = name[4:]

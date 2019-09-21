@@ -535,43 +535,43 @@ class MapBuilder(object):
 
     def set_name_from_north(self, name):
         """
-        Set the name that will be shown when player looks at this tile from
-        an adjacent tile north from this tile
+        Set the name that will be shown when player looks at the current tile
+        from an adjacent tile to the north
 
         :param str desc: description text
         """
 
-        self.current.name_from_dir["north"] = name
+        self.current.set_name_from_north(name)
 
     def set_name_from_south(self, name):
         """
-        Set the name that will be shown when player looks at this tile from
-        an adjacent tile south from this tile
+        Set the name that will be shown when player looks at the current tile
+        from an adjacent tile to the south
 
         :param str desc: description text
         """
 
-        self.current.name_from_dir["south"] = name
+        self.current.set_name_from_south(name)
 
     def set_name_from_east(self, name):
         """
-        Set the name that will be shown when player looks at this tile from
-        an adjacent tile east from this tile
+        Set the name that will be shown when player looks at the current tile
+        from an adjacent tile to the east
 
         :param str desc: description text
         """
 
-        self.current.name_from_dir["east"] = name
+        self.current.set_name_from_east(name)
 
     def set_name_from_west(self, name):
         """
-        Set the name that will be shown when player looks at this tile from
-        an adjacent tile west from this tile
+        Set the name that will be shown when player looks at the current tile
+        from an adjacent tile to the west
 
         :param str desc: description text
         """
 
-        self.current.name_from_dir["west"] = name
+        self.current.set_name_from_west(name)
 
     def set_name(self, name):
         """
