@@ -127,9 +127,19 @@ class Player(LivingGameEntity):
         self.pockets.add_item(lighter)
 
     def add_coins(self, value=1):
+        """
+        Give player some coins
+
+        :param int value: number of coins to add
+        """
         Coins(value=value).add_to_player_inventory(self)
 
     def remove_coins(self, value=1):
+        """
+        Take some coins from player
+
+        :param int value: number of coins to remove
+        """
         coins = utils.find_inventory_item_class(self, Coins)
         if not coins:
             return
@@ -266,6 +276,13 @@ class Player(LivingGameEntity):
         utils.game_print("You taste %s." % get_properties(self.material).taste)
 
     def has_item(self, item):
+        """
+        Check if an item is in the player's inventory
+
+        :param text_game_maker.game_objects.generic.Item item: item to check
+        :return: True if item is in the player's inventory, False otherwise
+        :rtype: bool
+        """
         if self.equipped and (self.equipped is item):
             return True
 
@@ -278,6 +295,17 @@ class Player(LivingGameEntity):
         return False
 
     def can_see(self):
+        """
+        Check if the player can see their surroundings in the current game
+        location. Takes the following things into account;
+
+        * Is the current tile dark?
+        * Does the player have a light source equipped?
+        * Does the light source need fuel, and if so, does it have some?
+
+        :return: True if the player can see their surroundings, False otherwise
+        :rtype: bool
+        """
         if not self.current.dark:
             return True
 
@@ -293,6 +321,13 @@ class Player(LivingGameEntity):
         return True
 
     def inventory_space(self):
+        """
+        Check number of remaining items the players inventory can fit. When
+        players inventory is full, this method will return 0.
+
+        :return: number of remaining items player's inventory has space for
+        ;rtype: int
+        """
         used = len(self.pockets.items)
         capacity = self.pockets.capacity
 
@@ -303,6 +338,12 @@ class Player(LivingGameEntity):
         return capacity - used
 
     def previous_tile(self):
+        """
+        Get the tile that the player was on before the current tile
+
+        :return: previous tile object
+        :rtype: text_game_maker.tile.tile.Tile
+        """
         if not self.move_history:
             return None
 
@@ -588,6 +629,15 @@ class Player(LivingGameEntity):
         self._loot_message(word, person.name, print_items)
 
     def describe_current_tile_contents(self, capitalize=True):
+        """
+        Return a string that describes the game state at the players current,
+        location, including people, objects and scenery on the players current
+        tile, and any adjacent tiles that connect to the players current tile.
+
+        :param bool capitalize: if True, the first letter of each sentence will\
+            be capitalized
+        :return: string describing the players current loca
+        """
         ret = ""
         scene = self.current.describe_scene()
         if scene:
@@ -607,6 +657,13 @@ class Player(LivingGameEntity):
         return ret
 
     def darkness_message(self):
+        """
+        Return the message to print when the player enters an area which is dark
+        and they do not have a working light source
+
+        :return: message to print when player cannot see surrounding area
+        :rtype: str
+        """
         return "It is pitch black, and you cannot see anything."
 
     def describe_current_tile(self):
