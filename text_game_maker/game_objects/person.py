@@ -229,6 +229,11 @@ class Person(LivingItem):
         return None
 
     def add_coins(self, value=1):
+        """
+        Give person some coins
+
+        :param int value: number of coins to add
+        """
         coins = self.find_item_class(Coins)
         if not coins:
             coins = Coins(value=value)
@@ -251,6 +256,12 @@ class Person(LivingItem):
         """
         for name, value in item_value_pairs:
             self.shopping_list[name] = value
+
+    def clear_shopping_list(self):
+        """
+        Clear this persons current shopping list
+        """
+        self.shopping_list.clear()
 
     def add_default_responses(self, *responses):
         """
@@ -306,6 +317,16 @@ class Person(LivingItem):
         self.responses.add_responses(*pattern_response_pairs)
 
     def get_response(self, text):
+        """
+        Get the response this person should speak back to the player, for a
+        given input string typed by the player
+
+        :param str text: input string to respond to
+        :return: tuple of the form (response, groups) where ``response`` is \
+            the response text as a string, and ``groups`` is a tuple of \
+            subgroups from the regular expression match (as returned by \
+            re.MatchObject.groups), if any, otherwise None.
+        """
         response, groups = self.responses.get_response(text)
         if (type(response) == list) or (type(response) == tuple):
             return random.choice(response), groups
