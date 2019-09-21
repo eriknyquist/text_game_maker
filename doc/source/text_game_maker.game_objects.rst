@@ -24,6 +24,11 @@ Submodules
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: text_game_maker.game_objects.living
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. automodule:: text_game_maker.game_objects.person
     :members:
     :undoc-members:
