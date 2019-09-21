@@ -258,6 +258,13 @@ class Tile(GameEntity):
         self.name_from_dir["west"] = name
 
     def matches_name(self, name):
+        """
+        Check if a string fuzzily matches the name of this tile
+
+        :param str name: string to check
+        :return: True if string fuzzily matches this tiles name
+        :rtype: bool
+        """
         if name.startswith("the"):
             name = name[4:]
 
@@ -575,6 +582,9 @@ class Tile(GameEntity):
         return '%s. ' % ('. '.join(ret))
 
 class LockedDoor(Tile):
+    """
+    Locked door with a mechanical lock, requires a key or lockpick to unlock
+    """
     def __init__(self, prefix="", name="", src_tile="", replacement_tile=""):
         if prefix in ["", None]:
             prefix = "a"
@@ -606,6 +616,11 @@ class LockedDoor(Tile):
         return True
 
     def on_open(self, player):
+        """
+        Called when player attempts to open this door
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         pick = utils.find_inventory_item_class(player, Lockpick)
         if not pick:
             utils._wrap_print("You need a key or a lockpick to unlock %s"
@@ -623,12 +638,22 @@ class LockedDoor(Tile):
             pick.uses -= 1
 
     def matches_name(self, name):
+        """
+        Check if a string fuzzily matches the name of this door
+
+        :param str name: string to check
+        :return: True if string fuzzily matches this doors name
+        :rtype: bool
+        """
         if name.startswith("the"):
             name = name[4:]
 
         return name in self.short_name
 
     def unlock(self):
+        """
+        Unlocks the door, revealing whichever tile is connected behind it
+        """
         if not self.locked:
             return
 
@@ -649,6 +674,9 @@ class LockedDoor(Tile):
             return False
 
 class LockedDoorWithKeypad(LockedDoor):
+    """
+    Locked door with an electronic lock, can be opened with a numeric code
+    """
     def __init__(self, unlock_code=None, **kwargs):
         super(LockedDoorWithKeypad, self).__init__(**kwargs)
         self.unlock_code = unlock_code
@@ -663,6 +691,11 @@ class LockedDoorWithKeypad(LockedDoor):
         self.prompt = prompt
 
     def on_open(self, player):
+        """
+        Called when playyer attempts to open this door.
+
+        :param text_game_maker.player.player.Player player: player object
+        """
         while True:
             code = utils.read_line_raw(self.prompt, cancel_word="cancel")
             if (code == None) or (code.strip() == ""):
