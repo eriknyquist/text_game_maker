@@ -327,7 +327,7 @@ def _do_set_print_width(player, word, setting):
         return
 
     utils._wrap_print("OK, line width set to %d." % val)
-    text_game_maker.utils.utils.wrapper.width = val
+    utils.set_wrap_width(val)
 
 def _int_meter(name, val, maxval):
     hp_width = 17

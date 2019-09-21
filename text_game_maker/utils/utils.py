@@ -924,6 +924,15 @@ def _wrap_print(text, wait=False):
 def _unrecognised(val):
     _wrap_print('Unrecognised command "%s"' % val)
 
+def set_wrap_width(width):
+    """
+    Set the maximum line width (in characters) used by text_game_maker when
+    wrapping long lines of text (default is 60)
+
+    :param int width: maximum line width in characters
+    """
+    wrapper.width = width
+
 def queue_command_sequence(seq):
     """
     Add to game command sequence list
