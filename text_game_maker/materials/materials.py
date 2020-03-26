@@ -18,7 +18,11 @@ class Material(object):
     BREAD = "bread"
     CHEESE = "cheese"
 
+
 class MaterialProperties(object):
+    """
+    Class representing all the properties of a specific material
+    """
     def __init__(self, material, **kwargs):
         self.material = material
         self.smell = None
@@ -41,16 +45,42 @@ class MaterialProperties(object):
         if self.taste is None:
             self.taste = 'like %s' % self.material
 
+
 def add_material(material, **kwargs):
+    """
+    Define a new material type
+
+    :param str material: unique name to represent material type
+    :param kwargs: all attributes of the MaterialProperties class can be set by name here
+    """
     _property_table[material] = MaterialProperties(material, **kwargs)
 
+
 def get_properties(material):
+    """
+    Get a MaterialProperties object by material name
+
+    :param str material: material name
+
+    :return: material properties
+    :rtype: text_game_maker.material.material.MaterialProperties
+    """
     try:
         ret = _property_table[material]
     except KeyError:
         raise RuntimeError("No such material '%s'" % material)
 
     return ret
+
+def get_materials():
+    """
+    Return a list of all material names
+
+    :return: list of material names
+    :rtype: [str]
+    """
+    return _property_table.keys()
+
 
 add_material(Material.METAL)
 add_material(Material.STONE)
