@@ -4,10 +4,12 @@ from text_game_maker.audio import audio
 from text_game_maker.utils import utils
 from text_game_maker.messages import messages
 
-ITEM_SIZE_SMALL = 1
-ITEM_SIZE_MEDIUM = 2
-ITEM_SIZE_LARGE = 3
-ITEM_SIZE_VERY_LARGE = 4
+class ItemSize(object):
+    SMALL = 1
+    MEDIUM = 2
+    LARGE = 3
+    VERY_LARGE = 4
+
 
 class Item(GameEntity):
     """
@@ -36,7 +38,7 @@ class Item(GameEntity):
         self.prep = 'the ' + name
 
         self.prefix = prefix
-        self.size = ITEM_SIZE_SMALL
+        self.size = ItemSize.SMALL
 
         for key in kwargs:
             if not hasattr(self, key):
@@ -52,7 +54,7 @@ class Item(GameEntity):
         :param text_game_maker.player.player.Player player: player object
         :param str word: command word used by player
         """
-        if self.size > ITEM_SIZE_SMALL:
+        if self.size > ItemSize.SMALL:
             utils.game_print(messages.nonsensical_action_message('%s %s'
                 % (word, self.prep)))
             utils.save_sound(audio.FAILURE_SOUND)
@@ -347,7 +349,7 @@ class Container(Item):
 class LargeContainer(Container):
     def __init__(self, *args, **kwargs):
         super(LargeContainer, self).__init__(*args, **kwargs)
-        self.size = ITEM_SIZE_LARGE
+        self.size = ItemSize.LARGE
         self.capacity = 2
 
 class InventoryBag(Container):
@@ -359,7 +361,7 @@ class InventoryBag(Container):
         super(InventoryBag, self).__init__(*args, **kwargs)
         self.material = Material.LEATHER
         self.capacity = 10
-        self.size = ITEM_SIZE_MEDIUM
+        self.size = ItemSize.MEDIUM
 
     def add_to_player_inventory(self, player):
         # Copy existing player items from old bag

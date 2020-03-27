@@ -6,6 +6,7 @@ from text_game_maker.utils import utils
 
 from text_game_maker.game_objects.generic import *
 
+
 class Battery(Item):
     def __init__(self, *args, **kwargs):
         super(Battery, self).__init__("a", "battery", **kwargs)
@@ -13,7 +14,7 @@ class Battery(Item):
         self.is_electricity_source = True
         self.max_fuel = 100.0
         self.fuel = self.max_fuel
-        self.size = ITEM_SIZE_SMALL
+        self.size = ItemSize.SMALL
         self.spent_name = "dead %s" % self.name
         self.original_name = self.name
 
@@ -28,7 +29,7 @@ class Battery(Item):
 class Flashlight(ElectricLightSource):
     def __init__(self, *args, **kwargs):
         super(Flashlight, self).__init__("a", "flashlight", **kwargs)
-        self.size = ITEM_SIZE_SMALL
+        self.size = ItemSize.SMALL
         self.material = Material.PLASTIC
         self.fuel = 0.0
         self.illuminate_msg = ("casting a bright white light across everything "
@@ -48,7 +49,7 @@ class Flashlight(ElectricLightSource):
 class Lighter(FlameSource):
     def __init__(self, *args, **kwargs):
         super(Lighter, self).__init__("a", "lighter", **kwargs)
-        self.size = ITEM_SIZE_SMALL
+        self.size = ItemSize.SMALL
         self.material = Material.PLASTIC
         self.fuel = 35.0
         self.value = 3
@@ -61,7 +62,7 @@ class Lighter(FlameSource):
 class BoxOfMatches(FlameSource):
     def __init__(self, *args, **kwargs):
         super(BoxOfMatches, self).__init__("a", "box of matches", **kwargs)
-        self.size = ITEM_SIZE_SMALL
+        self.size = ItemSize.SMALL
         self.material = Material.CARDBOARD
         self.fuel = 25.0
 
@@ -236,7 +237,7 @@ class Furniture(Item):
         super(Furniture, self).__init__(prefix, name, **kwargs)
         self.material = Material.METAL
         self.scenery = True
-        self.size = ITEM_SIZE_LARGE
+        self.size = ItemSize.LARGE
 
 class SmallTin(Container):
     def __init__(self, *args, **kwargs):
@@ -253,7 +254,7 @@ class PaperBag(Container):
         super(PaperBag, self).__init__(*args, **kwargs)
         self.material = Material.PAPER
         self.capacity = 5
-        self.size = ITEM_SIZE_MEDIUM
+        self.size = ItemSize.MEDIUM
 
 class SmallBag(InventoryBag):
     def __init__(self, *args, **kwargs):

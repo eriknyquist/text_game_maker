@@ -3,9 +3,7 @@ import random
 
 from text_game_maker.game_objects.items import Coins
 from text_game_maker.game_objects.living import LivingItem
-from text_game_maker.game_objects.generic import (Item, GameEntity,
-    ITEM_SIZE_LARGE
-)
+from text_game_maker.game_objects.generic import Item, GameEntity, ItemSize
 
 from text_game_maker.utils import utils
 from text_game_maker.tile import tile
@@ -185,7 +183,7 @@ class Person(LivingItem):
         self.alive = True
         self.prefix = prefix
         self.name = name
-        self.size = ITEM_SIZE_LARGE
+        self.size = ItemSize.LARGE
         self.introduction = None
         self.shopping_list = {}
         self.speak_count = 0
