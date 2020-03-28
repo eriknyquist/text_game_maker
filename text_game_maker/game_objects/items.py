@@ -26,6 +26,7 @@ class Battery(Item):
 
         self.fuel = min(self.max_fuel, value)
 
+
 class Flashlight(ElectricLightSource):
     def __init__(self, *args, **kwargs):
         super(Flashlight, self).__init__("a", "flashlight", **kwargs)
@@ -45,6 +46,7 @@ class Flashlight(ElectricLightSource):
             utils.game_print("%s needs a battery to work." % self.name)
 
         return True
+
 
 class Lighter(FlameSource):
     def __init__(self, *args, **kwargs):

@@ -4,6 +4,7 @@ from text_game_maker.audio import audio
 from text_game_maker.utils import utils
 from text_game_maker.messages import messages
 
+
 class ItemSize(object):
     SMALL = 1
     MEDIUM = 2
@@ -141,6 +142,7 @@ class Item(GameEntity):
     def __repr__(self):
         return self.__str__()
 
+
 class FuelConsumer(Item):
     def __init__(self, *args, **kwargs):
         self.max_fuel = 100.0
@@ -195,6 +197,7 @@ class FuelConsumer(Item):
         if self.get_fuel() <= 0.0:
             self.make_spent()
 
+
 class LightSource(FuelConsumer):
     """
     Base class for any item that can act as a light source
@@ -241,7 +244,11 @@ class LightSource(FuelConsumer):
         self.is_light_source = True
         self.equip_msg = self.original_equip_msg
 
-        player = utils.get_builder_instance().player
+        builder_ins = utils.get_builder_instance()
+        if builder_ins is None:
+            return
+
+        player = builder_ins.player
         if self is not player.equipped:
             return
 
@@ -266,6 +273,7 @@ class LightSource(FuelConsumer):
     def on_unequip(self, player):
         if (not player.can_see()) and (not self.spent):
             utils.game_print(player.darkness_message())
+
 
 class ElectricLightSource(LightSource):
     """
@@ -312,6 +320,7 @@ class ElectricLightSource(LightSource):
         self.refuel()
         return item.move(self.items)
 
+
 class FlameSource(LightSource):
     """
     Base class for anything that can be used as a flame source
@@ -319,6 +328,7 @@ class FlameSource(LightSource):
     def __init__(self, *args, **kwargs):
         super(FlameSource, self).__init__(*args, **kwargs)
         self.is_flame_source = True
+
 
 class Container(Item):
     """
@@ -345,6 +355,7 @@ class Container(Item):
             return None
 
         return item.move(self.items)
+
 
 class LargeContainer(Container):
     def __init__(self, *args, **kwargs):
