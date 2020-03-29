@@ -8,6 +8,10 @@ from text_game_maker.game_objects.generic import *
 
 
 class Battery(Item):
+    """
+    A single-use battery. Can be inserted into flashlights or other items requiring
+    electric power.
+    """
     def __init__(self, *args, **kwargs):
         super(Battery, self).__init__("a", "battery", **kwargs)
         self.value = 5
@@ -28,6 +32,9 @@ class Battery(Item):
 
 
 class Flashlight(ElectricLightSource):
+    """
+    An electric flashlight. Allows player to see in darkness. Requires a battery.
+    """
     def __init__(self, *args, **kwargs):
         super(Flashlight, self).__init__("a", "flashlight", **kwargs)
         self.size = ItemSize.SMALL
@@ -49,6 +56,10 @@ class Flashlight(ElectricLightSource):
 
 
 class Lighter(FlameSource):
+    """
+    A disposable lighter. Can be used as a light source. Can also be used to
+    burn things. When the fuel runs out, the lighter is useless.
+    """
     def __init__(self, *args, **kwargs):
         super(Lighter, self).__init__("a", "lighter", **kwargs)
         self.size = ItemSize.SMALL
@@ -61,7 +72,12 @@ class Lighter(FlameSource):
         self.spent_message = ("Your %s has run out of fuel. You'll need "
             "to find a new flame source." % self.name)
 
+
 class BoxOfMatches(FlameSource):
+    """
+    A box of matches. Can be used as a light source. Can also be used to
+    burn things. When the fuel runs out, there are no more matches in the box.
+    """
     def __init__(self, *args, **kwargs):
         super(BoxOfMatches, self).__init__("a", "box of matches", **kwargs)
         self.size = ItemSize.SMALL
@@ -77,6 +93,7 @@ class BoxOfMatches(FlameSource):
         self.spent_equip_msg = ("You take out the %s, which is empty."
             % self.name)
 
+
 class Weapon(Item):
     """
     Class to represent a weapon
@@ -86,68 +103,102 @@ class Weapon(Item):
         self.edible = False
         self.damage = 1
 
+
 class Crowbar(Weapon):
+    """
+    A crowbar
+    """
     def __init__(self, **kwargs):
         super(Crowbar, self).__init__("a", "crowbar", **kwargs)
         self.damage = 7
 
+
 class PocketKnife(Weapon):
+    """
+    A small knife. Low damage.
+    """
     def __init__(self, **kwargs):
         super(PocketKnife, self).__init__("a", "pocket knife", **kwargs)
         self.damage = 7
 
+
 class HuntingKnife(Weapon):
+    """
+    A larger knife. Higher damage.
+    """
     def __init__(self, **kwargs):
         super(HuntingKnife, self).__init__("a", "hunting knife", **kwargs)
         self.damage = 15
 
+
 class BaseballBat(Weapon):
+    """
+    A baseball bat
+    """
     def __init__(self, **kwargs):
         super(BaseballBat, self).__init__("a", "baseball bat", **kwargs)
         self.damage = 15
 
+
 class Machete(Weapon):
+    """
+    A machete
+    """
     def __init__(self, **kwargs):
         super(Machete, self).__init__("a", "machete", **kwargs)
         self.damage = 25
 
+
 class Food(Item):
     """
-    Class to represent a food item
+    Generic food item
     """
     def __init__(self, *args, **kwargs):
         super(Food, self).__init__(*args, **kwargs)
         self.material = Material.MEAT
         self.edbile = True
 
+
 class Coins(Item):
+    """
+    One or more coins
+    """
     def __init__(self, **kwargs):
-        self.value = 1
+        self._value = 1
         super(Coins, self).__init__(None, "", **kwargs)
         self.material = Material.METAL
         self.combustible = False
         self.prep = "the coins"
         self._set_name()
 
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, v):
+        self._value = v
+        self._set_name()
+
     def increment(self, value=1):
-        self.value += value
+        self._value += value
         self._set_name()
 
     def decrement(self, value=1):
-        if self.value > 0:
-            self.value -= value
+        if self._value > 0:
+            self._value -= value
             self._set_name()
 
     def _set_name(self):
-        self.name = "%s coin" % self.value
-        if self.value > 1:
+        self.name = "%s coin" % self._value
+        if self._value > 1:
             self.verb = "are"
             self.name += "s"
 
     def on_taste(self, player):
         tasteword = "taste"
 
-        if self.value == 1:
+        if self._value == 1:
             smellword += "s"
 
         taste = get_properties(self.material).taste
@@ -156,7 +207,7 @@ class Coins(Item):
     def on_smell(self, player):
         smellword = "smell"
 
-        if self.value == 1:
+        if self._value == 1:
             smellword += "s"
 
         smell = get_properties(self.material).smell
@@ -167,11 +218,15 @@ class Coins(Item):
         if not other_coins:
             return super(Coins, self).add_to_player_inventory(player)
 
-        other_coins.increment(self.value)
+        other_coins.increment(self._value)
         self.delete()
         return other_coins
 
+
 class Paper(Item):
+    """
+    A sheet of paper that can contain information for the player to read
+    """
     def __init__(self, prefix="", name="", **kwargs):
         self.paragraphs = []
         self.header = None
@@ -215,7 +270,11 @@ class Paper(Item):
 
         utils.printfunc('\n' + msg)
 
+
 class Blueprint(Item):
+    """
+    A blueprint for crafting one new item from a fixed set of other items.
+    """
     def __init__(self, ingredients=[], item=None, **kwargs):
         super(Blueprint, self).__init__("a", "blueprint for %s" % item,
             **kwargs)
@@ -234,23 +293,32 @@ class Blueprint(Item):
         self.delete()
         return self
 
+
 class Furniture(Item):
+    """
+    An immovable object that the player cannot take or destroy.
+    """
     def __init__(self, prefix="", name="", **kwargs):
         super(Furniture, self).__init__(prefix, name, **kwargs)
         self.material = Material.METAL
         self.scenery = True
         self.size = ItemSize.LARGE
 
+
 class SmallTin(Container):
+    """
+    A small tin that can contain a small number of items.
+    """
     def __init__(self, *args, **kwargs):
         super(SmallTin, self).__init__(*args, **kwargs)
         self.material = Material.METAL
         self.combustible = False
         self.capacity = 3
 
+
 class PaperBag(Container):
     """
-    Class to represent a small bag used to carry player items
+    A small paper bag that can hold a small number of items.
     """
     def __init__(self, *args, **kwargs):
         super(PaperBag, self).__init__(*args, **kwargs)
@@ -258,41 +326,66 @@ class PaperBag(Container):
         self.capacity = 5
         self.size = ItemSize.MEDIUM
 
+
 class SmallBag(InventoryBag):
+    """
+    A player inventory bag that can hold a small number of items.
+    """
     def __init__(self, *args, **kwargs):
         super(SmallBag, self).__init__(*args, **kwargs)
         value  = 10
         self.capacity = 5
 
+
 class Bag(InventoryBag):
+    """
+    A player inventory bag that can hold a medium number of items.
+    """
     def __init__(self, *args, **kwargs):
         super(Bag, self).__init__(*args, **kwargs)
         value = 25
         self.capacity = 10
 
+
 class LargeBag(InventoryBag):
+    """
+    A player inventory bag that can hold a large number of items.
+    """
     def __init__(self, *args, **kwargs):
         super(LargeBag, self).__init__(*args, **kwargs)
         value = 35
         self.capacity = 20
 
+
 class Lockpick(Item):
+    """
+    A lockpick that can be used to unlock a finite number of locked doors.
+    """
     def __init__(self, *args, **kwargs):
         super(Lockpick, self).__init__("a", "lockpick", **kwargs)
         self.value = 1
         self.uses = 2
 
+
 class StrongLockpick(Item):
+    """
+    A lockpick that can be used to unlock a finite number of locked doors.
+    """
     def __init__(self, *args, **kwargs):
         super(StrongLockpick, self).__init__("a", "strong lockpick", **kwargs)
         self.value = 5
         self.uses = 5
 
+
 class AdvancedLockpick(Item):
+    """
+    A lockpick that can be used to unlock a finite number of locked doors.
+    """
     def __init__(self, *args, **kwargs):
         super(AdvancedLockpick, self).__init__("an", "advanced lockpick", **kwargs)
         self.value = 35
         self.uses = 50
+
 
 class Drawing(Item):
     def __init__(self, *args, **kwargs):

@@ -332,9 +332,8 @@ class FlameSource(LightSource):
 
 class Container(Item):
     """
-    Class to represent a container with limited capacity and item size
+    Generic container with limited capacity and item size
     """
-
     def __init__(self, *args, **kwargs):
         super(Container, self).__init__(*args, **kwargs)
         self.is_container = True
@@ -358,10 +357,14 @@ class Container(Item):
 
 
 class LargeContainer(Container):
+    """
+    Generic container with limited capacity and item size
+    """
     def __init__(self, *args, **kwargs):
         super(LargeContainer, self).__init__(*args, **kwargs)
         self.size = ItemSize.LARGE
         self.capacity = 2
+
 
 class InventoryBag(Container):
     """
