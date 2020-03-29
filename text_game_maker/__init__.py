@@ -1,5 +1,5 @@
 __author__ = "Erik Nyquist"
 __license__ = "Apache 2.0"
-__version__ = "0.7.3"
+__version__ = "0.7.4"
 __maintainer__ = "Erik Nyquist"
 __email__ = "eknyquist@gmail.com"
