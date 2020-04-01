@@ -108,7 +108,7 @@ class Crowbar(Weapon):
     """
     A crowbar
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(Crowbar, self).__init__("a", "crowbar", **kwargs)
         self.damage = 7
 
@@ -117,8 +117,8 @@ class PocketKnife(Weapon):
     """
     A small knife. Low damage.
     """
-    def __init__(self, **kwargs):
-        super(PocketKnife, self).__init__("a", "pocket knife", **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(PocketKnife, self).__init__("a", "pocketknife", **kwargs)
         self.damage = 7
 
 
@@ -126,7 +126,7 @@ class HuntingKnife(Weapon):
     """
     A larger knife. Higher damage.
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(HuntingKnife, self).__init__("a", "hunting knife", **kwargs)
         self.damage = 15
 
@@ -135,7 +135,7 @@ class BaseballBat(Weapon):
     """
     A baseball bat
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(BaseballBat, self).__init__("a", "baseball bat", **kwargs)
         self.damage = 15
 
@@ -144,7 +144,7 @@ class Machete(Weapon):
     """
     A machete
     """
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(Machete, self).__init__("a", "machete", **kwargs)
         self.damage = 25
 
@@ -310,7 +310,7 @@ class SmallTin(Container):
     A small tin that can contain a small number of items.
     """
     def __init__(self, *args, **kwargs):
-        super(SmallTin, self).__init__(*args, **kwargs)
+        super(SmallTin, self).__init__("a", "small tin", **kwargs)
         self.material = Material.METAL
         self.combustible = False
         self.capacity = 3
@@ -321,7 +321,7 @@ class PaperBag(Container):
     A small paper bag that can hold a small number of items.
     """
     def __init__(self, *args, **kwargs):
-        super(PaperBag, self).__init__(*args, **kwargs)
+        super(PaperBag, self).__init__("a", "paper bag", **kwargs)
         self.material = Material.PAPER
         self.capacity = 5
         self.size = ItemSize.MEDIUM
@@ -332,7 +332,7 @@ class SmallBag(InventoryBag):
     A player inventory bag that can hold a small number of items.
     """
     def __init__(self, *args, **kwargs):
-        super(SmallBag, self).__init__(*args, **kwargs)
+        super(SmallBag, self).__init__("a", "small bag", **kwargs)
         value  = 10
         self.capacity = 5
 
@@ -342,7 +342,7 @@ class Bag(InventoryBag):
     A player inventory bag that can hold a medium number of items.
     """
     def __init__(self, *args, **kwargs):
-        super(Bag, self).__init__(*args, **kwargs)
+        super(Bag, self).__init__("a", "bag", **kwargs)
         value = 25
         self.capacity = 10
 
@@ -352,7 +352,7 @@ class LargeBag(InventoryBag):
     A player inventory bag that can hold a large number of items.
     """
     def __init__(self, *args, **kwargs):
-        super(LargeBag, self).__init__(*args, **kwargs)
+        super(LargeBag, self).__init__("a", "large bag", **kwargs)
         value = 35
         self.capacity = 20
 

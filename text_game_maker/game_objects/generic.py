@@ -35,11 +35,11 @@ class Item(GameEntity):
         self.damage = 0
         self.value = 0
         self.location = ""
-        self.name = name
-        self.prep = 'the ' + name
 
         self.prefix = prefix
+        self.name = name
         self.size = ItemSize.SMALL
+        self.prep = 'the ' + self.name
 
         for key in kwargs:
             if not hasattr(self, key):
