@@ -276,8 +276,12 @@ class Blueprint(Item):
     A blueprint for crafting one new item from a fixed set of other items.
     """
     def __init__(self, ingredients=[], item=None, **kwargs):
-        super(Blueprint, self).__init__("a", "blueprint for %s" % item,
-            **kwargs)
+        if item is None:
+            itemname = "a thing"
+        else:
+            itemname = str(item)
+
+        super(Blueprint, self).__init__("a", "blueprint for %s" % itemname, **kwargs)
         self.material = Material.PAPER
         self.ingredients = ingredients
         self.item = item
