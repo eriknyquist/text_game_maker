@@ -1,4 +1,5 @@
 import sys
+import copy
 from future.utils import with_metaclass
 
 import text_game_maker
@@ -331,6 +332,15 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
 
         utils._wrap_print("No space to hold the %s." % self.name)
         return None
+
+    def copy(self):
+        new = copy.deepcopy(self)
+        new.items = []
+
+        for item in self.items:
+            new.add_item(item.copy())
+
+        return new
 
     def delete(self):
         """

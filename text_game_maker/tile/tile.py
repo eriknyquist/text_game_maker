@@ -1,3 +1,5 @@
+import copy
+
 from text_game_maker.utils import utils
 from text_game_maker.materials.materials import get_properties
 from text_game_maker.game_objects.base import GameEntity, serialize, deserialize
@@ -216,6 +218,19 @@ class Tile(GameEntity):
         self.material = None
 
         self.tile_id = _register_tile(self)
+
+    def copy(self):
+        new = copy.deepcopy(self)
+        for t in new.iterate_directions():
+            t = None
+
+        new.items = {}
+
+        for loc in self.items:
+            for item in self.items[loc]:
+                new.add_item(item.copy())
+
+        return new
 
     def set_name_from_north(self, name):
         """
