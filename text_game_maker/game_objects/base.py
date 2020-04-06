@@ -133,7 +133,7 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
     :ivar str verb: singluar verb e.g. "the key is on the floor", or plural \
         e.g. "the coins are on the floor"
     """
-    
+
     global_skip_attrs = ['home', '_migrations']
     skip_attrs = []
 
@@ -149,7 +149,7 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
         self.value = 0
         self.prefix = "a"
         self.name = None
-        self.prep = None
+        self._prep = None
         self.home = None
         self.is_container = False
         self.is_light_source = False
@@ -161,6 +161,17 @@ class GameEntity(object, with_metaclass(utils.SubclassTrackerMetaClass, object))
         self.items = []
         self.size = 1
         self.verb = "is"
+
+    @property
+    def prep(self):
+        if self._prep in ["", None]:
+            return 'the ' + str(self.name)
+
+        return str(self._prep)
+
+    @prep.setter
+    def prep(self, val):
+        self._prep = val
 
     def matches_name(self, name):
         """

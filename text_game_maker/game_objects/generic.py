@@ -39,7 +39,6 @@ class Item(GameEntity):
         self.prefix = prefix
         self.name = name
         self.size = ItemSize.SMALL
-        self.prep = 'the ' + self.name
 
         for key in kwargs:
             if not hasattr(self, key):

@@ -610,11 +610,21 @@ class LockedDoor(Tile):
 
         self.name = '%s %s' % (prefix, name)
         self.short_name = name
-        self.prep = "the " + self.short_name
         self.prefix = prefix
         self.locked = True
         self.source_tile = src_tile
         self.replacement_tile = replacement_tile
+
+    @property
+    def prep(self):
+        if self._prep in ["", None]:
+            return "the " + str(self.short_name)
+
+        return self._prep
+
+    @prep.setter
+    def prep(self, val):
+        self._prep = val
 
     def get_special_attrs(self):
         ret = super(LockedDoor, self).get_special_attrs()
