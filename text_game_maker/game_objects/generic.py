@@ -78,7 +78,7 @@ class Item(GameEntity):
             if player.health <= self.damage:
                 utils._wrap_print(msg + " You are dead.")
                 player.death()
-                sys.exit()
+                return
 
             player.decrement_health(self.damage)
 

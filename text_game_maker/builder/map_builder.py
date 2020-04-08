@@ -37,6 +37,11 @@ _format_tokens = {
     "<playername>": lambda: get_instance().player.name
 }
 
+
+class StopWaitingForInput(object):
+    pass
+
+
 def _debug_next():
     info['debug_next'] = True
 
@@ -370,6 +375,9 @@ def _do_inventory_listing(player, word, setting):
 def get_instance():
     return info['instance']
 
+def clear_instance():
+    info['instance'] = None
+
 class MapBuilder(object):
     """
     Base class for building a tile-based map
@@ -396,7 +404,18 @@ class MapBuilder(object):
         random.seed(time.time())
         self.player = player.Player()
 
-    def load_map_data(self, filename):
+    def load_map_data_from_string(self, map_data):
+        """
+        Load a string containing uncompressed contents of a .tgmdata file
+
+        :param str filename: string containing uncompressed .tgmdata
+        """
+        attrs = json.loads(map_data)
+        self.start = tile.builder(attrs[player.TILES_KEY],
+                                  attrs[player.START_TILE_KEY],
+                                  attrs[player.OBJECT_VERSION_KEY])
+
+    def load_map_data_from_file(self, filename):
         """
         Load a map file saved from the map editor GUI
 
@@ -406,11 +425,7 @@ class MapBuilder(object):
             strdata = fh.read()
 
         decompressed = zlib.decompress(strdata).decode("utf-8")
-        attrs = json.loads(decompressed)
-
-        self.start = tile.builder(attrs[player.TILES_KEY],
-                                  attrs[player.START_TILE_KEY],
-                                  attrs[player.OBJECT_VERSION_KEY])
+        load_map_data_from_string(decompressed)
 
     def set_current_tile(self, tile_id):
         """
@@ -931,7 +946,7 @@ class MapBuilder(object):
             choice = utils.ask_multiple_choice(menu_choices, default=1)
 
             if choice < 0:
-                sys.exit()
+                return False
 
             elif choice == 0:
                 if self.on_game_run:
@@ -957,6 +972,8 @@ class MapBuilder(object):
 
             elif choice == 2:
                 utils.printfunc(utils.get_full_controls(self.player.parser))
+
+        return True
 
     def _check_flags(self):
         if self.player.load_from_file:
@@ -984,7 +1001,8 @@ class MapBuilder(object):
         Start running the game
         """
 
-        self._do_init()
+        if not self._do_init():
+            return
 
         while True:
             while True:
@@ -992,6 +1010,9 @@ class MapBuilder(object):
 
                 utils.save_sound(audio.SUCCESS_SOUND)
                 raw = utils.read_line_raw(self.player.prompt)
+                if isinstance(raw, StopWaitingForInput):
+                    return
+
                 action = ' '.join(raw.split())
 
                 if _has_badword(action):

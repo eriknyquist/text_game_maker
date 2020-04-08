@@ -1178,8 +1178,9 @@ def read_line_raw(msg="", cancel_word=None, default=None):
     if default and user_input == '':
         return default
 
-    if cancel_word and cancel_word.startswith(user_input):
-        return None
+    if isinstance(user_input, str):
+        if cancel_word and cancel_word.startswith(user_input):
+            return None
 
     return user_input
 
@@ -1208,7 +1209,7 @@ def ask_yes_no(msg, cancel_word="cancel"):
 
     while True:
         ret = read_line(prompt)
-        if cancel_word.startswith(ret):
+        if (not isinstance(ret, str)) or cancel_word.startswith(ret):
             return -1
         elif 'yes'.startswith(ret):
             return 1
@@ -1240,7 +1241,7 @@ def ask_multiple_choice(choices, msg=None, cancel_word="cancel", default=None):
 
     while True:
         ret = read_line(prompt, cancel_word, default_str)
-        if (ret is None) or (ret == ""):
+        if (not isinstance(ret, str)) or (ret == ""):
             return -1
 
         try:

@@ -13,7 +13,7 @@ def main():
 
     class TgmdataRunner(MapRunner):
         def build_map(self, builder):
-            builder.load_map_data(sys.argv[1])
+            builder.load_map_data_from_file(sys.argv[1])
 
             # Set the input prompt
             builder.set_input_prompt("")
