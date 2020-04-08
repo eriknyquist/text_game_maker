@@ -594,7 +594,7 @@ class Tile(GameEntity):
         if east: ret.append(east)
         if west: ret.append(west)
 
-        return '%s. ' % ('. '.join(ret))
+        return '%s. ' % ('. '.join(ret)) if ret else ''
 
 class LockedDoor(Tile):
     """
